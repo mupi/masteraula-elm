@@ -6,16 +6,6 @@ import Json.Decode.Pipeline exposing (decode, required, optional, hardcoded)
 import Question.Types exposing (..)
 
 
-urlQuestion : QuestionId -> String
-urlQuestion questionId =
-    String.concat [ "http://localhost:8000/rest/questions/", (toString questionId), "/" ]
-
-
-urlQuestionPage : PageNumber -> String
-urlQuestionPage page =
-    String.concat [ "http://localhost:8000/rest/questions/?page=", (toString page) ]
-
-
 answerDecoder : Decode.Decoder Answer
 answerDecoder =
     Decode.map3 Answer
@@ -58,6 +48,16 @@ headerBuild token =
             []
 
 
+urlQuestion : QuestionId -> String
+urlQuestion questionId =
+    String.concat [ "http://localhost:8000/rest/questions/", (toString questionId), "/" ]
+
+
+urlQuestionPage : PageNumber -> String
+urlQuestionPage page =
+    String.concat [ "http://localhost:8000/rest/questions/?page=", (toString page) ]
+
+
 getQuestion : QuestionId -> Maybe String -> Http.Request Question
 getQuestion questionId token =
     Http.request
@@ -92,3 +92,49 @@ fetchGetQuestion questionId token =
 fetchGetQuestionPage : PageNumber -> Maybe String -> Cmd Msg
 fetchGetQuestionPage page token =
     Http.send OnFetchGetQuestionPage (getQuestionPage page token)
+
+
+
+-- Search
+
+
+urlBaseSearch : PageNumber -> String
+urlBaseSearch page =
+    String.concat [ "http://localhost:8000/rest/search/question/?page=", toString page ]
+
+
+urlTagSearchQuestion : String -> List String -> String
+urlTagSearchQuestion baseUrl tags =
+    String.concat
+        (baseUrl
+            :: "&tags="
+            :: List.map
+                (\t -> String.concat [ t, "," ])
+                tags
+        )
+
+
+urlSearch : PageNumber -> List String -> String
+urlSearch page tags =
+    if List.length tags > 0 then
+        urlTagSearchQuestion (urlBaseSearch page) tags
+    else
+        urlBaseSearch page
+
+
+getQuestionTagSearch : PageNumber -> List String -> Maybe String -> Http.Request QuestionPage
+getQuestionTagSearch page tags token =
+    Http.request
+        { method = "GET"
+        , headers = (headerBuild token)
+        , url = (urlSearch page tags)
+        , body = Http.emptyBody
+        , expect = (Http.expectJson <| questionPageDecoder page)
+        , timeout = Nothing
+        , withCredentials = False
+        }
+
+
+fetchGetQuestionTagSearch : PageNumber -> List String -> Maybe String -> Cmd Msg
+fetchGetQuestionTagSearch page tags token =
+    Http.send OnFetchGetQuestionTagSearch (getQuestionTagSearch page tags token)

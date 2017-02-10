@@ -2,7 +2,7 @@ module Question.State exposing (init, update)
 
 import Http
 import Question.Types exposing (..)
-import Question.Rest exposing (fetchGetQuestion, fetchGetQuestionPage)
+import Question.Rest exposing (fetchGetQuestion, fetchGetQuestionPage, fetchGetQuestionTagSearch)
 import App.Types as App
 import Navigation
 
@@ -23,6 +23,7 @@ init =
         initQuestion
         initQuestionPage
         ""
+        ""
 
 
 update : Msg -> Model -> App.Global -> ( Model, Cmd Msg )
@@ -32,13 +33,32 @@ update msg model global =
             model ! [ fetchGetQuestion questionId global.token ]
 
         GetQuestionPage questionPage ->
-            model ! [ fetchGetQuestionPage questionPage global.token ]
+            { model | search = "" } ! [ fetchGetQuestionPage questionPage global.token ]
+
+        GetQuestionTagSearch questionPage ->
+            let
+                tags =
+                    String.split " " model.search
+            in
+                model ! [ fetchGetQuestionTagSearch questionPage tags global.token ]
 
         PreviousPage previousPage ->
-            model ! [ Navigation.newUrl <| String.concat [ "#questions/", toString previousPage ] ]
+            if model.search == "" then
+                model ! [ Navigation.newUrl <| String.concat [ "#questions/", toString previousPage ] ]
+            else
+                model ! [ Navigation.newUrl <| String.concat [ "#questions/tagsearch/", toString previousPage ] ]
 
         NextPage nextPage ->
-            model ! [ Navigation.newUrl <| String.concat [ "#questions/", toString nextPage ] ]
+            if model.search == "" then
+                model ! [ Navigation.newUrl <| String.concat [ "#questions/", toString nextPage ] ]
+            else
+                model ! [ Navigation.newUrl <| String.concat [ "#questions/tagsearch/", toString nextPage ] ]
+
+        TagSearchInput newSearch ->
+            { model | search = newSearch } ! []
+
+        TagSearch ->
+            model ! [ Navigation.newUrl "#questions/tagsearch/1" ]
 
         OnFetchGetQuestion (Ok question) ->
             { model | question = question, error = "" } ! []
@@ -62,6 +82,24 @@ update msg model global =
             { model | questionPage = questionPage, error = "" } ! []
 
         OnFetchGetQuestionPage (Err error) ->
+            let
+                errorMsg =
+                    case error of
+                        Http.NetworkError ->
+                            "Erro de conexão com o servidor"
+
+                        Http.BadStatus response ->
+                            "Página inexistente"
+
+                        _ ->
+                            toString error
+            in
+                { model | error = errorMsg } ! []
+
+        OnFetchGetQuestionTagSearch (Ok questionPage) ->
+            { model | questionPage = questionPage, error = "" } ! []
+
+        OnFetchGetQuestionTagSearch (Err error) ->
             let
                 errorMsg =
                     case error of

@@ -51,8 +51,17 @@ viewQuestionPage model =
     in
         div []
             [ questionPageHeader page
+            , searchTextField model
             , div [] (List.map questionView page.questions)
             ]
+
+
+searchTextField : Model -> Html Msg
+searchTextField model =
+    div []
+        [ input [ onInput TagSearchInput ] [ text model.search ]
+        , button [ onClick TagSearch ] [ text "Search" ]
+        ]
 
 
 questionPageHeader : QuestionPage -> Html Msg

@@ -6,6 +6,7 @@ import Http
 type alias Model =
     { question : Question
     , questionPage : QuestionPage
+    , search : String
     , error : String
     }
 
@@ -50,8 +51,12 @@ type alias Answer =
 type Msg
     = GetQuestion QuestionId
     | GetQuestionPage PageNumber
+    | GetQuestionTagSearch PageNumber
     | PreviousPage PageNumber
     | NextPage PageNumber
+    | TagSearchInput String
+    | TagSearch
     | OnFetchGetQuestion (Result Http.Error Question)
     | OnFetchGetQuestionPage (Result Http.Error QuestionPage)
+    | OnFetchGetQuestionTagSearch (Result Http.Error QuestionPage)
     | NoOp

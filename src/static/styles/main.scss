@@ -1,5 +1,10 @@
 // Helpers
 @import 'helpers/_variables.scss';
 
-@import 'home.scss';
+// Components
+@import 'components/thumbs.scss';
+
+// Pages
+@import 'pages/home.scss';
+
 @import 'forms.scss';

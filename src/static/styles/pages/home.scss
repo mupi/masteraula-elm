@@ -1,0 +1,14 @@
+.banner-header{
+  background: url('/static/img/banner.jpg') top left 100% no-repeat fixed;
+  background-size: 100% auto;
+  color: #FFF;
+  padding: 1em;
+  text-align: center;
+  p, h1{
+    max-width: 1000px;
+    margin: 1em auto;
+  }
+}
+.container .mdl-grid{
+  max-width: 1000px;
+}

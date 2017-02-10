@@ -2,7 +2,10 @@
 @import 'helpers/_variables.scss';
 
 // Components
-@import 'components/thumbs.scss';
+@import 'components/_thumbs.scss';
+
+// Layout
+@import 'layout/_regularview.scss';
 
 // Pages
 @import 'pages/home.scss';

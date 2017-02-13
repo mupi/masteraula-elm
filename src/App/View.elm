@@ -1,19 +1,20 @@
 module App.View exposing (..)
 
 import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (..)
+import Html.Attributes exposing (class, src)
+import Html.Events exposing (onClick)
 import App.Types exposing (..)
 import Login.View as Login
 import Login.Types as Login
 import Question.View as Question
-import Question.Types as Question
 import User.View as User
 import App.Routing exposing (Route(..))
-import Material
 import Material.Button as Button
 import Material.Options as Options exposing (css)
 import Material.Layout as Layout
+import Material.Typography as Typo
+import Material.Options as Options
+import Material.Grid exposing (grid, cell, size, offset, Device(..))
 
 
 view : Model -> Html Msg
@@ -64,12 +65,10 @@ header model =
     in
         if user == Nothing then
             [ Layout.row
-                [ Options.nop
-                , css "transition" "height 333ms ease-in-out 0s"
-                ]
+                [ Options.nop ]
                 [ Layout.link
                     [ Layout.href "/" ]
-                    [ Layout.title [] [ text "MupiLab" ] ]
+                    [ Layout.title [] [ text "PrePaula" ] ]
                 , Layout.spacer
                 , Layout.navigation []
                     [ Button.render Mdl
@@ -96,7 +95,7 @@ header model =
                 [ Options.nop ]
                 [ Layout.link
                     [ Layout.href "/" ]
-                    [ Layout.title [] [ text "MupiLab" ] ]
+                    [ Layout.title [] [ text "PrePaula" ] ]
                 , Layout.spacer
                 , Layout.navigation []
                     [ Button.render Mdl
@@ -130,7 +129,44 @@ header model =
 
 index : Html Msg
 index =
-    div [] [ text "Hello world" ]
+    div [ class "container" ]
+        [ div [ class "banner-header" ]
+            [ Options.styled h1
+                [ Typo.display2, Typo.center ]
+                [ text "Encontre, compre e venda planos de aula." ]
+            , Options.styled p
+                [ Typo.display1 ]
+                [ text "BuscaAula é uma ferramenta feita por educadores para educadores onde você pode encontrar materiais gratuitos ou a um preço acessível para utilizar em suas aulas. " ]
+            , button
+                [ onClick ShowLogin
+                , class "mdl-button mdl-js-button mdl-button--raised mdl-button--accent"
+                ]
+                [ text "Comece agora" ]
+            ]
+        , grid []
+            [ cell [ size All 4 ]
+                [ div [ class "thumb-circle" ]
+                    [ img [ src "/static/img/money.png" ] []
+                    ]
+                , h4 [] [ text " Venda seus planos de aula " ]
+                , p [] [ text "Ganhe uma renda extra vendendo os materiais que você já criou para outros educadores da comunidade." ]
+                ]
+            , cell [ size All 4 ]
+                [ div [ class "thumb-circle" ]
+                    [ img [ src "/static/img/clock.png" ] []
+                    ]
+                , h4 [] [ text "Ganhe tempo ao preparar aulas" ]
+                , p [] [ text "Otimize seu tempo de preparar aulas encontrando materiais curados por educadores de todo o Brasil." ]
+                ]
+            , cell [ size All 4 ]
+                [ div [ class "thumb-circle" ]
+                    [ img [ src "/static/img/search.png" ] []
+                    ]
+                , h4 [] [ text "Encontre materiais online" ]
+                , p [] [ text "Busque por disciplina, assunto ou tipo de material para você adaptar e utilizar com seus alunos." ]
+                ]
+            ]
+        ]
 
 
 notFoundView : Html Msg

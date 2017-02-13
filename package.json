@@ -5,15 +5,33 @@
   "main": "bundle.js",
   "devDependencies": {
     "clear": "0.0.1",
+    "copy-webpack-plugin": "^4.0.1",
+    "css-loader": "^0.25.0",
+    "elm-hot-loader": "^0.5.2",
+    "elm-webpack-loader": "^3.0.6",
+    "extract-text-webpack-plugin": "^1.0.1",
+    "file-loader": "^0.9.0",
     "gulp": "^3.9.1",
     "gulp-util": "^3.0.7",
+    "html-webpack-plugin": "^2.17.0",
     "st": "^1.1.0",
     "gulp-connect": "^4.0.0",
     "gulp-elm": "^0.4.4",
-    "gulp-plumber": "^1.1.0"
+    "gulp-plumber": "^1.1.0",
+    "node-sass": "^3.7.0",
+    "postcss-loader": "^1.1.1",
+    "sass-loader": "^4.0.0",
+    "style-loader": "^0.13.1",
+    "url-loader": "^0.5.7",
+    "webpack": "^1.13.1",
+    "webpack-dev-server": "^1.14.1",
+    "webpack-merge": "^0.16.0"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "webpack-dev-server --hot --inline --content-base src/",
+    "build": "rimraf dist && webpack",
+    "reinstall": "npm i rimraf && rimraf node_modules && npm uninstall -g elm && npm i -g elm && npm i && elm package install"
   },
   "author": "",
   "license": "ISC",

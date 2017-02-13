@@ -102,6 +102,13 @@ update msg model =
                             in
                                 ( { model | question = updatedQuestion }, Cmd.map QuestionMsg cmd )
 
+                        QuestionTagSearchRoute page ->
+                            let
+                                ( updatedQuestion, cmd ) =
+                                    Question.update (Question.GetQuestionTagSearch page) model.question model.global
+                            in
+                                ( { model | question = updatedQuestion }, Cmd.map QuestionMsg cmd )
+
                         _ ->
                             ( model, Cmd.none )
             in

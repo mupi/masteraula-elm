@@ -12,6 +12,7 @@ type Route
     | LoginRoute
     | QuestionRoute Question.QuestionId
     | QuestionPageRoute Question.PageNumber
+    | QuestionTagSearchRoute Question.PageNumber
     | NotFoundRote
 
 
@@ -23,6 +24,7 @@ normalMatchers =
         , map LoginRoute (s "login")
         , map QuestionPageRoute (s "questions" </> int)
         , map QuestionRoute (s "question" </> int)
+        , map QuestionTagSearchRoute (s "questions" </> s "tagsearch" </> int)
         ]
 
 
@@ -32,8 +34,9 @@ loginMatchers =
         [ map Index top
         , map Index (s "index")
         , map Index (s "login")
-        , map QuestionRoute (s "questions" </> int)
+        , map QuestionPageRoute (s "questions" </> int)
         , map QuestionRoute (s "question" </> int)
+        , map QuestionTagSearchRoute (s "questions" </> s "tagsearch" </> int)
         , map UsersRoute (s "users")
         ]
 

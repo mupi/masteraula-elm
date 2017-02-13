@@ -1,4 +1,4 @@
-module App.State exposing (init, update, subscriptions)
+port module App.State exposing (init, update, subscriptions)
 
 import Navigation exposing (Location)
 import App.Routing exposing (parseLocation, Route(..))
@@ -10,8 +10,11 @@ import User.State as User
 import Material
 
 
-init : Location -> ( Model, Cmd Msg )
-init location =
+port setStorage : GlobalStorage -> Cmd msg
+
+
+init : Maybe GlobalStorage -> Location -> ( Model, Cmd Msg )
+init savedGlobal location =
     let
         currentRoute =
             parseLocation Nothing location
@@ -23,11 +26,16 @@ init location =
             Login.init
             Question.init
             currentRoute
-            (Global Nothing Nothing)
+            (globalInit savedGlobal)
             mdl
           )
         , Cmd.none
         )
+
+
+globalInit : Maybe GlobalStorage -> Global
+globalInit savedGlobal =
+    Maybe.withDefault (Global Nothing Nothing) savedGlobal
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -72,7 +80,7 @@ update msg model =
                     else
                         Navigation.newUrl "#index"
             in
-                ( { model | login = updatedLogin, global = newGlobal }, newCmd )
+                ( { model | login = updatedLogin, global = newGlobal }, Cmd.batch [ setStorage newGlobal, newCmd ] )
 
         QuestionMsg subMsg ->
             let

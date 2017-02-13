@@ -17,6 +17,12 @@ type alias Model =
     }
 
 
+type alias GlobalStorage =
+    { user : Maybe User.Model
+    , token : Maybe String
+    }
+
+
 type alias Global =
     { user : Maybe User.Model
     , token : Maybe String

@@ -2,14 +2,14 @@ module App.Routing exposing (..)
 
 import Navigation exposing (Location)
 import UrlParser exposing (..)
-import User.Types as User
 import Question.Types as Question
 
 
 type Route
-    = Index
+    = IndexRoute
     | UsersRoute
     | LoginRoute
+    | SignupRoute
     | QuestionRoute Question.QuestionId
     | QuestionPageRoute Question.PageNumber
     | QuestionTagSearchRoute Question.PageNumber
@@ -19,9 +19,10 @@ type Route
 normalMatchers : Parser (Route -> a) a
 normalMatchers =
     oneOf
-        [ map Index top
-        , map Index (s "index")
+        [ map IndexRoute top
+        , map IndexRoute (s "index")
         , map LoginRoute (s "login")
+        , map SignupRoute (s "signup")
         , map QuestionPageRoute (s "questions" </> int)
         , map QuestionRoute (s "question" </> int)
         , map QuestionTagSearchRoute (s "questions" </> s "tagsearch" </> int)
@@ -31,9 +32,10 @@ normalMatchers =
 loginMatchers : Parser (Route -> a) a
 loginMatchers =
     oneOf
-        [ map Index top
-        , map Index (s "index")
-        , map Index (s "login")
+        [ map IndexRoute top
+        , map IndexRoute (s "index")
+        , map IndexRoute (s "login")
+        , map IndexRoute (s "signup")
         , map QuestionPageRoute (s "questions" </> int)
         , map QuestionRoute (s "question" </> int)
         , map QuestionTagSearchRoute (s "questions" </> s "tagsearch" </> int)

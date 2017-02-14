@@ -7,6 +7,7 @@ import App.Types exposing (..)
 import Login.View as Login
 import Login.Types as Login
 import Question.View as Question
+import Signup.View as Signup
 import User.View as User
 import App.Routing exposing (Route(..))
 import Material.Button as Button
@@ -33,7 +34,7 @@ view model =
 page : Model -> Html Msg
 page model =
     case model.route of
-        Index ->
+        IndexRoute ->
             index
 
         UsersRoute ->
@@ -46,6 +47,9 @@ page model =
 
         LoginRoute ->
             Html.map LoginMsg (Login.view model.login)
+
+        SignupRoute ->
+            Html.map SignupMsg (Signup.view model.signup)
 
         QuestionRoute questionId ->
             Html.map QuestionMsg (Question.view model.question)

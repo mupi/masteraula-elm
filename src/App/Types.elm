@@ -3,6 +3,7 @@ module App.Types exposing (..)
 import Navigation exposing (Location)
 import App.Routing exposing (Route)
 import Login.Types as Login
+import Signup.Types as Signup
 import Question.Types as Question
 import User.Types as User
 import Material
@@ -10,6 +11,7 @@ import Material
 
 type alias Model =
     { login : Login.Model
+    , signup : Signup.Model
     , question : Question.Model
     , route : Route
     , global : Global
@@ -36,6 +38,7 @@ type Status
 type Msg
     = UserMsg User.Msg
     | LoginMsg Login.Msg
+    | SignupMsg Signup.Msg
     | QuestionMsg Question.Msg
     | OnLocationChange Location
     | ShowIndex

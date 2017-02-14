@@ -4,6 +4,7 @@ import Navigation exposing (Location)
 import App.Routing exposing (parseLocation, Route(..))
 import App.Types exposing (..)
 import Login.State as Login
+import Signup.State as Signup
 import Question.State as Question
 import Question.Types as Question
 import User.State as User
@@ -24,6 +25,7 @@ init savedGlobal location =
     in
         ( (Model
             Login.init
+            Signup.init
             Question.init
             currentRoute
             (globalInit savedGlobal)
@@ -81,6 +83,13 @@ update msg model =
                         Navigation.newUrl "#index"
             in
                 ( { model | login = updatedLogin, global = newGlobal }, Cmd.batch [ setStorage newGlobal, newCmd ] )
+
+        SignupMsg subMsg ->
+            let
+                ( updatedSignup, cmd ) =
+                    Signup.update subMsg model.signup
+            in
+                ( { model | signup = updatedSignup }, Cmd.map SignupMsg cmd )
 
         QuestionMsg subMsg ->
             let

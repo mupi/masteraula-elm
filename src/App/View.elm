@@ -33,7 +33,7 @@ view model =
 page : Model -> Html Msg
 page model =
     case model.route of
-        Index ->
+        IndexRoute ->
             index
 
         UsersRoute ->

@@ -6,6 +6,7 @@ import Html.Events exposing (onClick)
 import App.Types exposing (..)
 import Login.View as Login
 import Login.Types as Login
+import VerifyEmail.View as VerifyEmail
 import Question.View as Question
 import Signup.View as Signup
 import User.View as User
@@ -50,6 +51,9 @@ page model =
 
         SignupRoute ->
             Html.map SignupMsg (Signup.view model.signup)
+
+        VerifyEmailRoute emailKey ->
+            Html.map VerifyEmailMsg (VerifyEmail.view model.verifyEmail)
 
         QuestionRoute questionId ->
             Html.map QuestionMsg (Question.view model.question)

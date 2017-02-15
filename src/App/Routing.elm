@@ -3,6 +3,7 @@ module App.Routing exposing (..)
 import Navigation exposing (Location)
 import UrlParser exposing (..)
 import Question.Types as Question
+import VerifyEmail.Types as VerifyEmail
 
 
 type Route
@@ -10,6 +11,7 @@ type Route
     | UsersRoute
     | LoginRoute
     | SignupRoute
+    | VerifyEmailRoute VerifyEmail.EmailKey
     | QuestionRoute Question.QuestionId
     | QuestionPageRoute Question.PageNumber
     | QuestionTagSearchRoute Question.PageNumber
@@ -23,6 +25,7 @@ normalMatchers =
         , map IndexRoute (s "index")
         , map LoginRoute (s "login")
         , map SignupRoute (s "signup")
+        , map VerifyEmailRoute (s "verify-email" </> string)
         , map QuestionPageRoute (s "questions" </> int)
         , map QuestionRoute (s "question" </> int)
         , map QuestionTagSearchRoute (s "questions" </> s "tagsearch" </> int)
@@ -36,6 +39,7 @@ loginMatchers =
         , map IndexRoute (s "index")
         , map IndexRoute (s "login")
         , map IndexRoute (s "signup")
+        , map IndexRoute (s "verify-email")
         , map QuestionPageRoute (s "questions" </> int)
         , map QuestionRoute (s "question" </> int)
         , map QuestionTagSearchRoute (s "questions" </> s "tagsearch" </> int)

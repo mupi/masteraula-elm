@@ -1,6 +1,7 @@
 module Question.Types exposing (..)
 
 import Http
+import Material
 
 
 type alias Model =
@@ -8,6 +9,7 @@ type alias Model =
     , questionPage : QuestionPage
     , search : String
     , error : String
+    , mdl : Material.Model
     }
 
 
@@ -52,11 +54,11 @@ type Msg
     = GetQuestion QuestionId
     | GetQuestionPage PageNumber
     | GetQuestionTagSearch PageNumber
-    | PreviousPage PageNumber
-    | NextPage PageNumber
+    | ChangePage PageNumber
     | TagSearchInput String
     | TagSearch
     | OnFetchGetQuestion (Result Http.Error Question)
     | OnFetchGetQuestionPage (Result Http.Error QuestionPage)
     | OnFetchGetQuestionTagSearch (Result Http.Error QuestionPage)
     | NoOp
+    | Mdl (Material.Msg Msg)

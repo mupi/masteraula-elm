@@ -22,17 +22,18 @@ init savedGlobal location =
 
         mdl =
             Material.model
+
+        initModel =
+            (Model
+                Login.init
+                Signup.init
+                Question.init
+                currentRoute
+                (globalInit savedGlobal)
+                mdl
+            )
     in
-        ( (Model
-            Login.init
-            Signup.init
-            Question.init
-            currentRoute
-            (globalInit savedGlobal)
-            mdl
-          )
-        , Cmd.none
-        )
+        update (OnLocationChange location) initModel
 
 
 globalInit : Maybe GlobalStorage -> Global

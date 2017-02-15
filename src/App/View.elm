@@ -149,7 +149,7 @@ index =
                 [ Typo.display1 ]
                 [ text "BuscaAula é uma ferramenta feita por educadores para educadores onde você pode encontrar materiais gratuitos ou a um preço acessível para utilizar em suas aulas. " ]
             , button
-                [ onClick ShowLogin
+                [ onClick ShowSignup
                 , class "mdl-button mdl-js-button mdl-button--raised mdl-button--accent"
                 ]
                 [ text "Comece agora" ]

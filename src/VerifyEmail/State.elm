@@ -15,10 +15,11 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         VerifyKey recievedKey ->
-            { model | key = recievedKey } ! []
-
-        VerifyEmail ->
-            ( model, fetchVerifyEmail model )
+            let
+                newModel =
+                    { model | key = recievedKey }
+            in
+                newModel ! [ fetchVerifyEmail newModel ]
 
         OnFetchVerifyEmail (Ok verifyEmail) ->
             { model | success = "Email verificado com sucesso!" } ! []

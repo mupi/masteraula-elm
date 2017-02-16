@@ -23,7 +23,6 @@ type alias EmailKey =
 
 type Msg
     = VerifyKey String
-    | VerifyEmail
     | OnFetchVerifyEmail (Result Http.Error VerifyEmailModel)
     | NoOp
     | Mdl (Material.Msg Msg)

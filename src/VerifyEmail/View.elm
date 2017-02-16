@@ -17,21 +17,13 @@ view model =
                 [ Options.styled h1
                     [ Typo.display1, Typo.center ]
                     [ text "Confirme seu email" ]
-                , div [ class "text-alert danger" ]
-                    [ text model.error
-                    ]
-                , div [ class "text-alert success" ]
-                    [ text model.success ]
-                , div []
-                    [ Button.render Mdl
-                        [ 2 ]
-                        model.mdl
-                        [ Button.raised
-                        , Button.colored
-                        , Options.onClick VerifyEmail
+                , if model.success == "" then
+                    div [ class "text-alert danger" ]
+                        [ text model.error
                         ]
-                        [ text "Confirmar Email" ]
-                    ]
+                  else
+                    div [ class "text-alert success" ]
+                        [ text model.success ]
                 ]
             ]
         , div [ class "banner-bg" ]

@@ -97,10 +97,33 @@ update msg model =
 
         VerifyEmailMsg subMsg ->
             let
-                ( updatedKey, cmd ) =
+                ( updatedVerifyKey, cmd ) =
                     VerifyEmail.update subMsg model.verifyEmail
+
+                -- Trata o login que dá para ser feito através da página verifyEmail
+                updatedLogin =
+                    updatedVerifyKey.login
+
+                newGlobal =
+                    if updatedLogin.user == Nothing then
+                        Global Nothing Nothing
+                    else
+                        Global updatedLogin.user updatedLogin.token
+
+                newCmd =
+                    if updatedLogin.user == Nothing then
+                        Cmd.map VerifyEmailMsg cmd
+                    else
+                        Navigation.newUrl "#index"
+
+                -- Serve para fazer um "logout" no login que está no verifyEmail para evitar um loop acima
+                newVerifyKey =
+                    if updatedLogin.user == Nothing then
+                        updatedVerifyKey
+                    else
+                        { updatedVerifyKey | login = Login.init }
             in
-                ( { model | verifyEmail = updatedKey }, Cmd.map VerifyEmailMsg cmd )
+                ( { model | verifyEmail = newVerifyKey, global = newGlobal }, Cmd.batch [ setStorage newGlobal, newCmd ] )
 
         QuestionMsg subMsg ->
             let

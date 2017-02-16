@@ -5,6 +5,8 @@ import App.Routing exposing (parseLocation, Route(..))
 import App.Types exposing (..)
 import Login.State as Login
 import Signup.State as Signup
+import VerifyEmail.State as VerifyEmail
+import VerifyEmail.Types as VerifyEmail
 import Question.State as Question
 import Question.Types as Question
 import User.State as User
@@ -27,6 +29,7 @@ init savedGlobal location =
             (Model
                 Login.init
                 Signup.init
+                VerifyEmail.init
                 Question.init
                 currentRoute
                 (globalInit savedGlobal)
@@ -92,6 +95,13 @@ update msg model =
             in
                 ( { model | signup = updatedSignup }, Cmd.map SignupMsg cmd )
 
+        VerifyEmailMsg subMsg ->
+            let
+                ( updatedKey, cmd ) =
+                    VerifyEmail.update subMsg model.verifyEmail
+            in
+                ( { model | verifyEmail = updatedKey }, Cmd.map VerifyEmailMsg cmd )
+
         QuestionMsg subMsg ->
             let
                 ( updatedQuestion, cmd ) =
@@ -127,6 +137,13 @@ update msg model =
                             in
                                 ( { model | question = updatedQuestion }, Cmd.map QuestionMsg cmd )
 
+                        VerifyEmailRoute emailKey ->
+                            let
+                                ( updatedKey, cmd ) =
+                                    VerifyEmail.update (VerifyEmail.VerifyKey emailKey) model.verifyEmail
+                            in
+                                ( { model | verifyEmail = updatedKey }, Cmd.map VerifyEmailMsg cmd )
+
                         _ ->
                             ( model, Cmd.none )
             in
@@ -137,6 +154,9 @@ update msg model =
 
         ShowLogin ->
             ( model, Navigation.newUrl "#login" )
+
+        ShowSignup ->
+            ( model, Navigation.newUrl "#signup" )
 
         ShowUser ->
             ( model, Navigation.newUrl "#users" )

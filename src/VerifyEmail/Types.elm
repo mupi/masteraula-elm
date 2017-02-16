@@ -2,6 +2,7 @@ module VerifyEmail.Types exposing (..)
 
 import Http
 import Material
+import Login.Types as Login
 
 
 type alias Model =
@@ -9,6 +10,7 @@ type alias Model =
     , error : String
     , success : String
     , mdl : Material.Model
+    , login : Login.Model
     }
 
 
@@ -23,7 +25,7 @@ type alias EmailKey =
 
 type Msg
     = VerifyKey String
-    | VerifyEmail
     | OnFetchVerifyEmail (Result Http.Error VerifyEmailModel)
     | NoOp
     | Mdl (Material.Msg Msg)
+    | LoginMsg Login.Msg

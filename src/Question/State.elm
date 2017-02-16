@@ -5,6 +5,7 @@ import Question.Types exposing (..)
 import Question.Rest exposing (fetchGetQuestion, fetchGetQuestionPage, fetchGetQuestionTagSearch)
 import App.Types as App
 import Navigation
+import Material
 
 
 initQuestion : Question
@@ -24,6 +25,7 @@ init =
         initQuestionPage
         ""
         ""
+        Material.model
 
 
 update : Msg -> Model -> App.Global -> ( Model, Cmd Msg )
@@ -42,17 +44,11 @@ update msg model global =
             in
                 model ! [ fetchGetQuestionTagSearch questionPage tags global.token ]
 
-        PreviousPage previousPage ->
+        ChangePage page ->
             if model.search == "" then
-                model ! [ Navigation.newUrl <| String.concat [ "#questions/", toString previousPage ] ]
+                model ! [ Navigation.newUrl <| String.concat [ "#questions/", toString page ] ]
             else
-                model ! [ Navigation.newUrl <| String.concat [ "#questions/tagsearch/", toString previousPage ] ]
-
-        NextPage nextPage ->
-            if model.search == "" then
-                model ! [ Navigation.newUrl <| String.concat [ "#questions/", toString nextPage ] ]
-            else
-                model ! [ Navigation.newUrl <| String.concat [ "#questions/tagsearch/", toString nextPage ] ]
+                model ! [ Navigation.newUrl <| String.concat [ "#questions/tagsearch/", toString page ] ]
 
         TagSearchInput newSearch ->
             { model | search = newSearch } ! []
@@ -116,3 +112,6 @@ update msg model global =
 
         NoOp ->
             model ! []
+
+        Mdl msg_ ->
+            Material.update Mdl msg_ model

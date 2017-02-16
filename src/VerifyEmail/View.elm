@@ -7,32 +7,37 @@ import Material.Button as Button
 import Material.Options as Options exposing (css)
 import Material.Grid exposing (grid, cell, size, offset, Device(..))
 import Material.Typography as Typo
+import Login.Types as Login
+import Login.View as Login
 
 
 view : Model -> Html Msg
 view model =
     div []
         [ grid []
-            [ cell [ size All 6, offset All 3, size Phone 12 ]
-                [ Options.styled h1
-                    [ Typo.display1, Typo.center ]
-                    [ text "Confirme seu email" ]
-                , div [ class "text-alert danger" ]
-                    [ text model.error
-                    ]
-                , div [ class "text-alert success" ]
-                    [ text model.success ]
-                , div []
-                    [ Button.render Mdl
-                        [ 2 ]
-                        model.mdl
-                        [ Button.raised
-                        , Button.colored
-                        , Options.onClick VerifyEmail
+            [ if model.success == "" then
+                (cell [ size All 6, offset All 3, size Phone 12 ]
+                    [ Options.styled h1
+                        [ Typo.display1, Typo.center ]
+                        [ text "Confirme seu email" ]
+                    , div
+                        [ class "text-alert danger" ]
+                        [ text model.error
                         ]
-                        [ text "Confirmar Email" ]
                     ]
-                ]
+                )
+              else
+                (cell [ size All 6, offset All 3, size Phone 12 ]
+                    [ Options.styled h1
+                        [ Typo.display1, Typo.center ]
+                        [ text "Confirme seu email" ]
+                    , div
+                        [ class "text-alert success" ]
+                        [ text model.success
+                        ]
+                    , Html.map LoginMsg <| (Login.viewForm model.login)
+                    ]
+                )
             ]
         , div [ class "banner-bg" ]
             [ Options.styled h1

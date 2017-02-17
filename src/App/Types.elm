@@ -17,6 +17,7 @@ type alias Model =
     , question : Question.Model
     , route : Route
     , global : Global
+    , currentDrawerLinks : DrawerLinks
     , mdl : Material.Model
     }
 
@@ -37,6 +38,13 @@ type Status
     = Login
 
 
+type DrawerLinks
+    = HomeDefault
+    | LoggedIn
+    | QuestionDefault
+    | UsersView
+
+
 type Msg
     = UserMsg User.Msg
     | LoginMsg Login.Msg
@@ -48,4 +56,5 @@ type Msg
     | ShowLogin
     | ShowSignup
     | ShowUser
+    | UpdateDrawerLinks DrawerLinks
     | Mdl (Material.Msg Msg)

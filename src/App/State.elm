@@ -33,6 +33,7 @@ init savedGlobal location =
                 Question.init
                 currentRoute
                 (globalInit savedGlobal)
+                HomeDefault
                 mdl
             )
     in
@@ -144,28 +145,28 @@ update msg model =
                                 ( updatedQuestion, cmd ) =
                                     Question.update (Question.GetQuestion questionId) model.question model.global
                             in
-                                ( { model | question = updatedQuestion }, Cmd.map QuestionMsg cmd )
+                                ( { model | question = updatedQuestion, currentDrawerLinks = QuestionDefault }, Cmd.map QuestionMsg cmd )
 
                         QuestionPageRoute page ->
                             let
                                 ( updatedQuestion, cmd ) =
                                     Question.update (Question.GetQuestionPage page) model.question model.global
                             in
-                                ( { model | question = updatedQuestion }, Cmd.map QuestionMsg cmd )
+                                ( { model | question = updatedQuestion, currentDrawerLinks = QuestionDefault }, Cmd.map QuestionMsg cmd )
 
                         QuestionTagSearchRoute page ->
                             let
                                 ( updatedQuestion, cmd ) =
                                     Question.update (Question.GetQuestionTagSearch page) model.question model.global
                             in
-                                ( { model | question = updatedQuestion }, Cmd.map QuestionMsg cmd )
+                                ( { model | question = updatedQuestion, currentDrawerLinks = QuestionDefault }, Cmd.map QuestionMsg cmd )
 
                         VerifyEmailRoute emailKey ->
                             let
                                 ( updatedKey, cmd ) =
                                     VerifyEmail.update (VerifyEmail.VerifyKey emailKey) model.verifyEmail
                             in
-                                ( { model | verifyEmail = updatedKey }, Cmd.map VerifyEmailMsg cmd )
+                                ( { model | verifyEmail = updatedKey, currentDrawerLinks = QuestionDefault }, Cmd.map VerifyEmailMsg cmd )
 
                         _ ->
                             ( model, Cmd.none )
@@ -173,16 +174,28 @@ update msg model =
                 ( { newModel | route = newRoute }, cmd )
 
         ShowIndex ->
-            ( model, Navigation.newUrl "#index" )
+            let
+                global =
+                    model.global
+            in
+                case global.user of
+                    Nothing ->
+                        ( { model | currentDrawerLinks = HomeDefault }, Navigation.newUrl "#index" )
+
+                    Just user ->
+                        ( { model | currentDrawerLinks = LoggedIn }, Navigation.newUrl "#index" )
 
         ShowLogin ->
-            ( model, Navigation.newUrl "#login" )
+            ( { model | currentDrawerLinks = HomeDefault }, Navigation.newUrl "#login" )
 
         ShowSignup ->
-            ( model, Navigation.newUrl "#signup" )
+            ( { model | currentDrawerLinks = HomeDefault }, Navigation.newUrl "#signup" )
 
         ShowUser ->
-            ( model, Navigation.newUrl "#users" )
+            ( { model | currentDrawerLinks = UsersView }, Navigation.newUrl "#users" )
+
+        UpdateDrawerLinks newLinks ->
+            ( { model | currentDrawerLinks = newLinks }, Cmd.none )
 
         Mdl msg_ ->
             Material.update Mdl msg_ model

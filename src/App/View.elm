@@ -17,6 +17,7 @@ import Material.Layout as Layout
 import Material.Typography as Typo
 import Material.Options as Options
 import Material.Grid exposing (grid, cell, size, offset, Device(..))
+import Material.Button as Button
 
 
 view : Model -> Html Msg
@@ -24,9 +25,10 @@ view model =
     Layout.render Mdl
         model.mdl
         [ Layout.fixedHeader
+          -- , Layout.fixedDrawer
         ]
         { header = header model
-        , drawer = []
+        , drawer = drawer model
         , tabs = ( [], [] )
         , main = [ page model ]
         }
@@ -189,3 +191,93 @@ notFoundView =
         div []
             [ text "404 - Page Not found!"
             ]
+
+
+
+-- write a function that takes the model and returns
+-- links according to model.page, then call that function in the drawer
+
+
+getDrawerLinks : DrawerLinks -> Html Msg
+getDrawerLinks currentDrawerLinks =
+    case currentDrawerLinks of
+        HomeDefault ->
+            Layout.navigation
+                []
+                [ Layout.link
+                    [ Layout.href "#login"
+                    , Options.onClick (Layout.toggleDrawer Mdl)
+                    ]
+                    [ text "Entrar" ]
+                , Layout.link
+                    [ Layout.href "#signup"
+                    , Options.onClick (Layout.toggleDrawer Mdl)
+                    ]
+                    [ text "Fazer cadastro" ]
+                , Layout.link
+                    [ Layout.href "#questions/1"
+                    , Options.onClick (Layout.toggleDrawer Mdl)
+                    ]
+                    [ text "Ver questões" ]
+                ]
+
+        LoggedIn ->
+            Layout.navigation
+                []
+                [ Layout.link
+                    [ Layout.href "#questions/1"
+                    , Options.onClick (Layout.toggleDrawer Mdl)
+                    ]
+                    [ text "Ver questões" ]
+                , Layout.link
+                    [ Layout.href "#"
+                    , Options.onClick (Layout.toggleDrawer Mdl)
+                    ]
+                    [ text "Minhas questões" ]
+                , Layout.link
+                    [ Layout.href "#"
+                    , Options.onClick (Layout.toggleDrawer Mdl)
+                    ]
+                    [ text "Minhas listas" ]
+                , Layout.link
+                    [ Layout.href "#users"
+                    , Options.onClick (Layout.toggleDrawer Mdl)
+                    ]
+                    [ text "Alterar conta" ]
+                ]
+
+        QuestionDefault ->
+            Layout.navigation
+                []
+                [ Layout.link
+                    [ Layout.href "#questions/1"
+                    ]
+                    [ text "Colocar os filtros das questões" ]
+                ]
+
+        UsersView ->
+            Layout.navigation
+                []
+                [ Layout.link
+                    [ Layout.href "#"
+                    , Options.onClick (Layout.toggleDrawer Mdl)
+                    ]
+                    [ text "Minhas questões" ]
+                , Layout.link
+                    [ Layout.href "#"
+                    , Options.onClick (Layout.toggleDrawer Mdl)
+                    ]
+                    [ text "Minhas listas" ]
+                , Layout.link
+                    [ Layout.href "#"
+                    , Options.onClick (Layout.toggleDrawer Mdl)
+                    ]
+                    [ text "Alterar conta" ]
+                ]
+
+
+drawer : Model -> List (Html Msg)
+drawer model =
+    [ Layout.title [] [ text "PrePaula" ]
+    , getDrawerLinks model.currentDrawerLinks
+    ]

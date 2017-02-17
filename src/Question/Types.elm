@@ -7,7 +7,8 @@ import Material
 type alias Model =
     { question : Question
     , questionPage : QuestionPage
-    , search : String
+    , currentTag : String
+    , tags : List String
     , error : String
     , mdl : Material.Model
     }
@@ -56,7 +57,9 @@ type Msg
     | GetQuestionTagSearch PageNumber
     | ChangePage PageNumber
     | TagSearchInput String
+    | TagSearchAdd
     | TagSearch
+    | TagSearchRemove String
     | OnFetchGetQuestion (Result Http.Error Question)
     | OnFetchGetQuestionPage (Result Http.Error QuestionPage)
     | OnFetchGetQuestionTagSearch (Result Http.Error QuestionPage)

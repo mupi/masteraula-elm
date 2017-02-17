@@ -5,15 +5,29 @@ import Html.Attributes exposing (id, type_, for, value, class)
 import Html.Events exposing (..)
 import Question.Types exposing (..)
 import Markdown
+import Json.Decode as Json
 import Material.Textfield as Textfield
 import Material.Button as Button
 import Material.Grid as Grid
 import Material.Card as Card
+import Material.Chip as Chip
 import Material.Icon as Icon
 import Material.Options as Options exposing (css)
 import Material.Grid exposing (grid, cell, size, offset, Device(..))
 import Material.Typography as Typo
 import Material.Color as Color
+
+
+onEnter : Msg -> Options.Property c Msg
+onEnter msg =
+    let
+        isEnter code =
+            if code == 13 then
+                Json.succeed msg
+            else
+                Json.fail "not ENTER"
+    in
+        Options.on "keydown" (Json.andThen isEnter keyCode)
 
 
 view : Model -> Html Msg
@@ -104,11 +118,40 @@ questionCardView model question =
         ]
 
 
-searchTextField : Model -> Html Msg
-searchTextField model =
+searchTagChip : String -> Html Msg
+searchTagChip tag =
+    Chip.span
+        [ Chip.deleteIcon "cancel"
+        , Chip.deleteClick (TagSearchRemove tag)
+        ]
+        [ Chip.content []
+            [ text tag ]
+        ]
+
+
+searchView : Model -> Html Msg
+searchView model =
     div []
-        [ input [ onInput TagSearchInput ] [ text model.search ]
-        , button [ onClick TagSearch ] [ text "Search" ]
+        [ Textfield.render Mdl
+            [ 4, 0 ]
+            model.mdl
+            [ Options.onInput TagSearchInput
+            , onEnter TagSearchAdd
+            , Textfield.value model.currentTag
+            , Textfield.label "Search"
+            ]
+            []
+        , Grid.grid [] <|
+            List.map (\tag -> Grid.cell [ size All 2 ] [ searchTagChip tag ]) model.tags
+        , Button.render Mdl
+            [ 4, 1 ]
+            model.mdl
+            [ Button.ripple
+            , Button.colored
+            , Button.raised
+            , Options.onClick TagSearch
+            ]
+            [ text "Search" ]
         ]
 
 
@@ -179,10 +222,10 @@ viewQuestionPage : Model -> Html Msg
 viewQuestionPage model =
     Grid.grid []
         [ Grid.cell [ size All 3 ]
-            [ searchTextField model
-            ]
+            []
         , Grid.cell [ size All 9 ]
-            [ Grid.grid []
+            [ searchView model
+            , Grid.grid []
                 (List.map (questionCardView model) (List.take 9 model.questionPage.questions))
             , questionPageControls model
             ]

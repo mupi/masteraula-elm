@@ -4,6 +4,7 @@ import Http
 import Json.Decode as Decode exposing (field)
 import Json.Decode.Pipeline exposing (decode, required, optional, hardcoded)
 import Question.Types exposing (..)
+import Utils.StringUtils exposing (..)
 
 
 answerDecoder : Decode.Decoder Answer
@@ -109,7 +110,7 @@ urlTagSearchQuestion baseUrl tags =
         (baseUrl
             :: "&tags="
             :: List.map
-                (\t -> String.concat [ t, "," ])
+                (\t -> String.concat [ tagFormatter t, "," ])
                 tags
         )
 

@@ -6,6 +6,7 @@ import Question.Rest exposing (fetchGetQuestion, fetchGetQuestionPage, fetchGetQ
 import App.Types as App
 import Navigation
 import Material
+import Utils.StringUtils as StringUtils
 
 
 initQuestion : Question
@@ -24,6 +25,7 @@ init =
         initQuestion
         initQuestionPage
         ""
+        []
         ""
         Material.model
 
@@ -35,26 +37,53 @@ update msg model global =
             model ! [ fetchGetQuestion questionId global.token ]
 
         GetQuestionPage questionPage ->
-            { model | search = "" } ! [ fetchGetQuestionPage questionPage global.token ]
+            { model | tags = [] } ! [ fetchGetQuestionPage questionPage global.token ]
 
         GetQuestionTagSearch questionPage ->
-            let
-                tags =
-                    String.split " " model.search
-            in
-                model ! [ fetchGetQuestionTagSearch questionPage tags global.token ]
+            model ! [ fetchGetQuestionTagSearch questionPage model.tags global.token ]
 
         ChangePage page ->
-            if model.search == "" then
+            if model.tags == [] then
                 model ! [ Navigation.newUrl <| String.concat [ "#questions/", toString page ] ]
             else
                 model ! [ Navigation.newUrl <| String.concat [ "#questions/tagsearch/", toString page ] ]
 
-        TagSearchInput newSearch ->
-            { model | search = newSearch } ! []
+        TagSearchInput newCurrentTag ->
+            { model | currentTag = newCurrentTag } ! []
 
         TagSearch ->
-            model ! [ Navigation.newUrl "#questions/tagsearch/1" ]
+            let
+                tags =
+                    if (StringUtils.removeSpaces model.currentTag) == "" then
+                        model.tags
+                    else
+                        model.currentTag :: model.tags
+            in
+                { model | tags = tags, currentTag = "" } ! [ Navigation.newUrl "#questions/tagsearch/1" ]
+
+        TagSearchAdd ->
+            let
+                tags =
+                    if (StringUtils.removeSpaces model.currentTag) == "" then
+                        model.tags
+                    else
+                        model.currentTag :: model.tags
+            in
+                { model | tags = tags, currentTag = "" } ! []
+
+        TagSearchRemove tag ->
+            let
+                tags =
+                    List.filterMap
+                        (\t ->
+                            if t == tag then
+                                Nothing
+                            else
+                                Just t
+                        )
+                        model.tags
+            in
+                { model | tags = tags } ! []
 
         OnFetchGetQuestion (Ok question) ->
             { model | question = question, error = "" } ! []

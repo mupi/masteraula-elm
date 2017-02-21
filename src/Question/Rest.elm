@@ -3,8 +3,12 @@ module Question.Rest exposing (..)
 import Http
 import Json.Decode as Decode exposing (field)
 import Json.Decode.Pipeline exposing (decode, required, optional, hardcoded)
+import Json.Encode as Encode exposing (Value, encode, object, string, list, int, bool)
 import Question.Types exposing (..)
 import Utils.StringUtils exposing (..)
+
+
+-- Decoders
 
 
 answerDecoder : Decode.Decoder Answer
@@ -49,14 +53,13 @@ headerBuild token =
             []
 
 
+
+-- Question
+
+
 urlQuestion : QuestionId -> String
 urlQuestion questionId =
     String.concat [ "http://localhost:8000/rest/questions/", (toString questionId), "/" ]
-
-
-urlQuestionPage : PageNumber -> String
-urlQuestionPage page =
-    String.concat [ "http://localhost:8000/rest/questions/?page=", (toString page) ]
 
 
 getQuestion : QuestionId -> Maybe String -> Http.Request Question
@@ -72,6 +75,20 @@ getQuestion questionId token =
         }
 
 
+fetchGetQuestion : QuestionId -> Maybe String -> Cmd Msg
+fetchGetQuestion questionId token =
+    Http.send OnFetchGetQuestion (getQuestion questionId token)
+
+
+
+--Question Page
+
+
+urlQuestionPage : PageNumber -> String
+urlQuestionPage page =
+    String.concat [ "http://localhost:8000/rest/questions/?page=", (toString page) ]
+
+
 getQuestionPage : PageNumber -> Maybe String -> Http.Request QuestionPage
 getQuestionPage page token =
     Http.request
@@ -85,18 +102,13 @@ getQuestionPage page token =
         }
 
 
-fetchGetQuestion : QuestionId -> Maybe String -> Cmd Msg
-fetchGetQuestion questionId token =
-    Http.send OnFetchGetQuestion (getQuestion questionId token)
-
-
 fetchGetQuestionPage : PageNumber -> Maybe String -> Cmd Msg
 fetchGetQuestionPage page token =
     Http.send OnFetchGetQuestionPage (getQuestionPage page token)
 
 
 
--- Search
+-- Question Search
 
 
 urlBaseSearch : PageNumber -> String
@@ -139,3 +151,94 @@ getQuestionTagSearch page tags token =
 fetchGetQuestionTagSearch : PageNumber -> List String -> Maybe String -> Cmd Msg
 fetchGetQuestionTagSearch page tags token =
     Http.send OnFetchGetQuestionTagSearch (getQuestionTagSearch page tags token)
+
+
+
+-- Question List
+
+
+urlSaveList : String
+urlSaveList =
+    "http://localhost:8000/rest/question_lists/"
+
+
+questionEncoder : Int -> Question -> Value
+questionEncoder index question =
+    object
+        [ ( "question", string (String.concat [ "http://localhost:8000/rest/questions/", toString question.id, "/" ]) )
+        , ( "order", int (index + 1) )
+        ]
+
+
+saveQuestionListEncoder : QuestionList -> Value
+saveQuestionListEncoder questionList =
+    object
+        [ ( "private", bool False )
+        , ( "questions", list (List.indexedMap questionEncoder questionList.questions) )
+        , ( "question_list_header", string questionList.question_list_header )
+        ]
+
+
+saveQuestionListBody : QuestionList -> Http.Body
+saveQuestionListBody questionList =
+    Http.stringBody "application/json" (encode 0 (saveQuestionListEncoder questionList))
+
+
+postSaveQuestioList : QuestionList -> Maybe String -> Http.Request String
+postSaveQuestioList questionList token =
+    let
+        a =
+            Debug.log
+                "a"
+                (Http.request
+                    { method = "POST"
+                    , headers = (headerBuild token)
+                    , url = urlSaveList
+                    , body = saveQuestionListBody questionList
+                    , expect = (Http.expectJson (field "url" Decode.string))
+                    , timeout = Nothing
+                    , withCredentials = False
+                    }
+                )
+    in
+        Http.request
+            { method = "POST"
+            , headers = (headerBuild token)
+            , url = urlSaveList
+            , body = saveQuestionListBody questionList
+            , expect = (Http.expectJson (field "url" Decode.string))
+            , timeout = Nothing
+            , withCredentials = False
+            }
+
+
+fetchPostSaveQuestioList : QuestionList -> Maybe String -> Cmd Msg
+fetchPostSaveQuestioList question token =
+    Http.send OnFetchSaveQuestionList (postSaveQuestioList question token)
+
+
+
+-- Question List (Docx file generation)
+
+
+urlGenerateList : Int -> String
+urlGenerateList id =
+    String.concat [ "http://localhost:8000/rest/question_lists/", toString id, "/generate_list/" ]
+
+
+getGenerateList : Int -> Maybe String -> Http.Request String
+getGenerateList id token =
+    Http.request
+        { method = "GET"
+        , headers = (headerBuild token)
+        , url = (urlGenerateList id)
+        , body = Http.emptyBody
+        , expect = (Http.expectJson (field "code" Decode.string))
+        , timeout = Nothing
+        , withCredentials = False
+        }
+
+
+fetchGetGenerateList : Int -> Maybe String -> Cmd Msg
+fetchGetGenerateList id token =
+    Http.send OnFecthQuestionListGenerate (getGenerateList id token)

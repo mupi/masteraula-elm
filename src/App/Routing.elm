@@ -14,6 +14,7 @@ type Route
     | VerifyEmailRoute VerifyEmail.EmailKey
     | QuestionRoute Question.QuestionId
     | QuestionPageRoute Question.PageNumber
+    | QuestionListRoute
     | QuestionTagSearchRoute Question.PageNumber
     | NotFoundRote
 
@@ -27,6 +28,7 @@ normalMatchers =
         , map SignupRoute (s "signup")
         , map VerifyEmailRoute (s "verify-email" </> string)
         , map QuestionPageRoute (s "questions" </> int)
+        , map QuestionListRoute (s "questions" </> s "questionlist")
         , map QuestionRoute (s "question" </> int)
         , map QuestionTagSearchRoute (s "questions" </> s "tagsearch" </> int)
         ]
@@ -42,6 +44,7 @@ loginMatchers =
         , map IndexRoute (s "verify-email")
         , map QuestionPageRoute (s "questions" </> int)
         , map QuestionRoute (s "question" </> int)
+        , map QuestionListRoute (s "questions" </> s "questionlist")
         , map QuestionTagSearchRoute (s "questions" </> s "tagsearch" </> int)
         , map UsersRoute (s "users")
         ]

@@ -1,8 +1,8 @@
-module Question.State exposing (init, update)
+module Question.State exposing (init, update, initQuestionList)
 
 import Http
 import Question.Types exposing (..)
-import Question.Rest exposing (fetchGetQuestion, fetchGetQuestionPage, fetchGetQuestionTagSearch)
+import Question.Rest exposing (..)
 import App.Types as App
 import Navigation
 import Material
@@ -19,11 +19,17 @@ initQuestionPage =
     QuestionPage 0 1 Nothing Nothing []
 
 
+initQuestionList : QuestionList
+initQuestionList =
+    QuestionList 0 "" False "" "" []
+
+
 init : Model
 init =
     Model
         initQuestion
         initQuestionPage
+        initQuestionList
         ""
         []
         ""
@@ -85,6 +91,55 @@ update msg model global =
             in
                 { model | tags = tags } ! []
 
+        QuestionListAdd question ->
+            let
+                questionList =
+                    model.questionList
+
+                newQuestionList =
+                    { questionList | questions = question :: questionList.questions }
+            in
+                { model | questionList = newQuestionList } ! []
+
+        QuestionListRemove question ->
+            let
+                questionList =
+                    model.questionList
+
+                newQuestions =
+                    List.filterMap
+                        (\t ->
+                            if t == question then
+                                Nothing
+                            else
+                                Just t
+                        )
+                        questionList.questions
+
+                newQuestionList =
+                    { questionList | questions = newQuestions }
+            in
+                { model | questionList = newQuestionList } ! []
+
+        QuestionListHeaderInput newQuestionHeader ->
+            let
+                questionList =
+                    model.questionList
+
+                newQuestionList =
+                    { questionList | question_list_header = newQuestionHeader }
+            in
+                { model | questionList = newQuestionList } ! []
+
+        QuestionListSave ->
+            model ! [ fetchPostSaveQuestioList model.questionList global.token ]
+
+        QuestionListClear ->
+            { model | questionList = initQuestionList } ! []
+
+        QuestionListGenerate id ->
+            model ! [ fetchGetGenerateList id global.token ]
+
         OnFetchGetQuestion (Ok question) ->
             { model | question = question, error = "" } ! []
 
@@ -125,6 +180,46 @@ update msg model global =
             { model | questionPage = questionPage, error = "" } ! []
 
         OnFetchGetQuestionTagSearch (Err error) ->
+            let
+                errorMsg =
+                    case error of
+                        Http.NetworkError ->
+                            "Erro de conexão com o servidor"
+
+                        Http.BadStatus response ->
+                            "Página inexistente"
+
+                        _ ->
+                            toString error
+            in
+                { model | error = errorMsg } ! []
+
+        OnFecthQuestionListGenerate (Ok id) ->
+            let
+                newUrl =
+                    String.concat [ "http://localhost:8000/rest/question_lists/", id, "/get_list/" ]
+            in
+                { model | error = "" } ! [ Navigation.load newUrl ]
+
+        OnFecthQuestionListGenerate (Err error) ->
+            let
+                errorMsg =
+                    case error of
+                        Http.NetworkError ->
+                            "Erro de conexão com o servidor"
+
+                        Http.BadStatus response ->
+                            "Página inexistente"
+
+                        _ ->
+                            toString error
+            in
+                { model | error = errorMsg } ! []
+
+        OnFetchSaveQuestionList (Ok string) ->
+            { model | error = string } ! []
+
+        OnFetchSaveQuestionList (Err error) ->
             let
                 errorMsg =
                     case error of

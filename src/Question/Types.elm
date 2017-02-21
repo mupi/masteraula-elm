@@ -7,6 +7,7 @@ import Material
 type alias Model =
     { question : Question
     , questionPage : QuestionPage
+    , questionList : QuestionList
     , currentTag : String
     , tags : List String
     , error : String
@@ -36,6 +37,16 @@ type alias QuestionPage =
     }
 
 
+type alias QuestionList =
+    { id : Int
+    , question_list_header : String
+    , secret : Bool
+    , owner : String
+    , url : String
+    , questions : List Question
+    }
+
+
 type alias QuestionId =
     Int
 
@@ -56,12 +67,23 @@ type Msg
     | GetQuestionPage PageNumber
     | GetQuestionTagSearch PageNumber
     | ChangePage PageNumber
+      -- Tags
     | TagSearchInput String
     | TagSearchAdd
-    | TagSearch
     | TagSearchRemove String
+    | TagSearch
+      -- QuestionList
+    | QuestionListAdd Question
+    | QuestionListRemove Question
+    | QuestionListHeaderInput String
+    | QuestionListSave
+    | QuestionListClear
+    | QuestionListGenerate Int
+      -- Fetch
     | OnFetchGetQuestion (Result Http.Error Question)
     | OnFetchGetQuestionPage (Result Http.Error QuestionPage)
     | OnFetchGetQuestionTagSearch (Result Http.Error QuestionPage)
+    | OnFecthQuestionListGenerate (Result Http.Error String)
+    | OnFetchSaveQuestionList (Result Http.Error String)
     | NoOp
     | Mdl (Material.Msg Msg)

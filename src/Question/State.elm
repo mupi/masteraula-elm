@@ -77,7 +77,7 @@ update msg model global =
                     else
                         model.currentTag :: model.tags
             in
-                { model | tags = tags, currentTag = "" } ! []
+                { model | tags = tags, currentTag = "" } ! [ Navigation.newUrl "#questions/tagsearch/1" ]
 
         TagSearchRemove tag ->
             let
@@ -91,7 +91,7 @@ update msg model global =
                         )
                         model.tags
             in
-                { model | tags = tags } ! []
+                { model | tags = tags } ! [ Navigation.newUrl "#questions/tagsearch/1" ]
 
         QuestionListAdd question ->
             let

@@ -5,7 +5,6 @@ import Html.Attributes exposing (id, type_, for, value, class, href)
 import Html.Events exposing (..)
 import Question.Types exposing (..)
 import Markdown
-import Json.Decode as Json
 import Material.Textfield as Textfield
 import Material.Button as Button
 import Material.Grid as Grid
@@ -16,18 +15,7 @@ import Material.Options as Options exposing (css)
 import Material.Grid exposing (grid, cell, size, offset, Device(..))
 import Material.Typography as Typo
 import Material.Color as Color
-
-
-onEnter : Msg -> Options.Property c Msg
-onEnter msg =
-    let
-        isEnter code =
-            if code == 13 then
-                Json.succeed msg
-            else
-                Json.fail "not ENTER"
-    in
-        Options.on "keydown" (Json.andThen isEnter keyCode)
+import Utils.MDLUtils as Utils
 
 
 view : Model -> Html Msg
@@ -159,7 +147,7 @@ searchView model =
             [ 4, 0 ]
             model.mdl
             [ Options.onInput TagSearchInput
-            , onEnter TagSearchAdd
+            , Utils.onEnter TagSearchAdd
             , Textfield.value model.currentTag
             , Textfield.label "Search"
             ]

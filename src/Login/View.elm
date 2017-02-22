@@ -3,6 +3,7 @@ module Login.View exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (id, type_, for, value, class)
 import Html.Events exposing (..)
+import Json.Decode as Json
 import Login.Types exposing (..)
 import Material.Textfield as Textfield
 import Material.Button as Button
@@ -10,9 +11,7 @@ import Material.Options as Options exposing (css)
 import Material.Grid exposing (grid, cell, size, offset, Device(..))
 import Material.Typography as Typo
 import Material.Color as Color
-
-
--- import State exposing (..)
+import Utils.MDLUtils as Utils
 
 
 view : Model -> Html Msg
@@ -56,6 +55,7 @@ viewForm model =
                 , Textfield.password
                 , Textfield.value model.password
                 , Options.onInput SetPassword
+                , Utils.onEnter Login
                 ]
                 []
             ]

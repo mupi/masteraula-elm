@@ -5,7 +5,7 @@ import User.Types exposing (..)
 
 init : Model
 init =
-    Model 0 "" "" "" ""
+    Model 0 "" "" ""
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )

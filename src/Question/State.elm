@@ -4,6 +4,7 @@ import Http
 import Question.Types exposing (..)
 import Question.Rest exposing (..)
 import App.Types as App
+import User.State as User
 import Navigation
 import Material
 import Utils.StringUtils as StringUtils
@@ -11,7 +12,7 @@ import Utils.StringUtils as StringUtils
 
 initQuestion : Question
 initQuestion =
-    Question 0 "" "" Nothing "" 0 "" [] []
+    Question 0 "" "" Nothing User.init 0 [] []
 
 
 initQuestionPage : QuestionPage
@@ -21,7 +22,7 @@ initQuestionPage =
 
 initQuestionList : QuestionList
 initQuestionList =
-    QuestionList 0 "" False "" "" []
+    QuestionList 0 "" False "" []
 
 
 init : Model
@@ -32,6 +33,7 @@ init =
         initQuestionList
         ""
         []
+        False
         ""
         Material.model
 
@@ -137,8 +139,11 @@ update msg model global =
         QuestionListClear ->
             { model | questionList = initQuestionList } ! []
 
-        QuestionListGenerate id ->
-            model ! [ fetchGetGenerateList id global.token ]
+        QuestionListGenerate ->
+            { model | generateAfterSave = True } ! [ fetchPostSaveQuestioList model.questionList global.token ]
+
+        QuestionListDelete ->
+            model ! [ fetchDeleteQuestioList model.questionList global.token ]
 
         OnFetchGetQuestion (Ok question) ->
             { model | question = question, error = "" } ! []
@@ -216,10 +221,41 @@ update msg model global =
             in
                 { model | error = errorMsg } ! []
 
-        OnFetchSaveQuestionList (Ok string) ->
-            { model | error = string } ! []
+        OnFetchSaveQuestionList (Ok newId) ->
+            let
+                questionList =
+                    model.questionList
+
+                newQuestionList =
+                    { questionList | id = newId }
+
+                cmds =
+                    if model.generateAfterSave then
+                        [ fetchGetGenerateList newId global.token ]
+                    else
+                        []
+            in
+                { model | questionList = newQuestionList, generateAfterSave = False } ! cmds
 
         OnFetchSaveQuestionList (Err error) ->
+            let
+                errorMsg =
+                    case error of
+                        Http.NetworkError ->
+                            "Erro de conexão com o servidor"
+
+                        Http.BadStatus response ->
+                            "Página inexistente"
+
+                        _ ->
+                            toString error
+            in
+                { model | error = errorMsg } ! []
+
+        OnFetchDeleteQuestionList (Ok text) ->
+            { model | questionList = initQuestionList } ! []
+
+        OnFetchDeleteQuestionList (Err error) ->
             let
                 errorMsg =
                     case error of

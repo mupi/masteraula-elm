@@ -12,9 +12,8 @@ usersDecoder =
 
 userDecoder : Decode.Decoder Model
 userDecoder =
-    Decode.map5 Model
+    Decode.map4 Model
         (field "id" Decode.int)
         (field "username" Decode.string)
         (field "name" Decode.string)
         (field "email" Decode.string)
-        (field "url" Decode.string)

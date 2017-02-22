@@ -39,6 +39,7 @@ view model =
         div []
             [ questionView question
             , text (toString model)
+            , text model.error
             ]
 
 
@@ -250,6 +251,7 @@ viewQuestionPage model =
             , Grid.grid []
                 (List.map (questionCardView model) (List.take 9 model.questionPage.questions))
             , questionPageControls model
+            , text model.error
             ]
         ]
 
@@ -338,7 +340,7 @@ viewQuestionList model =
                 [ Button.ripple
                 , Button.colored
                 , Button.raised
-                , Options.onClick (QuestionListGenerate model.questionList.id)
+                , Options.onClick QuestionListGenerate
                 ]
                 [ text "Gerar Lista" ]
             , Button.render Mdl
@@ -356,8 +358,8 @@ viewQuestionList model =
                 [ Button.ripple
                 , Button.colored
                 , Button.raised
-                , Options.onClick QuestionListClear
+                , Options.onClick QuestionListDelete
                 ]
-                [ text "Limpar" ]
+                [ text "Apagar Lista" ]
             ]
         ]

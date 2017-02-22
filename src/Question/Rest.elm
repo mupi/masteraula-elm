@@ -5,6 +5,7 @@ import Json.Decode as Decode exposing (field)
 import Json.Decode.Pipeline exposing (decode, required, optional, hardcoded)
 import Json.Encode as Encode exposing (Value, encode, object, string, list, int, bool)
 import Question.Types exposing (..)
+import User.Rest as User
 import Utils.StringUtils exposing (..)
 
 
@@ -26,9 +27,8 @@ questionDecoder =
         |> required "question_header" Decode.string
         |> required "question_text" Decode.string
         |> required "level" (Decode.nullable Decode.string)
-        |> required "author" Decode.string
+        |> required "author" User.userDecoder
         |> required "credit_cost" Decode.int
-        |> required "url" Decode.string
         |> required "tags" (Decode.list Decode.string)
         |> optional "answers" (Decode.list answerDecoder) []
 
@@ -157,15 +157,18 @@ fetchGetQuestionTagSearch page tags token =
 -- Question List
 
 
-urlSaveList : String
-urlSaveList =
-    "http://localhost:8000/rest/question_lists/"
+urlQuestionList : QuestionList -> String
+urlQuestionList questionList =
+    if questionList.id <= 0 then
+        "http://localhost:8000/rest/question_lists/"
+    else
+        String.concat [ "http://localhost:8000/rest/question_lists/", toString questionList.id, "/" ]
 
 
 questionEncoder : Int -> Question -> Value
 questionEncoder index question =
     object
-        [ ( "question", string (String.concat [ "http://localhost:8000/rest/questions/", toString question.id, "/" ]) )
+        [ ( "question", int question.id )
         , ( "order", int (index + 1) )
         ]
 
@@ -184,37 +187,44 @@ saveQuestionListBody questionList =
     Http.stringBody "application/json" (encode 0 (saveQuestionListEncoder questionList))
 
 
-postSaveQuestioList : QuestionList -> Maybe String -> Http.Request String
+postSaveQuestioList : QuestionList -> Maybe String -> Http.Request Int
 postSaveQuestioList questionList token =
-    let
-        a =
-            Debug.log
-                "a"
-                (Http.request
-                    { method = "POST"
-                    , headers = (headerBuild token)
-                    , url = urlSaveList
-                    , body = saveQuestionListBody questionList
-                    , expect = (Http.expectJson (field "url" Decode.string))
-                    , timeout = Nothing
-                    , withCredentials = False
-                    }
-                )
-    in
-        Http.request
-            { method = "POST"
-            , headers = (headerBuild token)
-            , url = urlSaveList
-            , body = saveQuestionListBody questionList
-            , expect = (Http.expectJson (field "url" Decode.string))
-            , timeout = Nothing
-            , withCredentials = False
-            }
+    Http.request
+        { method =
+            if questionList.id <= 0 then
+                "POST"
+            else
+                "PATCH"
+        , headers = (headerBuild token)
+        , url = (urlQuestionList questionList)
+        , body = saveQuestionListBody questionList
+        , expect = (Http.expectJson (field "id" Decode.int))
+        , timeout = Nothing
+        , withCredentials = False
+        }
 
 
 fetchPostSaveQuestioList : QuestionList -> Maybe String -> Cmd Msg
 fetchPostSaveQuestioList question token =
     Http.send OnFetchSaveQuestionList (postSaveQuestioList question token)
+
+
+deleteQuestioList : QuestionList -> Maybe String -> Http.Request String
+deleteQuestioList questionList token =
+    Http.request
+        { method = "DELETE"
+        , headers = (headerBuild token)
+        , url = (urlQuestionList questionList)
+        , body = Http.emptyBody
+        , expect = (Http.expectString)
+        , timeout = Nothing
+        , withCredentials = False
+        }
+
+
+fetchDeleteQuestioList : QuestionList -> Maybe String -> Cmd Msg
+fetchDeleteQuestioList question token =
+    Http.send OnFetchDeleteQuestionList (deleteQuestioList question token)
 
 
 

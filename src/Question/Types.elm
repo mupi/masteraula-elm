@@ -2,6 +2,7 @@ module Question.Types exposing (..)
 
 import Http
 import Material
+import User.Types as User
 
 
 type alias Model =
@@ -10,6 +11,7 @@ type alias Model =
     , questionList : QuestionList
     , currentTag : String
     , tags : List String
+    , generateAfterSave : Bool
     , error : String
     , mdl : Material.Model
     }
@@ -20,9 +22,8 @@ type alias Question =
     , question_header : String
     , question_text : String
     , level : Maybe String
-    , author : String
+    , author : User.Model
     , credit_cost : Int
-    , url : String
     , tags : List String
     , answers : List Answer
     }
@@ -42,7 +43,6 @@ type alias QuestionList =
     , question_list_header : String
     , secret : Bool
     , owner : String
-    , url : String
     , questions : List Question
     }
 
@@ -78,12 +78,14 @@ type Msg
     | QuestionListHeaderInput String
     | QuestionListSave
     | QuestionListClear
-    | QuestionListGenerate Int
+    | QuestionListGenerate
+    | QuestionListDelete
       -- Fetch
     | OnFetchGetQuestion (Result Http.Error Question)
     | OnFetchGetQuestionPage (Result Http.Error QuestionPage)
     | OnFetchGetQuestionTagSearch (Result Http.Error QuestionPage)
     | OnFecthQuestionListGenerate (Result Http.Error String)
-    | OnFetchSaveQuestionList (Result Http.Error String)
+    | OnFetchSaveQuestionList (Result Http.Error Int)
+    | OnFetchDeleteQuestionList (Result Http.Error String)
     | NoOp
     | Mdl (Material.Msg Msg)

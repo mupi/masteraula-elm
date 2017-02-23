@@ -1,6 +1,7 @@
 port module App.State exposing (init, update, subscriptions)
 
 import Navigation exposing (Location)
+import App.Drawer exposing (..)
 import App.Routing exposing (parseLocation, Route(..))
 import App.Types exposing (..)
 import Login.State as Login
@@ -184,6 +185,9 @@ update msg model =
                 newRoute =
                     parseLocation model.global.user location
 
+                newDrawerLink =
+                    parseDrawerLink model.global.user newRoute
+
                 ( newModel, cmd ) =
                     case newRoute of
                         QuestionRoute questionId ->
@@ -217,7 +221,7 @@ update msg model =
                         _ ->
                             ( model, Cmd.none )
             in
-                ( { newModel | route = newRoute }, cmd )
+                ( { newModel | route = newRoute, currentDrawerLinks = newDrawerLink }, cmd )
 
         ShowIndex ->
             let
@@ -232,16 +236,16 @@ update msg model =
                         ( { model | currentDrawerLinks = LoggedIn }, Navigation.newUrl "#index" )
 
         ShowLogin ->
-            ( { model | currentDrawerLinks = HomeDefault }, Navigation.newUrl "#login" )
+            ( model, Navigation.newUrl "#login" )
 
         ShowSignup ->
-            ( { model | currentDrawerLinks = HomeDefault }, Navigation.newUrl "#signup" )
+            ( model, Navigation.newUrl "#signup" )
 
         ShowUser ->
-            ( { model | currentDrawerLinks = UsersView }, Navigation.newUrl "#users" )
+            ( model, Navigation.newUrl "#users" )
 
         UpdateDrawerLinks newLinks ->
-            ( { model | currentDrawerLinks = newLinks }, Cmd.none )
+            ( model, Cmd.none )
 
         Mdl msg_ ->
             Material.update Mdl msg_ model

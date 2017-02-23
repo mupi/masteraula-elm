@@ -2,6 +2,7 @@ module App.Types exposing (..)
 
 import Navigation exposing (Location)
 import App.Routing exposing (Route)
+import App.Drawer exposing (DrawerLinks)
 import Login.Types as Login
 import Signup.Types as Signup
 import VerifyEmail.Types as VerifyEmail
@@ -38,13 +39,6 @@ type alias Global =
 
 type Status
     = Login
-
-
-type DrawerLinks
-    = HomeDefault
-    | LoggedIn
-    | QuestionDefault
-    | UsersView
 
 
 type Msg

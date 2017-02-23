@@ -11,11 +11,73 @@ import Material.Grid as Grid
 import Material.Card as Card
 import Material.Chip as Chip
 import Material.Icon as Icon
+import Material.Layout as Layout
+import Material.Toggles as Toggles
 import Material.Options as Options exposing (css)
 import Material.Grid exposing (grid, cell, size, offset, Device(..))
 import Material.Typography as Typo
 import Material.Color as Color
 import Utils.MDLUtils as Utils
+
+
+drawerLink : Model -> Html Msg
+drawerLink model =
+    Layout.navigation
+        []
+        [ Layout.link
+            [ Layout.href "#questions/1"
+            ]
+            [ text "Ver Questões" ]
+        , Layout.link
+            [ Layout.href "#questions/questionlist/"
+            ]
+            [ Icon.view "view_module" [ Icon.size18 ], text " Lista de questão atual" ]
+        , Layout.row []
+            [ Layout.title
+                []
+                [ text "Filtros" ]
+            ]
+        , text "nível: "
+        , div
+            []
+            [ Toggles.radio Mdl
+                [ 0 ]
+                model.mdl
+                [ Toggles.value (0 == model.filterId)
+                , Toggles.group "MyRadioGroup"
+                , Toggles.ripple
+                , Options.onToggle (Filter 0)
+                ]
+                [ text "Todos" ]
+            , Toggles.radio Mdl
+                [ 1 ]
+                model.mdl
+                [ Toggles.value (1 == model.filterId)
+                , Toggles.group "MyRadioGroup"
+                , Toggles.ripple
+                , Options.onToggle (Filter 1)
+                ]
+                [ text "Fácil" ]
+            , Toggles.radio Mdl
+                [ 2 ]
+                model.mdl
+                [ Toggles.value (2 == model.filterId)
+                , Toggles.group "MyRadioGroup"
+                , Toggles.ripple
+                , Options.onToggle (Filter 2)
+                ]
+                [ text "Médio" ]
+            , Toggles.radio Mdl
+                [ 3 ]
+                model.mdl
+                [ Toggles.value (3 == model.filterId)
+                , Toggles.group "MyRadioGroup"
+                , Toggles.ripple
+                , Options.onToggle (Filter 3)
+                ]
+                [ text "Difícil" ]
+            ]
+        ]
 
 
 view : Model -> Html Msg
@@ -24,7 +86,7 @@ view model =
         question =
             model.question
     in
-        div []
+        Options.div []
             [ questionView question
             , text (toString model)
             , text model.error
@@ -37,7 +99,7 @@ view model =
 
 questionView : Question -> Html Msg
 questionView question =
-    div []
+    Options.div []
         [ Html.h1 [] [ text "Question" ]
         , p [] [ text (toString question.id) ]
         , p [] [ text question.question_header ]
@@ -65,8 +127,8 @@ questionView question =
 questionCardView : Model -> Question -> Grid.Cell Msg
 questionCardView model question =
     Grid.cell
-        [ size All 4
-        , Options.css "padding" "16px 16px"
+        [ size All 3
+        , Options.css "padding" "8px 8px"
         ]
         [ Card.view
             [ Color.background (Color.color Color.LightGreen Color.S500)
@@ -99,31 +161,27 @@ questionCardView model question =
                     , Button.accent
                     , Color.text Color.white
                     , css "font-size" "11px"
+                    , css "width" "50%"
                     ]
                     [ Icon.view "favorite" [ Icon.size18 ], text " Favoritar" ]
-                , (if List.member question model.questionList.questions then
-                    Button.render Mdl
-                        [ 2, 1, question.id ]
-                        model.mdl
-                        [ Button.ripple
-                        , Button.accent
-                        , Button.disabled
-                        , Color.text Color.white
-                        , css "font-size" "11px"
-                        ]
+                , Button.render Mdl
+                    [ 2, 1, question.id ]
+                    model.mdl
+                    [ Button.ripple
+                    , Button.accent
+                    , Color.text Color.white
+                    , css "font-size" "11px"
+                    , css "width" "50%"
+                    , if List.member question model.questionList.questions then
+                        Button.disabled
+                      else
+                        Options.onClick (QuestionListAdd question)
+                    ]
+                    (if List.member question model.questionList.questions then
                         [ text "Adicionado" ]
-                   else
-                    Button.render Mdl
-                        [ 2, 1, question.id ]
-                        model.mdl
-                        [ Button.ripple
-                        , Button.accent
-                        , Options.onClick (QuestionListAdd question)
-                        , Color.text Color.white
-                        , css "font-size" "11px"
-                        ]
+                     else
                         [ Icon.view "add" [ Icon.size18 ], text " Adicionar" ]
-                  )
+                    )
                 ]
             ]
         ]
@@ -142,7 +200,7 @@ searchTagChip tag =
 
 searchView : Model -> Html Msg
 searchView model =
-    div []
+    Options.div []
         [ Textfield.render Mdl
             [ 4, 0 ]
             model.mdl
@@ -231,16 +289,15 @@ questionPageControls model =
 
 viewQuestionPage : Model -> Html Msg
 viewQuestionPage model =
-    Grid.grid []
-        [ Grid.cell [ size All 3 ]
-            []
-        , Grid.cell [ size All 9 ]
-            [ searchView model
-            , Grid.grid []
-                (List.map (questionCardView model) (List.take 9 model.questionPage.questions))
-            , questionPageControls model
-            , text model.error
+    div []
+        [ Grid.grid []
+            [ Grid.cell [ size All 12 ]
+                [ searchView model ]
             ]
+        , Grid.grid []
+            (List.map (questionCardView model) (List.take 9 model.questionPage.questions))
+        , questionPageControls model
+        , text model.error
         ]
 
 
@@ -251,8 +308,8 @@ viewQuestionPage model =
 questionListCardView : Model -> Question -> Grid.Cell Msg
 questionListCardView model question =
     Grid.cell
-        [ size All 4
-        , Options.css "padding" "16px 16px"
+        [ size All 3
+        , Options.css "padding" "8px 8px"
         ]
         [ Card.view
             [ Color.background (Color.color Color.LightGreen Color.S500)
@@ -260,7 +317,7 @@ questionListCardView model question =
             ]
             [ Card.title
                 [ Color.text Color.white
-                , css "padding" "16px"
+                , css "padding" "8px"
                 , css "display" "flex"
                 , css "align-items" "center"
                 , css "justify-content" "center"
@@ -285,6 +342,7 @@ questionListCardView model question =
                     , Button.accent
                     , Color.text Color.white
                     , css "font-size" "11px"
+                    , css "width" "50%"
                     ]
                     [ Icon.view "favorite" [ Icon.size18 ], text " Favoritar" ]
                 , Button.render Mdl
@@ -295,6 +353,7 @@ questionListCardView model question =
                     , Options.onClick (QuestionListRemove question)
                     , Color.text Color.white
                     , css "font-size" "11px"
+                    , css "width" "50%"
                     ]
                     [ Icon.view "remove" [ Icon.size18 ], text " Remover" ]
                 ]
@@ -304,50 +363,46 @@ questionListCardView model question =
 
 viewQuestionList : Model -> Html Msg
 viewQuestionList model =
-    Grid.grid []
-        [ Grid.cell [ size All 3 ]
-            []
-        , Grid.cell [ size All 9 ]
-            [ Options.styled h1
-                [ Typo.display1, Typo.center ]
-                [ text "Lista de questões" ]
-            , Textfield.render Mdl
-                [ 5, 0 ]
-                model.mdl
-                [ Options.onInput QuestionListHeaderInput
-                , Textfield.value model.questionList.question_list_header
-                , Textfield.floatingLabel
-                , Textfield.label "Nome da lista"
-                ]
-                []
-            , Grid.grid []
-                (List.map (questionListCardView model) model.questionList.questions)
-            , Button.render Mdl
-                [ 5, 1 ]
-                model.mdl
-                [ Button.ripple
-                , Button.colored
-                , Button.raised
-                , Options.onClick QuestionListGenerate
-                ]
-                [ text "Gerar Lista" ]
-            , Button.render Mdl
-                [ 5, 2 ]
-                model.mdl
-                [ Button.ripple
-                , Button.colored
-                , Button.raised
-                , Options.onClick QuestionListSave
-                ]
-                [ text "Salvar" ]
-            , Button.render Mdl
-                [ 5, 3 ]
-                model.mdl
-                [ Button.ripple
-                , Button.colored
-                , Button.raised
-                , Options.onClick QuestionListDelete
-                ]
-                [ text "Apagar Lista" ]
+    div []
+        [ Options.styled h1
+            [ Typo.display1, Typo.center ]
+            [ text "Lista de questões" ]
+        , Textfield.render Mdl
+            [ 5, 0 ]
+            model.mdl
+            [ Options.onInput QuestionListHeaderInput
+            , Textfield.value model.questionList.question_list_header
+            , Textfield.floatingLabel
+            , Textfield.label "Nome da lista"
             ]
+            []
+        , Grid.grid []
+            (List.map (questionListCardView model) model.questionList.questions)
+        , Button.render Mdl
+            [ 5, 1 ]
+            model.mdl
+            [ Button.ripple
+            , Button.colored
+            , Button.raised
+            , Options.onClick QuestionListGenerate
+            ]
+            [ text "Gerar Lista" ]
+        , Button.render Mdl
+            [ 5, 2 ]
+            model.mdl
+            [ Button.ripple
+            , Button.colored
+            , Button.raised
+            , Options.onClick QuestionListSave
+            ]
+            [ text "Salvar" ]
+        , Button.render Mdl
+            [ 5, 3 ]
+            model.mdl
+            [ Button.ripple
+            , Button.colored
+            , Button.raised
+            , Options.onClick QuestionListDelete
+            ]
+            [ text "Apagar Lista" ]
         ]

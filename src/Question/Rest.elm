@@ -127,20 +127,39 @@ urlTagSearchQuestion baseUrl tags =
         )
 
 
-urlSearch : PageNumber -> List String -> String
-urlSearch page tags =
+urlFilterSearchQuestion : String -> Int -> String
+urlFilterSearchQuestion baseUrl levelFilter =
+    String.concat
+        [ baseUrl
+        , case levelFilter of
+            1 ->
+                "&level=Facil"
+
+            2 ->
+                "&level=Medio"
+
+            3 ->
+                "&level=Dificil"
+
+            _ ->
+                ""
+        ]
+
+
+urlSearch : PageNumber -> List String -> Int -> String
+urlSearch page tags levelFilter =
     if List.length tags > 0 then
-        urlTagSearchQuestion (urlBaseSearch page) tags
+        urlFilterSearchQuestion (urlTagSearchQuestion (urlBaseSearch page) tags) levelFilter
     else
-        urlBaseSearch page
+        urlFilterSearchQuestion (urlBaseSearch page) levelFilter
 
 
-getQuestionTagSearch : PageNumber -> List String -> Maybe String -> Http.Request QuestionPage
-getQuestionTagSearch page tags token =
+getQuestionFilterSearch : PageNumber -> List String -> Int -> Maybe String -> Http.Request QuestionPage
+getQuestionFilterSearch page tags levelFilter token =
     Http.request
         { method = "GET"
         , headers = (headerBuild token)
-        , url = (urlSearch page tags)
+        , url = (urlSearch page tags levelFilter)
         , body = Http.emptyBody
         , expect = (Http.expectJson <| questionPageDecoder page)
         , timeout = Nothing
@@ -148,9 +167,9 @@ getQuestionTagSearch page tags token =
         }
 
 
-fetchGetQuestionTagSearch : PageNumber -> List String -> Maybe String -> Cmd Msg
-fetchGetQuestionTagSearch page tags token =
-    Http.send OnFetchGetQuestionTagSearch (getQuestionTagSearch page tags token)
+fetchGetQuestionFilterSearch : PageNumber -> List String -> Int -> Maybe String -> Cmd Msg
+fetchGetQuestionFilterSearch page tags levelFilter token =
+    Http.send OnFetchGetQuestionFilterSearch (getQuestionFilterSearch page tags levelFilter token)
 
 
 

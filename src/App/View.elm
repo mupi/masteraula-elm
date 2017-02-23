@@ -3,6 +3,7 @@ module App.View exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (class, src)
 import Html.Events exposing (onClick)
+import App.Drawer exposing (..)
 import App.Types exposing (..)
 import Login.View as Login
 import Login.Types as Login
@@ -18,15 +19,33 @@ import Material.Typography as Typo
 import Material.Options as Options
 import Material.Grid exposing (grid, cell, size, offset, Device(..))
 import Material.Button as Button
+import Material.Icon as Icon
 
 
 view : Model -> Html Msg
 view model =
     Layout.render Mdl
         model.mdl
-        [ Layout.fixedHeader
-          -- , Layout.fixedDrawer
-        ]
+        (case model.route of
+            QuestionTagSearchRoute a ->
+                [ Layout.fixedHeader
+                , Layout.fixedDrawer
+                ]
+
+            QuestionPageRoute a ->
+                [ Layout.fixedHeader
+                , Layout.fixedDrawer
+                ]
+
+            QuestionListRoute ->
+                [ Layout.fixedHeader
+                , Layout.fixedDrawer
+                ]
+
+            _ ->
+                [ Layout.fixedHeader
+                ]
+        )
         { header = header model
         , drawer = drawer model
         , tabs = ( [], [] )
@@ -201,86 +220,84 @@ notFoundView =
 -- links according to model.page, then call that function in the drawer
 
 
-getDrawerLinks : DrawerLinks -> Html Msg
-getDrawerLinks currentDrawerLinks =
-    case currentDrawerLinks of
-        HomeDefault ->
-            Layout.navigation
-                []
-                [ Layout.link
-                    [ Layout.href "#login"
-                    , Options.onClick (Layout.toggleDrawer Mdl)
+getDrawerLinks : Model -> Html Msg
+getDrawerLinks model =
+    let
+        currentDrawerLinks =
+            model.currentDrawerLinks
+    in
+        case currentDrawerLinks of
+            HomeDefault ->
+                Layout.navigation
+                    []
+                    [ Layout.link
+                        [ Layout.href "#login"
+                        , Options.onClick (Layout.toggleDrawer Mdl)
+                        ]
+                        [ text "Entrar" ]
+                    , Layout.link
+                        [ Layout.href "#signup"
+                        , Options.onClick (Layout.toggleDrawer Mdl)
+                        ]
+                        [ text "Fazer cadastro" ]
+                    , Layout.link
+                        [ Layout.href "#questions/1"
+                        , Options.onClick (Layout.toggleDrawer Mdl)
+                        ]
+                        [ text "Ver questões" ]
                     ]
-                    [ text "Entrar" ]
-                , Layout.link
-                    [ Layout.href "#signup"
-                    , Options.onClick (Layout.toggleDrawer Mdl)
-                    ]
-                    [ text "Fazer cadastro" ]
-                , Layout.link
-                    [ Layout.href "#questions/1"
-                    , Options.onClick (Layout.toggleDrawer Mdl)
-                    ]
-                    [ text "Ver questões" ]
-                ]
 
-        LoggedIn ->
-            Layout.navigation
-                []
-                [ Layout.link
-                    [ Layout.href "#questions/1"
-                    , Options.onClick (Layout.toggleDrawer Mdl)
+            LoggedIn ->
+                Layout.navigation
+                    []
+                    [ Layout.link
+                        [ Layout.href "#questions/1"
+                        , Options.onClick (Layout.toggleDrawer Mdl)
+                        ]
+                        [ text "Ver questões" ]
+                    , Layout.link
+                        [ Layout.href "#"
+                        , Options.onClick (Layout.toggleDrawer Mdl)
+                        ]
+                        [ text "Minhas questões" ]
+                    , Layout.link
+                        [ Layout.href "#"
+                        , Options.onClick (Layout.toggleDrawer Mdl)
+                        ]
+                        [ text "Minhas listas" ]
+                    , Layout.link
+                        [ Layout.href "#users"
+                        , Options.onClick (Layout.toggleDrawer Mdl)
+                        ]
+                        [ text "Alterar conta" ]
                     ]
-                    [ text "Ver questões" ]
-                , Layout.link
-                    [ Layout.href "#"
-                    , Options.onClick (Layout.toggleDrawer Mdl)
-                    ]
-                    [ text "Minhas questões" ]
-                , Layout.link
-                    [ Layout.href "#"
-                    , Options.onClick (Layout.toggleDrawer Mdl)
-                    ]
-                    [ text "Minhas listas" ]
-                , Layout.link
-                    [ Layout.href "#users"
-                    , Options.onClick (Layout.toggleDrawer Mdl)
-                    ]
-                    [ text "Alterar conta" ]
-                ]
 
-        QuestionDefault ->
-            Layout.navigation
-                []
-                [ Layout.link
-                    [ Layout.href "#questions/1"
-                    ]
-                    [ text "Colocar os filtros das questões" ]
-                ]
+            QuestionDefault ->
+                Html.map QuestionMsg (Question.drawerLink model.question)
 
-        UsersView ->
-            Layout.navigation
-                []
-                [ Layout.link
-                    [ Layout.href "#"
-                    , Options.onClick (Layout.toggleDrawer Mdl)
+            UsersView ->
+                Layout.navigation
+                    []
+                    [ Layout.link
+                        [ Layout.href "#"
+                        , Options.onClick (Layout.toggleDrawer Mdl)
+                        ]
+                        [ text "Minhas questões" ]
+                    , Layout.link
+                        [ Layout.href "#"
+                        , Options.onClick (Layout.toggleDrawer Mdl)
+                        ]
+                        [ text "Minhas listas" ]
+                    , Layout.link
+                        [ Layout.href "#"
+                        , Options.onClick (Layout.toggleDrawer Mdl)
+                        ]
+                        [ text "Alterar conta" ]
                     ]
-                    [ text "Minhas questões" ]
-                , Layout.link
-                    [ Layout.href "#"
-                    , Options.onClick (Layout.toggleDrawer Mdl)
-                    ]
-                    [ text "Minhas listas" ]
-                , Layout.link
-                    [ Layout.href "#"
-                    , Options.onClick (Layout.toggleDrawer Mdl)
-                    ]
-                    [ text "Alterar conta" ]
-                ]
 
 
 drawer : Model -> List (Html Msg)
 drawer model =
     [ Layout.title [] [ text "PrePaula" ]
-    , getDrawerLinks model.currentDrawerLinks
+    , getDrawerLinks model
     ]

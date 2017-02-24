@@ -4,6 +4,7 @@ import Navigation exposing (Location)
 import UrlParser exposing (..)
 import Question.Types as Question
 import VerifyEmail.Types as VerifyEmail
+import User.Types as User
 
 
 type Route
@@ -50,7 +51,7 @@ loginMatchers =
         ]
 
 
-parseLocation : Maybe a -> Location -> Route
+parseLocation : Maybe User.Model -> Location -> Route
 parseLocation user location =
     case user of
         Just user ->

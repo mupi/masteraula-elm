@@ -33,6 +33,7 @@ init =
         initQuestionList
         ""
         []
+        0
         False
         ""
         Material.model
@@ -48,7 +49,7 @@ update msg model global =
             { model | tags = [] } ! [ fetchGetQuestionPage questionPage global.token ]
 
         GetQuestionTagSearch questionPage ->
-            model ! [ fetchGetQuestionTagSearch questionPage model.tags global.token ]
+            model ! [ fetchGetQuestionFilterSearch questionPage model.tags model.filterId global.token ]
 
         ChangePage page ->
             if model.tags == [] then
@@ -77,7 +78,7 @@ update msg model global =
                     else
                         model.currentTag :: model.tags
             in
-                { model | tags = tags, currentTag = "" } ! []
+                { model | tags = tags, currentTag = "" } ! [ Navigation.newUrl "#questions/tagsearch/1" ]
 
         TagSearchRemove tag ->
             let
@@ -91,7 +92,7 @@ update msg model global =
                         )
                         model.tags
             in
-                { model | tags = tags } ! []
+                { model | tags = tags } ! [ Navigation.newUrl "#questions/tagsearch/1" ]
 
         QuestionListAdd question ->
             let
@@ -145,6 +146,9 @@ update msg model global =
         QuestionListDelete ->
             model ! [ fetchDeleteQuestioList model.questionList global.token ]
 
+        Filter newFilterId ->
+            { model | filterId = newFilterId } ! [ fetchGetQuestionFilterSearch 1 model.tags newFilterId global.token ]
+
         OnFetchGetQuestion (Ok question) ->
             { model | question = question, error = "" } ! []
 
@@ -181,10 +185,10 @@ update msg model global =
             in
                 { model | error = errorMsg } ! []
 
-        OnFetchGetQuestionTagSearch (Ok questionPage) ->
+        OnFetchGetQuestionFilterSearch (Ok questionPage) ->
             { model | questionPage = questionPage, error = "" } ! []
 
-        OnFetchGetQuestionTagSearch (Err error) ->
+        OnFetchGetQuestionFilterSearch (Err error) ->
             let
                 errorMsg =
                     case error of

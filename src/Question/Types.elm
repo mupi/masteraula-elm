@@ -9,9 +9,12 @@ type alias Model =
     { question : Question
     , questionPage : QuestionPage
     , questionList : QuestionList
-    , currentTag : String
+    , -- Search
+      currentTag : String
     , tags : List String
-    , generateAfterSave : Bool
+    , filterId : Int
+    , -- List docx file generation
+      generateAfterSave : Bool
     , error : String
     , mdl : Material.Model
     }
@@ -80,10 +83,12 @@ type Msg
     | QuestionListClear
     | QuestionListGenerate
     | QuestionListDelete
+      -- Filter
+    | Filter Int
       -- Fetch
     | OnFetchGetQuestion (Result Http.Error Question)
     | OnFetchGetQuestionPage (Result Http.Error QuestionPage)
-    | OnFetchGetQuestionTagSearch (Result Http.Error QuestionPage)
+    | OnFetchGetQuestionFilterSearch (Result Http.Error QuestionPage)
     | OnFecthQuestionListGenerate (Result Http.Error String)
     | OnFetchSaveQuestionList (Result Http.Error Int)
     | OnFetchDeleteQuestionList (Result Http.Error String)

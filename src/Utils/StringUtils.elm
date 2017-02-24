@@ -1,6 +1,7 @@
 module Utils.StringUtils exposing (..)
 
 import Regex exposing (..)
+import Date exposing (..)
 
 
 removeAccents : String -> String
@@ -45,3 +46,63 @@ removeSpecialCharacters text =
 tagFormatter : String -> String
 tagFormatter tag =
     removeSpecialCharacters <| spaceToTrace <| removeAccents tag
+
+
+monthToInt : Month -> Int
+monthToInt month =
+    case month of
+        Jan ->
+            1
+
+        Feb ->
+            2
+
+        Mar ->
+            3
+
+        Apr ->
+            4
+
+        May ->
+            5
+
+        Jun ->
+            6
+
+        Jul ->
+            7
+
+        Aug ->
+            8
+
+        Sep ->
+            9
+
+        Oct ->
+            10
+
+        Nov ->
+            11
+
+        Dec ->
+            12
+
+
+dateToString : Result String Date -> String
+dateToString res =
+    case res of
+        Ok date ->
+            String.concat [ toString <| day date, "/", toString <| monthToInt (month date), "/", toString <| year date ]
+
+        Err error ->
+            ""
+
+
+timeToString : Result String Date -> String
+timeToString res =
+    case res of
+        Ok date ->
+            String.concat [ toString <| hour date, ":", toString <| minute date, ":", toString <| second date ]
+
+        Err error ->
+            ""

@@ -1,6 +1,7 @@
 module Question.View exposing (..)
 
 import Html exposing (..)
+import Date
 import Html.Attributes exposing (id, type_, for, value, class, href)
 import Html.Events exposing (..)
 import Question.Types exposing (..)
@@ -11,6 +12,7 @@ import Material.Grid as Grid
 import Material.Card as Card
 import Material.Chip as Chip
 import Material.Icon as Icon
+import Material.List as Lists
 import Material.Layout as Layout
 import Material.Toggles as Toggles
 import Material.Options as Options exposing (css)
@@ -18,6 +20,7 @@ import Material.Grid exposing (grid, cell, size, offset, Device(..))
 import Material.Typography as Typo
 import Material.Color as Color
 import Utils.MDLUtils as Utils
+import Utils.StringUtils as StringUtils
 
 
 drawerLink : Model -> Html Msg
@@ -32,6 +35,10 @@ drawerLink model =
             [ Layout.href "#questions/questionlist/"
             ]
             [ Icon.view "view_module" [ Icon.size18 ], text " Lista de questão atual" ]
+        , Layout.link
+            [ Layout.href "#questions/minequestionlists/1"
+            ]
+            [ text "Minhas listas" ]
         , Layout.row []
             [ Layout.title
                 []
@@ -80,44 +87,35 @@ drawerLink model =
         ]
 
 
-view : Model -> Html Msg
-view model =
+
+-- Question View
+
+
+viewQuestion : Model -> Html Msg
+viewQuestion model =
     let
         question =
             model.question
     in
         Options.div []
-            [ questionView question
-            , text (toString model)
-            , text model.error
+            [ Html.h1 [] [ text "Question" ]
+            , p [] [ text (toString question.id) ]
+            , p [] [ text question.question_header ]
+            , p [] [ Markdown.toHtml [] question.question_text ]
+            , p []
+                [ text
+                    (case question.level of
+                        Just level ->
+                            level
+
+                        Nothing ->
+                            ""
+                    )
+                ]
+            , p [] [ text (toString question.credit_cost) ]
+            , p [] [ text (toString question.tags) ]
+            , p [] [ text (toString question.answers) ]
             ]
-
-
-
--- Question View
-
-
-questionView : Question -> Html Msg
-questionView question =
-    Options.div []
-        [ Html.h1 [] [ text "Question" ]
-        , p [] [ text (toString question.id) ]
-        , p [] [ text question.question_header ]
-        , p [] [ Markdown.toHtml [] question.question_text ]
-        , p []
-            [ text
-                (case question.level of
-                    Just level ->
-                        level
-
-                    Nothing ->
-                        ""
-                )
-            ]
-        , p [] [ text (toString question.credit_cost) ]
-        , p [] [ text (toString question.tags) ]
-        , p [] [ text (toString question.answers) ]
-        ]
 
 
 
@@ -126,65 +124,69 @@ questionView question =
 
 questionCardView : Model -> Question -> Grid.Cell Msg
 questionCardView model question =
-    Grid.cell
-        [ size All 3
-        , Options.css "padding" "8px 8px"
-        ]
-        [ Card.view
-            [ Color.background (Color.color Color.LightGreen Color.S500)
-            , css "width" "100%"
+    let
+        questions =
+            model.questionListEdit.questions
+    in
+        Grid.cell
+            [ size All 3
+            , Options.css "padding" "8px 8px"
             ]
-            [ Card.title
-                [ Color.text Color.white
-                , css "padding" "16px"
-                , css "display" "flex"
-                , css "align-items" "center"
-                , css "justify-content" "center"
-                , Card.border
-                  -- Clear default padding to encompass scrim
+            [ Card.view
+                [ Color.background (Color.color Color.LightGreen Color.S500)
+                , css "width" "100%"
                 ]
-                [ Icon.view "description" [ Icon.size36 ]
-                , text "Português"
-                ]
-            , Card.text
-                [ css "height" "196px"
-                ]
-                [ Markdown.toHtml [] (String.slice 0 100 question.question_header) ]
-            , Card.actions
-                [ Card.border
-                , Color.background (Color.color Color.LightGreen Color.S900)
-                ]
-                [ Button.render Mdl
-                    [ 2, 0, question.id ]
-                    model.mdl
-                    [ Button.ripple
-                    , Button.accent
-                    , Color.text Color.white
-                    , css "font-size" "11px"
-                    , css "width" "50%"
+                [ Card.title
+                    [ Color.text Color.white
+                    , css "padding" "16px"
+                    , css "display" "flex"
+                    , css "align-items" "center"
+                    , css "justify-content" "center"
+                    , Card.border
+                      -- Clear default padding to encompass scrim
                     ]
-                    [ Icon.view "favorite" [ Icon.size18 ], text " Favoritar" ]
-                , Button.render Mdl
-                    [ 2, 1, question.id ]
-                    model.mdl
-                    [ Button.ripple
-                    , Button.accent
-                    , Color.text Color.white
-                    , css "font-size" "11px"
-                    , css "width" "50%"
-                    , if List.member question model.questionList.questions then
-                        Button.disabled
-                      else
-                        Options.onClick (QuestionListAdd question)
+                    [ Icon.view "description" [ Icon.size36 ]
+                    , text "Português"
                     ]
-                    (if List.member question model.questionList.questions then
-                        [ text "Adicionado" ]
-                     else
-                        [ Icon.view "add" [ Icon.size18 ], text " Adicionar" ]
-                    )
+                , Card.text
+                    [ css "height" "196px"
+                    ]
+                    [ Markdown.toHtml [] (String.slice 0 100 question.question_header) ]
+                , Card.actions
+                    [ Card.border
+                    , Color.background (Color.color Color.LightGreen Color.S900)
+                    ]
+                    [ Button.render Mdl
+                        [ 2, 0, question.id ]
+                        model.mdl
+                        [ Button.ripple
+                        , Button.accent
+                        , Color.text Color.white
+                        , css "font-size" "11px"
+                        , css "width" "50%"
+                        ]
+                        [ Icon.view "favorite" [ Icon.size18 ], text " Favoritar" ]
+                    , Button.render Mdl
+                        [ 2, 1, question.id ]
+                        model.mdl
+                        [ Button.ripple
+                        , Button.accent
+                        , Color.text Color.white
+                        , css "font-size" "11px"
+                        , css "width" "50%"
+                        , if List.member question <| List.map (\q -> q.question) questions then
+                            Button.disabled
+                          else
+                            Options.onClick (QuestionListAdd question)
+                        ]
+                        (if List.member question <| List.map (\q -> q.question) questions then
+                            [ text "Adicionado" ]
+                         else
+                            [ Icon.view "add" [ Icon.size18 ], text " Adicionar" ]
+                        )
+                    ]
                 ]
             ]
-        ]
 
 
 searchTagChip : String -> Html Msg
@@ -305,104 +307,184 @@ viewQuestionPage model =
 -- Question List View
 
 
-questionListCardView : Model -> Question -> Grid.Cell Msg
-questionListCardView model question =
-    Grid.cell
-        [ size All 3
-        , Options.css "padding" "8px 8px"
-        ]
-        [ Card.view
-            [ Color.background (Color.color Color.LightGreen Color.S500)
-            , css "width" "100%"
+questionListCardView : Model -> QuestionOrder -> Grid.Cell Msg
+questionListCardView model questionOrder =
+    let
+        question =
+            questionOrder.question
+    in
+        Grid.cell
+            [ size All 3
+            , Options.css "padding" "8px 8px"
             ]
-            [ Card.title
-                [ Color.text Color.white
-                , css "padding" "8px"
-                , css "display" "flex"
-                , css "align-items" "center"
-                , css "justify-content" "center"
-                , Card.border
-                  -- Clear default padding to encompass scrim
+            [ Card.view
+                [ Color.background (Color.color Color.LightGreen Color.S500)
+                , css "width" "100%"
                 ]
-                [ Icon.view "description" [ Icon.size36 ]
-                , text "Português"
-                ]
-            , Card.text
-                [ css "height" "196px"
-                ]
-                [ Markdown.toHtml [] (String.slice 0 100 question.question_header) ]
-            , Card.actions
-                [ Card.border
-                , Color.background (Color.color Color.LightGreen Color.S900)
-                ]
-                [ Button.render Mdl
-                    [ 6, 0, question.id ]
-                    model.mdl
-                    [ Button.ripple
-                    , Button.accent
-                    , Color.text Color.white
-                    , css "font-size" "11px"
-                    , css "width" "50%"
+                [ Card.title
+                    [ Color.text Color.white
+                    , css "padding" "8px"
+                    , css "display" "flex"
+                    , css "align-items" "center"
+                    , css "justify-content" "center"
+                    , Card.border
+                      -- Clear default padding to encompass scrim
                     ]
-                    [ Icon.view "favorite" [ Icon.size18 ], text " Favoritar" ]
-                , Button.render Mdl
-                    [ 6, 1, question.id ]
-                    model.mdl
-                    [ Button.ripple
-                    , Button.accent
-                    , Options.onClick (QuestionListRemove question)
-                    , Color.text Color.white
-                    , css "font-size" "11px"
-                    , css "width" "50%"
+                    [ Icon.view "description" [ Icon.size36 ]
+                    , text "Português"
                     ]
-                    [ Icon.view "remove" [ Icon.size18 ], text " Remover" ]
+                , Card.text
+                    [ css "height" "196px"
+                    ]
+                    [ Markdown.toHtml [] (String.slice 0 100 question.question_header) ]
+                , Card.actions
+                    [ Card.border
+                    , Color.background (Color.color Color.LightGreen Color.S900)
+                    ]
+                    [ Button.render Mdl
+                        [ 6, 0, question.id ]
+                        model.mdl
+                        [ Button.ripple
+                        , Button.accent
+                        , Color.text Color.white
+                        , css "font-size" "11px"
+                        , css "width" "50%"
+                        ]
+                        [ Icon.view "favorite" [ Icon.size18 ], text " Favoritar" ]
+                    , Button.render Mdl
+                        [ 6, 1, question.id ]
+                        model.mdl
+                        [ Button.ripple
+                        , Button.accent
+                        , Options.onClick (QuestionListRemove question)
+                        , Color.text Color.white
+                        , css "font-size" "11px"
+                        , css "width" "50%"
+                        ]
+                        [ Icon.view "remove" [ Icon.size18 ], text " Remover" ]
+                    ]
                 ]
             ]
-        ]
 
 
 viewQuestionList : Model -> Html Msg
 viewQuestionList model =
+    let
+        questionList =
+            model.questionListEdit
+    in
+        div []
+            [ Options.styled h1
+                [ Typo.display1, Typo.center ]
+                [ text "Lista de questões" ]
+            , Textfield.render Mdl
+                [ 5, 0 ]
+                model.mdl
+                [ Options.onInput QuestionListHeaderInput
+                , Textfield.value questionList.question_list_header
+                , Textfield.floatingLabel
+                , Textfield.label "Nome da lista"
+                ]
+                []
+            , Grid.grid []
+                (List.map (questionListCardView model) questionList.questions)
+            , Button.render Mdl
+                [ 5, 1 ]
+                model.mdl
+                [ Button.ripple
+                , Button.colored
+                , Button.raised
+                , Options.onClick <| QuestionListGenerate questionList
+                ]
+                [ text "Gerar Lista" ]
+            , Button.render Mdl
+                [ 5, 2 ]
+                model.mdl
+                [ Button.ripple
+                , Button.colored
+                , Button.raised
+                , Options.onClick QuestionListSave
+                ]
+                [ text "Salvar" ]
+            , Button.render Mdl
+                [ 5, 3 ]
+                model.mdl
+                [ Button.ripple
+                , Button.colored
+                , Button.raised
+                , Options.onClick QuestionListDelete
+                ]
+                [ text "Apagar Lista" ]
+            ]
+
+
+
+-- Mine Question List Page
+
+
+questionListItems : Model -> QuestionList -> Html Msg
+questionListItems model questionList =
+    let
+        createdDate =
+            (Date.fromString questionList.create_date)
+    in
+        Lists.li [ Lists.withSubtitle ]
+            -- ! Required on every Lists.li containing subtitle.
+            [ Lists.content
+                [ Options.attribute <| Html.Events.onClick (QuestionListClick questionList.id)
+                , Options.css "cursor" "pointer"
+                , Options.css "cursor" "hand"
+                ]
+                [ text questionList.question_list_header
+                , Lists.subtitle [] [ text <| String.concat [ "Lista criada em: ", StringUtils.dateToString createdDate, " às ", StringUtils.timeToString createdDate ] ]
+                ]
+              -- , Lists.content2 []
+              --     [ Toggles.checkbox Mdl
+              --         [ 4 ]
+              --         model.mdl
+              --         [ Toggles.value 4
+              --            , Options.onToggle SelectQuestionList
+              --         ]
+              --         []
+              --     ]
+            ]
+
+
+viewQuestionListPage : Model -> Html Msg
+viewQuestionListPage model =
     div []
-        [ Options.styled h1
-            [ Typo.display1, Typo.center ]
-            [ text "Lista de questões" ]
-        , Textfield.render Mdl
-            [ 5, 0 ]
-            model.mdl
-            [ Options.onInput QuestionListHeaderInput
-            , Textfield.value model.questionList.question_list_header
-            , Textfield.floatingLabel
-            , Textfield.label "Nome da lista"
-            ]
-            []
-        , Grid.grid []
-            (List.map (questionListCardView model) model.questionList.questions)
-        , Button.render Mdl
-            [ 5, 1 ]
-            model.mdl
-            [ Button.ripple
-            , Button.colored
-            , Button.raised
-            , Options.onClick QuestionListGenerate
-            ]
-            [ text "Gerar Lista" ]
-        , Button.render Mdl
-            [ 5, 2 ]
-            model.mdl
-            [ Button.ripple
-            , Button.colored
-            , Button.raised
-            , Options.onClick QuestionListSave
-            ]
-            [ text "Salvar" ]
-        , Button.render Mdl
-            [ 5, 3 ]
-            model.mdl
-            [ Button.ripple
-            , Button.colored
-            , Button.raised
-            , Options.onClick QuestionListDelete
-            ]
-            [ text "Apagar Lista" ]
+        [ Lists.ul [] <| List.map (questionListItems model) model.questionListPage.questionLists
         ]
+
+
+viewSelectedQuestionList : Model -> Html Msg
+viewSelectedQuestionList model =
+    let
+        questionList =
+            model.questionListSelected
+    in
+        div []
+            [ Options.styled h1
+                [ Typo.display1, Typo.center ]
+                [ text questionList.question_list_header ]
+            , Grid.grid []
+                (List.map (questionListCardView model) questionList.questions)
+            , Button.render Mdl
+                [ 5, 1 ]
+                model.mdl
+                [ Button.ripple
+                , Button.colored
+                , Button.raised
+                , Options.onClick <| QuestionListGenerate questionList
+                ]
+                [ text "Gerar Lista" ]
+              -- , Button.render Mdl
+              --     [ 5, 3 ]
+              --     model.mdl
+              --     [ Button.ripple
+              --     , Button.colored
+              --     , Button.raised
+              --       , Options.onClick QuestionListDelete
+              --     ]
+              --     [ text "Editar Lista" ]
+            ]

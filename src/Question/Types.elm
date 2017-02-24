@@ -8,7 +8,9 @@ import User.Types as User
 type alias Model =
     { question : Question
     , questionPage : QuestionPage
-    , questionList : QuestionList
+    , questionListEdit : QuestionList
+    , questionListSelected : QuestionList
+    , questionListPage : QuestionListPage
     , -- Search
       currentTag : String
     , tags : List String
@@ -32,6 +34,22 @@ type alias Question =
     }
 
 
+type alias QuestionOrder =
+    { question : Question
+    , order : Int
+    }
+
+
+type alias QuestionList =
+    { id : Int
+    , question_list_header : String
+    , secret : Bool
+    , owner : User.Model
+    , questions : List QuestionOrder
+    , create_date : String
+    }
+
+
 type alias QuestionPage =
     { count : Int
     , actual : Int
@@ -41,12 +59,12 @@ type alias QuestionPage =
     }
 
 
-type alias QuestionList =
-    { id : Int
-    , question_list_header : String
-    , secret : Bool
-    , owner : String
-    , questions : List Question
+type alias QuestionListPage =
+    { count : Int
+    , actual : Int
+    , next : Maybe String
+    , previous : Maybe String
+    , questionLists : List QuestionList
     }
 
 
@@ -68,6 +86,8 @@ type alias Answer =
 type Msg
     = GetQuestion QuestionId
     | GetQuestionPage PageNumber
+    | GetQuestionList QuestionId
+    | GetMineQuestionListPage PageNumber
     | GetQuestionTagSearch PageNumber
     | ChangePage PageNumber
       -- Tags
@@ -75,14 +95,16 @@ type Msg
     | TagSearchAdd
     | TagSearchRemove String
     | TagSearch
-      -- QuestionList
+      -- QuestionList (on Edit)
     | QuestionListAdd Question
     | QuestionListRemove Question
     | QuestionListHeaderInput String
     | QuestionListSave
     | QuestionListClear
-    | QuestionListGenerate
+    | QuestionListGenerate QuestionList
     | QuestionListDelete
+      -- Question List Page
+    | QuestionListClick Int
       -- Filter
     | Filter Int
       -- Fetch
@@ -92,5 +114,7 @@ type Msg
     | OnFecthQuestionListGenerate (Result Http.Error String)
     | OnFetchSaveQuestionList (Result Http.Error Int)
     | OnFetchDeleteQuestionList (Result Http.Error String)
+    | OnFetchGetMineQuestionListPage (Result Http.Error QuestionListPage)
+    | OnFetchGetQuestionList (Result Http.Error QuestionList)
     | NoOp
     | Mdl (Material.Msg Msg)

@@ -33,6 +33,24 @@ questionDecoder =
         |> optional "answers" (Decode.list answerDecoder) []
 
 
+questionOrderDecoder : Decode.Decoder QuestionOrder
+questionOrderDecoder =
+    decode QuestionOrder
+        |> required "question" questionDecoder
+        |> required "order" Decode.int
+
+
+questionListDecoder : Decode.Decoder QuestionList
+questionListDecoder =
+    decode QuestionList
+        |> required "id" Decode.int
+        |> required "question_list_header" Decode.string
+        |> required "private" Decode.bool
+        |> required "owner" User.userDecoder
+        |> required "questions" (Decode.list questionOrderDecoder)
+        |> required "create_date" Decode.string
+
+
 questionPageDecoder : PageNumber -> Decode.Decoder QuestionPage
 questionPageDecoder page =
     decode QuestionPage
@@ -41,6 +59,16 @@ questionPageDecoder page =
         |> required "next" (Decode.nullable Decode.string)
         |> required "previous" (Decode.nullable Decode.string)
         |> required "results" (Decode.list questionDecoder)
+
+
+questionListPageDecoder : PageNumber -> Decode.Decoder QuestionListPage
+questionListPageDecoder page =
+    decode QuestionListPage
+        |> required "count" Decode.int
+        |> hardcoded page
+        |> required "next" (Decode.nullable Decode.string)
+        |> required "previous" (Decode.nullable Decode.string)
+        |> required "results" (Decode.list questionListDecoder)
 
 
 headerBuild : Maybe String -> List Http.Header
@@ -176,19 +204,19 @@ fetchGetQuestionFilterSearch page tags levelFilter token =
 -- Question List
 
 
-urlQuestionList : QuestionList -> String
-urlQuestionList questionList =
-    if questionList.id <= 0 then
+urlQuestionList : Int -> String
+urlQuestionList questionListId =
+    if questionListId <= 0 then
         "http://localhost:8000/rest/question_lists/"
     else
-        String.concat [ "http://localhost:8000/rest/question_lists/", toString questionList.id, "/" ]
+        String.concat [ "http://localhost:8000/rest/question_lists/", toString questionListId, "/" ]
 
 
-questionEncoder : Int -> Question -> Value
-questionEncoder index question =
+questionEncoder : QuestionOrder -> Value
+questionEncoder questionOrder =
     object
-        [ ( "question", int question.id )
-        , ( "order", int (index + 1) )
+        [ ( "question", int questionOrder.question.id )
+        , ( "order", int (questionOrder.order + 1) )
         ]
 
 
@@ -196,7 +224,7 @@ saveQuestionListEncoder : QuestionList -> Value
 saveQuestionListEncoder questionList =
     object
         [ ( "private", bool False )
-        , ( "questions", list (List.indexedMap questionEncoder questionList.questions) )
+        , ( "questions", list (List.map questionEncoder questionList.questions) )
         , ( "question_list_header", string questionList.question_list_header )
         ]
 
@@ -206,8 +234,8 @@ saveQuestionListBody questionList =
     Http.stringBody "application/json" (encode 0 (saveQuestionListEncoder questionList))
 
 
-postSaveQuestioList : QuestionList -> Maybe String -> Http.Request Int
-postSaveQuestioList questionList token =
+postSaveQuestionList : QuestionList -> Maybe String -> Http.Request Int
+postSaveQuestionList questionList token =
     Http.request
         { method =
             if questionList.id <= 0 then
@@ -215,7 +243,7 @@ postSaveQuestioList questionList token =
             else
                 "PATCH"
         , headers = (headerBuild token)
-        , url = (urlQuestionList questionList)
+        , url = (urlQuestionList questionList.id)
         , body = saveQuestionListBody questionList
         , expect = (Http.expectJson (field "id" Decode.int))
         , timeout = Nothing
@@ -223,17 +251,17 @@ postSaveQuestioList questionList token =
         }
 
 
-fetchPostSaveQuestioList : QuestionList -> Maybe String -> Cmd Msg
-fetchPostSaveQuestioList question token =
-    Http.send OnFetchSaveQuestionList (postSaveQuestioList question token)
+fetchPostSaveQuestionList : QuestionList -> Maybe String -> Cmd Msg
+fetchPostSaveQuestionList question token =
+    Http.send OnFetchSaveQuestionList (postSaveQuestionList question token)
 
 
-deleteQuestioList : QuestionList -> Maybe String -> Http.Request String
-deleteQuestioList questionList token =
+deleteQuestionList : QuestionList -> Maybe String -> Http.Request String
+deleteQuestionList questionList token =
     Http.request
         { method = "DELETE"
         , headers = (headerBuild token)
-        , url = (urlQuestionList questionList)
+        , url = (urlQuestionList questionList.id)
         , body = Http.emptyBody
         , expect = (Http.expectString)
         , timeout = Nothing
@@ -241,9 +269,54 @@ deleteQuestioList questionList token =
         }
 
 
-fetchDeleteQuestioList : QuestionList -> Maybe String -> Cmd Msg
-fetchDeleteQuestioList question token =
-    Http.send OnFetchDeleteQuestionList (deleteQuestioList question token)
+fetchDeleteQuestionList : QuestionList -> Maybe String -> Cmd Msg
+fetchDeleteQuestionList question token =
+    Http.send OnFetchDeleteQuestionList (deleteQuestionList question token)
+
+
+getQuestionList : Int -> Maybe String -> Http.Request QuestionList
+getQuestionList questionListId token =
+    Http.request
+        { method = "GET"
+        , headers = (headerBuild token)
+        , url = (urlQuestionList questionListId)
+        , body = Http.emptyBody
+        , expect = (Http.expectJson questionListDecoder)
+        , timeout = Nothing
+        , withCredentials = False
+        }
+
+
+fetchGetQuestionList : Int -> Maybe String -> Cmd Msg
+fetchGetQuestionList questionListId token =
+    Http.send OnFetchGetQuestionList (getQuestionList questionListId token)
+
+
+
+-- Question List Pages
+
+
+urlListMineQuestionList : PageNumber -> String
+urlListMineQuestionList page =
+    String.concat [ "http://localhost:8000/rest/question_lists/user_list_questions/?page=", (toString page) ]
+
+
+getMineQuestionList : PageNumber -> Maybe String -> Http.Request QuestionListPage
+getMineQuestionList page token =
+    Http.request
+        { method = "GET"
+        , headers = (headerBuild token)
+        , url = (urlListMineQuestionList page)
+        , body = Http.emptyBody
+        , expect = (Http.expectJson <| questionListPageDecoder page)
+        , timeout = Nothing
+        , withCredentials = False
+        }
+
+
+fetchGetMineQuestionList : PageNumber -> Maybe String -> Cmd Msg
+fetchGetMineQuestionList page token =
+    Http.send OnFetchGetMineQuestionListPage (getMineQuestionList page token)
 
 
 

@@ -60,7 +60,7 @@ questionInit savedStorage =
     in
         case savedStorage of
             Just storage ->
-                { question | questionList = storage.questionList }
+                { question | questionListEdit = storage.questionList }
 
             Nothing ->
                 question
@@ -176,7 +176,7 @@ update msg model =
                         localStorage =
                             model.localStorage
                     in
-                        { localStorage | questionList = updatedQuestion.questionList }
+                        { localStorage | questionList = updatedQuestion.questionListEdit }
             in
                 ( { model | question = updatedQuestion }, Cmd.batch [ setLocalStorage newStorage, Cmd.map QuestionMsg cmd ] )
 
@@ -208,6 +208,20 @@ update msg model =
                             let
                                 ( updatedQuestion, cmd ) =
                                     Question.update (Question.GetQuestionTagSearch page) model.question model.global
+                            in
+                                ( { model | question = updatedQuestion, currentDrawerLinks = QuestionDefault }, Cmd.map QuestionMsg cmd )
+
+                        MineQuestionListRoute page ->
+                            let
+                                ( updatedQuestion, cmd ) =
+                                    Question.update (Question.GetMineQuestionListPage page) model.question model.global
+                            in
+                                ( { model | question = updatedQuestion, currentDrawerLinks = QuestionDefault }, Cmd.map QuestionMsg cmd )
+
+                        SelectedQuestionListRoute page ->
+                            let
+                                ( updatedQuestion, cmd ) =
+                                    Question.update (Question.GetQuestionList page) model.question model.global
                             in
                                 ( { model | question = updatedQuestion, currentDrawerLinks = QuestionDefault }, Cmd.map QuestionMsg cmd )
 

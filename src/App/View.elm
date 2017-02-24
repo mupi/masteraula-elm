@@ -26,18 +26,8 @@ view : Model -> Html Msg
 view model =
     Layout.render Mdl
         model.mdl
-        (case model.route of
-            QuestionTagSearchRoute a ->
-                [ Layout.fixedHeader
-                , Layout.fixedDrawer
-                ]
-
-            QuestionPageRoute a ->
-                [ Layout.fixedHeader
-                , Layout.fixedDrawer
-                ]
-
-            QuestionListRoute ->
+        (case model.currentDrawerLinks of
+            QuestionDefault ->
                 [ Layout.fixedHeader
                 , Layout.fixedDrawer
                 ]
@@ -77,16 +67,22 @@ page model =
             Html.map VerifyEmailMsg (VerifyEmail.view model.verifyEmail)
 
         QuestionRoute questionId ->
-            Html.map QuestionMsg (Question.view model.question)
+            Html.map QuestionMsg (Question.viewQuestion model.question)
 
-        QuestionPageRoute questionId ->
+        QuestionPageRoute page ->
             Html.map QuestionMsg (Question.viewQuestionPage model.question)
 
-        QuestionTagSearchRoute questionId ->
+        QuestionTagSearchRoute page ->
             Html.map QuestionMsg (Question.viewQuestionPage model.question)
 
         QuestionListRoute ->
             Html.map QuestionMsg (Question.viewQuestionList model.question)
+
+        SelectedQuestionListRoute questionListId ->
+            Html.map QuestionMsg (Question.viewSelectedQuestionList model.question)
+
+        MineQuestionListRoute page ->
+            Html.map QuestionMsg (Question.viewQuestionListPage model.question)
 
         NotFoundRote ->
             notFoundView
@@ -261,7 +257,7 @@ getDrawerLinks model =
                         ]
                         [ text "Minhas questões" ]
                     , Layout.link
-                        [ Layout.href "#"
+                        [ Layout.href "#questions/minequestionlists/1"
                         , Options.onClick (Layout.toggleDrawer Mdl)
                         ]
                         [ text "Minhas listas" ]
@@ -284,7 +280,7 @@ getDrawerLinks model =
                         ]
                         [ text "Minhas questões" ]
                     , Layout.link
-                        [ Layout.href "#"
+                        [ Layout.href "#questions/minequestionlists/1"
                         , Options.onClick (Layout.toggleDrawer Mdl)
                         ]
                         [ text "Minhas listas" ]

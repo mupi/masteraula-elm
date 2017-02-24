@@ -13,11 +13,11 @@ import User.State as User
 import Material
 
 
-port setStorage : GlobalStorage -> Cmd msg
+port setLocalStorage : LocalStorage -> Cmd msg
 
 
-init : Maybe GlobalStorage -> Location -> ( Model, Cmd Msg )
-init savedGlobal location =
+init : Maybe LocalStorage -> Location -> ( Model, Cmd Msg )
+init savedStorage location =
     let
         currentRoute =
             parseLocation Nothing location
@@ -30,9 +30,10 @@ init savedGlobal location =
                 Login.init
                 Signup.init
                 VerifyEmail.init
-                Question.init
+                (questionInit savedStorage)
                 currentRoute
-                (globalInit savedGlobal)
+                (globalInit savedStorage)
+                (storageInit savedStorage)
                 HomeDefault
                 mdl
             )
@@ -40,9 +41,33 @@ init savedGlobal location =
         update (OnLocationChange location) initModel
 
 
-globalInit : Maybe GlobalStorage -> Global
-globalInit savedGlobal =
-    Maybe.withDefault (Global Nothing Nothing) savedGlobal
+globalInit : Maybe LocalStorage -> Global
+globalInit savedStorage =
+    case savedStorage of
+        Just storage ->
+            Global storage.user storage.token
+
+        Nothing ->
+            Global Nothing Nothing
+
+
+questionInit : Maybe LocalStorage -> Question.Model
+questionInit savedStorage =
+    let
+        question =
+            Question.init
+    in
+        case savedStorage of
+            Just storage ->
+                { question | questionList = storage.questionList }
+
+            Nothing ->
+                question
+
+
+storageInit : Maybe LocalStorage -> LocalStorage
+storageInit savedStorage =
+    Maybe.withDefault (LocalStorage Nothing Nothing Question.initQuestionList) savedStorage
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -86,8 +111,15 @@ update msg model =
                         Cmd.map LoginMsg cmd
                     else
                         Navigation.newUrl "#index"
+
+                newStorage =
+                    let
+                        localStorage =
+                            model.localStorage
+                    in
+                        { localStorage | user = newGlobal.user, token = newGlobal.token }
             in
-                ( { model | login = updatedLogin, global = newGlobal }, Cmd.batch [ setStorage newGlobal, newCmd ] )
+                ( { model | login = updatedLogin, global = newGlobal }, Cmd.batch [ setLocalStorage newStorage, newCmd ] )
 
         SignupMsg subMsg ->
             let
@@ -123,15 +155,29 @@ update msg model =
                         updatedVerifyKey
                     else
                         { updatedVerifyKey | login = Login.init }
+
+                newStorage =
+                    let
+                        localStorage =
+                            model.localStorage
+                    in
+                        { localStorage | user = newGlobal.user, token = newGlobal.token }
             in
-                ( { model | verifyEmail = newVerifyKey, global = newGlobal }, Cmd.batch [ setStorage newGlobal, newCmd ] )
+                ( { model | verifyEmail = newVerifyKey, global = newGlobal }, Cmd.batch [ setLocalStorage newStorage, newCmd ] )
 
         QuestionMsg subMsg ->
             let
                 ( updatedQuestion, cmd ) =
                     Question.update subMsg model.question model.global
+
+                newStorage =
+                    let
+                        localStorage =
+                            model.localStorage
+                    in
+                        { localStorage | questionList = updatedQuestion.questionList }
             in
-                ( { model | question = updatedQuestion }, Cmd.map QuestionMsg cmd )
+                ( { model | question = updatedQuestion }, Cmd.batch [ setLocalStorage newStorage, Cmd.map QuestionMsg cmd ] )
 
         OnLocationChange location ->
             let

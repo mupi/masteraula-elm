@@ -66,6 +66,9 @@ page model =
         QuestionTagSearchRoute questionId ->
             Html.map QuestionMsg (Question.viewQuestionPage model.question)
 
+        QuestionListRoute ->
+            Html.map QuestionMsg (Question.viewQuestionList model.question)
+
         NotFoundRote ->
             notFoundView
 

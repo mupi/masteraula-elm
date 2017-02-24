@@ -6,7 +6,6 @@ type alias Model =
     , username : String
     , name : String
     , email : String
-    , url : String
     }
 
 

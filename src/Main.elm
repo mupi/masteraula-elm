@@ -2,11 +2,11 @@ module Main exposing (..)
 
 import App.View exposing (view)
 import App.State exposing (init, update, subscriptions)
-import App.Types exposing (Model, Msg(..), GlobalStorage)
+import App.Types exposing (Model, Msg(..), LocalStorage)
 import Navigation exposing (programWithFlags)
 
 
-main : Program (Maybe GlobalStorage) Model Msg
+main : Program (Maybe LocalStorage) Model Msg
 main =
     programWithFlags OnLocationChange
         { init = init

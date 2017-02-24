@@ -17,14 +17,16 @@ type alias Model =
     , question : Question.Model
     , route : Route
     , global : Global
+    , localStorage : LocalStorage
     , currentDrawerLinks : DrawerLinks
     , mdl : Material.Model
     }
 
 
-type alias GlobalStorage =
+type alias LocalStorage =
     { user : Maybe User.Model
     , token : Maybe String
+    , questionList : Question.QuestionList
     }
 
 

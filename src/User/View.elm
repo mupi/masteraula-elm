@@ -17,6 +17,5 @@ view model =
         , p [] [ text model.username ]
         , p [] [ text model.name ]
         , p [] [ text model.email ]
-        , p [] [ text model.url ]
         , text (toString model)
         ]

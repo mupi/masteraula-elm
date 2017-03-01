@@ -1,5 +1,6 @@
 module VerifyEmail.Rest exposing (..)
 
+import App.Config as Config
 import Http exposing (..)
 import Json.Decode as Decode exposing (field)
 import Json.Encode as Encode exposing (Value, encode, object, string)
@@ -8,7 +9,7 @@ import VerifyEmail.Types exposing (..)
 
 url : String
 url =
-    "http://localhost:8000/rest/auth/registration/verify-email/"
+    String.concat [ Config.baseUrl, "registration/verify-email/" ]
 
 
 verifyEmailDecoder : Decode.Decoder VerifyEmailModel

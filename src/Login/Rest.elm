@@ -1,5 +1,6 @@
 module Login.Rest exposing (..)
 
+import App.Config as Config
 import Http exposing (..)
 import Json.Decode as Decode exposing (field)
 import Json.Encode as Encode exposing (Value, encode, object, string)
@@ -9,7 +10,7 @@ import User.Rest as User
 
 url : String
 url =
-    "http://localhost:8000/rest/auth/login/"
+    String.concat [ Config.baseUrl, "auth/login/" ]
 
 
 loginDecoder : Decode.Decoder LoginModel

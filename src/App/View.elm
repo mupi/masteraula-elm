@@ -236,11 +236,11 @@ getDrawerLinks model =
                         , Options.onClick (Layout.toggleDrawer Mdl)
                         ]
                         [ text "Fazer cadastro" ]
-                    , Layout.link
-                        [ Layout.href "#questions/1"
-                        , Options.onClick (Layout.toggleDrawer Mdl)
-                        ]
-                        [ text "Ver questões" ]
+                      -- , Layout.link
+                      --     [ Layout.href "#questions/1"
+                      --     , Options.onClick (Layout.toggleDrawer Mdl)
+                      --     ]
+                      --     [ text "Ver questões" ]
                     ]
 
             LoggedIn ->
@@ -251,11 +251,11 @@ getDrawerLinks model =
                         , Options.onClick (Layout.toggleDrawer Mdl)
                         ]
                         [ text "Ver questões" ]
-                    , Layout.link
-                        [ Layout.href "#"
-                        , Options.onClick (Layout.toggleDrawer Mdl)
-                        ]
-                        [ text "Minhas questões" ]
+                      -- , Layout.link
+                      --     [ Layout.href "#"
+                      --     , Options.onClick (Layout.toggleDrawer Mdl)
+                      --     ]
+                      --     [ text "Minhas questões" ]
                     , Layout.link
                         [ Layout.href "#questions/minequestionlists/1"
                         , Options.onClick (Layout.toggleDrawer Mdl)

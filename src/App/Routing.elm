@@ -30,11 +30,11 @@ normalMatchers =
         , map LoginRoute (s "login")
         , map SignupRoute (s "signup")
         , map VerifyEmailRoute (s "verify-email" </> string)
-        , map QuestionPageRoute (s "questions" </> int)
-        , map QuestionListRoute (s "questions" </> s "questionlist")
-        , map SelectedQuestionListRoute (s "questions" </> s "questionlists" </> int)
-        , map QuestionRoute (s "question" </> int)
-        , map QuestionTagSearchRoute (s "questions" </> s "tagsearch" </> int)
+          -- , map QuestionPageRoute (s "questions" </> int)
+          -- , map QuestionListRoute (s "questions" </> s "questionlist")
+          -- , map SelectedQuestionListRoute (s "questions" </> s "questionlists" </> int)
+          -- , map QuestionRoute (s "question" </> int)
+          -- , map QuestionTagSearchRoute (s "questions" </> s "tagsearch" </> int)
         ]
 
 

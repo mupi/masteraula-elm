@@ -1,6 +1,7 @@
 module Login.State exposing (init, update)
 
 import Http
+import Navigation
 import Login.Types exposing (..)
 import Login.Rest exposing (..)
 import Material
@@ -24,10 +25,10 @@ update msg model =
             ( model, fetchLogin model )
 
         Logout ->
-            ( init, Cmd.none )
+            ( init, Navigation.newUrl "#index" )
 
         OnFetchLogin (Ok login) ->
-            { model | user = Just login.user, token = Just login.token, error = "" } ! []
+            { model | user = Just login.user, token = Just login.token, error = "" } ! [ Navigation.newUrl "#index" ]
 
         OnFetchLogin (Err error) ->
             let

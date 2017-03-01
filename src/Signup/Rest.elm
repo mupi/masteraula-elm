@@ -1,5 +1,6 @@
 module Signup.Rest exposing (..)
 
+import App.Config as Config
 import Http exposing (..)
 import Json.Decode as Decode exposing (field)
 import Json.Decode.Pipeline exposing (decode, required, optional, hardcoded)
@@ -9,7 +10,7 @@ import Signup.Types exposing (..)
 
 url : String
 url =
-    "http://localhost:8000/rest/auth/registration/"
+    String.concat [ Config.baseUrl, "auth/registration/" ]
 
 
 signupDecoder : Decode.Decoder RestErrorModel

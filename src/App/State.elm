@@ -108,10 +108,7 @@ update msg model =
                         Global updatedLogin.user updatedLogin.token
 
                 newCmd =
-                    if updatedLogin.user == Nothing then
-                        Cmd.map LoginMsg cmd
-                    else
-                        Navigation.newUrl "#index"
+                    Cmd.map LoginMsg cmd
 
                 newStorage =
                     let
@@ -134,7 +131,7 @@ update msg model =
                 ( updatedVerifyKey, cmd ) =
                     VerifyEmail.update subMsg model.verifyEmail
 
-                -- Trata o login que dá para ser feito através da página verifyEmail
+                -- Threats the login that can be done using verifyEmail page
                 updatedLogin =
                     updatedVerifyKey.login
 
@@ -150,7 +147,7 @@ update msg model =
                     else
                         Navigation.newUrl "#index"
 
-                -- Serve para fazer um "logout" no login que está no verifyEmail para evitar um loop acima
+                -- Do a "logout" in the verifyEmail login model to prevent a loop
                 newVerifyKey =
                     if updatedLogin.user == Nothing then
                         updatedVerifyKey

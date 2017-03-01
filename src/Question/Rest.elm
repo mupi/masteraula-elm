@@ -1,5 +1,6 @@
 module Question.Rest exposing (..)
 
+import App.Config as Config
 import Http
 import Json.Decode as Decode exposing (field)
 import Json.Decode.Pipeline exposing (decode, required, optional, hardcoded)
@@ -87,7 +88,7 @@ headerBuild token =
 
 urlQuestion : QuestionId -> String
 urlQuestion questionId =
-    String.concat [ "http://localhost:8000/rest/questions/", (toString questionId), "/" ]
+    String.concat [ Config.baseUrl, "questions/", (toString questionId), "/" ]
 
 
 getQuestion : QuestionId -> Maybe String -> Http.Request Question
@@ -114,7 +115,7 @@ fetchGetQuestion questionId token =
 
 urlQuestionPage : PageNumber -> String
 urlQuestionPage page =
-    String.concat [ "http://localhost:8000/rest/questions/?page=", (toString page) ]
+    String.concat [ Config.baseUrl, "questions/?page=", (toString page) ]
 
 
 getQuestionPage : PageNumber -> Maybe String -> Http.Request QuestionPage
@@ -141,7 +142,7 @@ fetchGetQuestionPage page token =
 
 urlBaseSearch : PageNumber -> String
 urlBaseSearch page =
-    String.concat [ "http://localhost:8000/rest/search/question/?page=", toString page ]
+    String.concat [ Config.baseUrl, "search/question/?page=", toString page ]
 
 
 urlTagSearchQuestion : String -> List String -> String
@@ -207,9 +208,9 @@ fetchGetQuestionFilterSearch page tags levelFilter token =
 urlQuestionList : Int -> String
 urlQuestionList questionListId =
     if questionListId <= 0 then
-        "http://localhost:8000/rest/question_lists/"
+        String.concat [ Config.baseUrl, "question_lists/" ]
     else
-        String.concat [ "http://localhost:8000/rest/question_lists/", toString questionListId, "/" ]
+        String.concat [ Config.baseUrl, "question_lists/", toString questionListId, "/" ]
 
 
 questionEncoder : QuestionOrder -> Value
@@ -298,7 +299,7 @@ fetchGetQuestionList questionListId token =
 
 urlListMineQuestionList : PageNumber -> String
 urlListMineQuestionList page =
-    String.concat [ "http://localhost:8000/rest/question_lists/user_list_questions/?page=", (toString page) ]
+    String.concat [ Config.baseUrl, "question_lists/user_list_questions/?page=", (toString page) ]
 
 
 getMineQuestionList : PageNumber -> Maybe String -> Http.Request QuestionListPage
@@ -325,7 +326,7 @@ fetchGetMineQuestionList page token =
 
 urlGenerateList : Int -> String
 urlGenerateList id =
-    String.concat [ "http://localhost:8000/rest/question_lists/", toString id, "/generate_list/" ]
+    String.concat [ Config.baseUrl, "question_lists/", toString id, "/generate_list/" ]
 
 
 getGenerateList : Int -> Maybe String -> Http.Request String

@@ -1,5 +1,6 @@
 module Question.State exposing (init, update, initQuestionList)
 
+import App.Config as Config
 import Http
 import Question.Types exposing (..)
 import Question.Rest exposing (..)
@@ -232,7 +233,7 @@ update msg model global =
         OnFecthQuestionListGenerate (Ok id) ->
             let
                 newUrl =
-                    String.concat [ "http://localhost:8000/rest/question_lists/", id, "/get_list/" ]
+                    String.concat [ Config.baseUrl, "question_lists/", id, "/get_list/" ]
             in
                 { model | error = "" } ! [ Navigation.load newUrl ]
 

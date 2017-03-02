@@ -81,7 +81,7 @@ type alias PageNumber =
 type alias Answer =
     { id : Int
     , answer_text : String
-    , is_corect : Bool
+    , is_correct : Bool
     }
 
 
@@ -97,6 +97,8 @@ type Msg
     | TagSearchAdd
     | TagSearchRemove String
     | TagSearch
+    | QuestionClick Question
+    | QuestionBack
       -- QuestionList (on Edit)
     | QuestionListAdd Question
     | QuestionListRemove Question

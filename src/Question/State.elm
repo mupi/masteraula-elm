@@ -111,6 +111,12 @@ update msg model global =
             in
                 { model | tags = tags } ! [ Navigation.newUrl "#questions/tagsearch/1" ]
 
+        QuestionClick question ->
+            model ! [ Navigation.newUrl <| String.concat [ "#question/", toString question.id ] ]
+
+        QuestionBack ->
+            model ! [ Navigation.back 1 ]
+
         QuestionListAdd question ->
             let
                 questionList =

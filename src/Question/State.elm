@@ -8,6 +8,8 @@ import App.Types as App
 import User.State as User
 import Navigation
 import Material
+import Material.Snackbar as Snackbar
+import Material.Helpers exposing (map1st, map2nd)
 import Utils.StringUtils as StringUtils
 
 
@@ -44,6 +46,7 @@ init =
         0
         False
         ""
+        Snackbar.model
         Material.model
 
 
@@ -114,12 +117,10 @@ update msg model global =
                     model.questionListEdit
 
                 updQuestionList =
-                    { questionList | questions = QuestionOrder question 0 :: questionList.questions }
+                    { questionList | questions = List.append questionList.questions [ QuestionOrder question 0 ] }
 
                 newQuestionList =
-                    { questionList
-                        | questions = List.indexedMap (\index questionOrder -> { questionOrder | order = index }) updQuestionList.questions
-                    }
+                    { questionList | questions = List.indexedMap (\index questionOrder -> { questionOrder | order = index }) updQuestionList.questions }
             in
                 { model | questionListEdit = newQuestionList } ! []
 
@@ -156,13 +157,35 @@ update msg model global =
                 { model | questionListEdit = newQuestionList } ! []
 
         QuestionListSave ->
-            model ! [ fetchPostSaveQuestionList model.questionListEdit global.token ]
+            if model.questionListEdit.question_list_header == "" then
+                let
+                    ( snackbar, effect ) =
+                        Snackbar.add (Snackbar.snackbar 0 "Por favor, coloque o nome da lista anstes de salvá-la" "Fechar") model.snackbar
+                            |> map2nd (Cmd.map Snackbar)
+                in
+                    { model | snackbar = snackbar } ! [ effect ]
+            else
+                { model | generateAfterSave = False } ! [ fetchPostSaveQuestionList model.questionListEdit global.token ]
 
         QuestionListClear ->
-            { model | questionListEdit = initQuestionList } ! []
+            let
+                questionListEdit =
+                    model.questionListEdit
+
+                newQuestionList =
+                    { questionListEdit | questions = [] }
+            in
+                { model | questionListEdit = newQuestionList } ! []
 
         QuestionListGenerate questionList ->
-            if (model.questionListEdit == questionList) then
+            if model.questionListEdit.question_list_header == "" then
+                let
+                    ( snackbar, effect ) =
+                        Snackbar.add (Snackbar.snackbar 0 "Por favor, coloque o nome da lista anstes de gerá-la" "Fechar") model.snackbar
+                            |> map2nd (Cmd.map Snackbar)
+                in
+                    { model | snackbar = snackbar } ! [ effect ]
+            else if (model.questionListEdit == questionList) then
                 { model | generateAfterSave = True } ! [ fetchPostSaveQuestionList questionList global.token ]
             else
                 model ! [ fetchGetGenerateList questionList.id global.token ]
@@ -172,6 +195,9 @@ update msg model global =
 
         QuestionListClick questionListId ->
             model ! [ Navigation.newUrl <| String.concat [ "#questions/questionlists/", toString questionListId ] ]
+
+        QuestionListEdit questionList ->
+            { model | questionListEdit = questionList } ! [ Navigation.newUrl <| String.concat [ "#questions/questionlist" ] ]
 
         Filter newFilterId ->
             { model | filterId = newFilterId } ! [ fetchGetQuestionFilterSearch 1 model.tags newFilterId global.token ]
@@ -301,8 +327,12 @@ update msg model global =
 
                         _ ->
                             toString error
+
+                ( snackbar, effect ) =
+                    Snackbar.add (Snackbar.snackbar 0 errorMsg "Close") model.snackbar
+                        |> map2nd (Cmd.map Snackbar)
             in
-                { model | error = errorMsg } ! []
+                { model | error = errorMsg, snackbar = snackbar } ! [ effect ]
 
         OnFetchGetMineQuestionListPage (Ok questionListPage) ->
             { model | questionListPage = questionListPage, error = "" } ! []
@@ -342,6 +372,14 @@ update msg model global =
 
         NoOp ->
             model ! []
+
+        Snackbar (Snackbar.End a) ->
+            { model | snackbar = Snackbar.model } ! []
+
+        Snackbar msg ->
+            Snackbar.update msg model.snackbar
+                |> map1st (\s -> { model | snackbar = s })
+                |> map2nd (Cmd.map Snackbar)
 
         Mdl msg_ ->
             Material.update Mdl msg_ model

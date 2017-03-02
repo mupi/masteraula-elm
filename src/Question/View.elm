@@ -18,6 +18,7 @@ import Material.Toggles as Toggles
 import Material.Options as Options exposing (css)
 import Material.Grid exposing (grid, cell, size, offset, Device(..))
 import Material.Typography as Typo
+import Material.Snackbar as Snackbar
 import Material.Color as Color
 import Utils.MDLUtils as Utils
 import Utils.StringUtils as StringUtils
@@ -84,6 +85,14 @@ drawerLink model =
                 ]
                 [ text "Difícil" ]
             ]
+        ]
+
+
+view : (Model -> Html Msg) -> Model -> Html Msg
+view method model =
+    div []
+        [ method model
+        , Snackbar.view model.snackbar |> Html.map Snackbar
         ]
 
 
@@ -388,34 +397,68 @@ viewQuestionList model =
                 []
             , Grid.grid []
                 (List.map (questionListCardView model) questionList.questions)
-            , Button.render Mdl
-                [ 5, 1 ]
-                model.mdl
-                [ Button.ripple
-                , Button.colored
-                , Button.raised
-                , Options.onClick <| QuestionListGenerate questionList
-                ]
-                [ text "Gerar Lista" ]
-            , Button.render Mdl
-                [ 5, 2 ]
-                model.mdl
-                [ Button.ripple
-                , Button.colored
-                , Button.raised
-                , Options.onClick QuestionListSave
-                ]
-                [ text "Salvar" ]
-            , Button.render Mdl
-                [ 5, 3 ]
-                model.mdl
-                [ Button.ripple
-                , Button.colored
-                , Button.raised
-                , Options.onClick QuestionListDelete
-                ]
-                [ text "Apagar Lista" ]
+            , if questionList.id == 0 then
+                viewQuestionListButtonNew model
+              else
+                viewQuestionListButtonEdit model
             ]
+
+
+viewQuestionListButtonNew : Model -> Html Msg
+viewQuestionListButtonNew model =
+    div []
+        [ Button.render Mdl
+            [ 5, 1 ]
+            model.mdl
+            [ Button.ripple
+            , Button.colored
+            , Button.raised
+            , Options.onClick QuestionListSave
+            ]
+            [ text "Salvar" ]
+        , Button.render Mdl
+            [ 5, 2 ]
+            model.mdl
+            [ Button.ripple
+            , Button.colored
+            , Button.raised
+            , Options.onClick QuestionListClear
+            ]
+            [ text "Limpar lista" ]
+        ]
+
+
+viewQuestionListButtonEdit : Model -> Html Msg
+viewQuestionListButtonEdit model =
+    div []
+        [ Button.render Mdl
+            [ 5, 1 ]
+            model.mdl
+            [ Button.ripple
+            , Button.colored
+            , Button.raised
+            , Options.onClick QuestionListSave
+            ]
+            [ text "Salvar" ]
+        , Button.render Mdl
+            [ 5, 2 ]
+            model.mdl
+            [ Button.ripple
+            , Button.colored
+            , Button.raised
+            , Options.onClick QuestionListClear
+            ]
+            [ text "Limpar lista" ]
+        , Button.render Mdl
+            [ 5, 3 ]
+            model.mdl
+            [ Button.ripple
+            , Button.colored
+            , Button.raised
+            , Options.onClick QuestionListDelete
+            ]
+            [ text "Apagar lista" ]
+        ]
 
 
 
@@ -478,13 +521,13 @@ viewSelectedQuestionList model =
                 , Options.onClick <| QuestionListGenerate questionList
                 ]
                 [ text "Gerar Lista" ]
-              -- , Button.render Mdl
-              --     [ 5, 3 ]
-              --     model.mdl
-              --     [ Button.ripple
-              --     , Button.colored
-              --     , Button.raised
-              --       , Options.onClick QuestionListDelete
-              --     ]
-              --     [ text "Editar Lista" ]
+            , Button.render Mdl
+                [ 5, 2 ]
+                model.mdl
+                [ Button.ripple
+                , Button.colored
+                , Button.raised
+                , Options.onClick <| QuestionListEdit questionList
+                ]
+                [ text "Editar Lista" ]
             ]

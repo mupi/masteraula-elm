@@ -67,22 +67,22 @@ page model =
             Html.map VerifyEmailMsg (VerifyEmail.view model.verifyEmail)
 
         QuestionRoute questionId ->
-            Html.map QuestionMsg (Question.viewQuestion model.question)
+            Html.map QuestionMsg (Question.view Question.viewQuestion model.question)
 
         QuestionPageRoute page ->
-            Html.map QuestionMsg (Question.viewQuestionPage model.question)
+            Html.map QuestionMsg (Question.view Question.viewQuestionPage model.question)
 
         QuestionTagSearchRoute page ->
-            Html.map QuestionMsg (Question.viewQuestionPage model.question)
+            Html.map QuestionMsg (Question.view Question.viewQuestionPage model.question)
 
         QuestionListRoute ->
-            Html.map QuestionMsg (Question.viewQuestionList model.question)
+            Html.map QuestionMsg (Question.view Question.viewQuestionList model.question)
 
         SelectedQuestionListRoute questionListId ->
-            Html.map QuestionMsg (Question.viewSelectedQuestionList model.question)
+            Html.map QuestionMsg (Question.view Question.viewSelectedQuestionList model.question)
 
         MineQuestionListRoute page ->
-            Html.map QuestionMsg (Question.viewQuestionListPage model.question)
+            Html.map QuestionMsg (Question.view Question.viewQuestionListPage model.question)
 
         NotFoundRote ->
             notFoundView

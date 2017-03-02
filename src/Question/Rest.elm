@@ -217,7 +217,7 @@ questionEncoder : QuestionOrder -> Value
 questionEncoder questionOrder =
     object
         [ ( "question", int questionOrder.question.id )
-        , ( "order", int (questionOrder.order + 1) )
+        , ( "order", int questionOrder.order )
         ]
 
 
@@ -253,8 +253,8 @@ postSaveQuestionList questionList token =
 
 
 fetchPostSaveQuestionList : QuestionList -> Maybe String -> Cmd Msg
-fetchPostSaveQuestionList question token =
-    Http.send OnFetchSaveQuestionList (postSaveQuestionList question token)
+fetchPostSaveQuestionList questionList token =
+    Http.send OnFetchSaveQuestionList (postSaveQuestionList questionList token)
 
 
 deleteQuestionList : QuestionList -> Maybe String -> Http.Request String

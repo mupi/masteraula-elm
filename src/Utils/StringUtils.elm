@@ -106,3 +106,30 @@ timeToString res =
 
         Err error ->
             ""
+
+
+intToResponseString : Int -> String
+intToResponseString index =
+    case index of
+        0 ->
+            "a"
+
+        1 ->
+            "b"
+
+        2 ->
+            "c"
+
+        3 ->
+            "d"
+
+        4 ->
+            "e"
+
+        _ ->
+            ""
+
+
+removeEnters : String -> String
+removeEnters text =
+    replace All (regex "\x0D\n\t") (\_ -> "") text

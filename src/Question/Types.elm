@@ -2,6 +2,7 @@ module Question.Types exposing (..)
 
 import Http
 import Material
+import Material.Snackbar as Snackbar
 import User.Types as User
 
 
@@ -18,6 +19,7 @@ type alias Model =
     , -- List docx file generation
       generateAfterSave : Bool
     , error : String
+    , snackbar : Snackbar.Model Int
     , mdl : Material.Model
     }
 
@@ -79,7 +81,7 @@ type alias PageNumber =
 type alias Answer =
     { id : Int
     , answer_text : String
-    , is_corect : Bool
+    , is_correct : Bool
     }
 
 
@@ -95,6 +97,8 @@ type Msg
     | TagSearchAdd
     | TagSearchRemove String
     | TagSearch
+    | QuestionClick Question
+    | QuestionBack
       -- QuestionList (on Edit)
     | QuestionListAdd Question
     | QuestionListRemove Question
@@ -105,6 +109,7 @@ type Msg
     | QuestionListDelete
       -- Question List Page
     | QuestionListClick Int
+    | QuestionListEdit QuestionList
       -- Filter
     | Filter Int
       -- Fetch
@@ -117,4 +122,5 @@ type Msg
     | OnFetchGetMineQuestionListPage (Result Http.Error QuestionListPage)
     | OnFetchGetQuestionList (Result Http.Error QuestionList)
     | NoOp
+    | Snackbar (Snackbar.Msg Int)
     | Mdl (Material.Msg Msg)

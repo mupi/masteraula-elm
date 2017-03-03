@@ -107,6 +107,7 @@ type Msg
     | QuestionListClear
     | QuestionListGenerate QuestionList
     | QuestionListDelete
+    | QuestionListCancel
       -- Question List Page
     | QuestionListClick Int
     | QuestionListEdit QuestionList

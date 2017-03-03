@@ -205,6 +205,13 @@ update msg model global =
         QuestionListEdit questionList ->
             { model | questionListEdit = questionList } ! [ Navigation.newUrl <| String.concat [ "#questions/questionlist" ] ]
 
+        QuestionListCancel ->
+            let
+                questionListId =
+                    model.questionListEdit.id
+            in
+                { model | questionListEdit = initQuestionList } ! [ Navigation.newUrl <| String.concat [ "#questions/questionlists/", toString questionListId ] ]
+
         Filter newFilterId ->
             { model | filterId = newFilterId } ! [ fetchGetQuestionFilterSearch 1 model.tags newFilterId global.token ]
 

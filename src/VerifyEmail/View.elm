@@ -7,6 +7,7 @@ import Material.Button as Button
 import Material.Options as Options exposing (css)
 import Material.Grid exposing (grid, cell, size, offset, Device(..))
 import Material.Typography as Typo
+import Material.Snackbar as Snackbar
 import Login.Types as Login
 import Login.View as Login
 
@@ -44,4 +45,5 @@ view model =
                 [ Typo.display1, Typo.center ]
                 [ text "Já possui login? Clique aqui para entrar" ]
             ]
+        , Snackbar.view model.snackbar |> Html.map Snackbar
         ]

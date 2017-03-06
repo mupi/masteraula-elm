@@ -9,7 +9,7 @@ import VerifyEmail.Types exposing (..)
 
 url : String
 url =
-    String.concat [ Config.baseUrl, "registration/verify-email/" ]
+    String.concat [ Config.baseUrl, "auth/registration/verify-email/" ]
 
 
 verifyEmailDecoder : Decode.Decoder VerifyEmailModel

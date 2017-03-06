@@ -11,6 +11,7 @@ import Material.Options as Options exposing (css)
 import Material.Grid exposing (grid, cell, size, offset, Device(..))
 import Material.Typography as Typo
 import Material.Color as Color
+import Material.Snackbar as Snackbar
 import Utils.MDLUtils as Utils
 
 
@@ -72,8 +73,6 @@ view model =
                         []
                     ]
                 , div [ class "text-alert" ]
-                    [ text model.error ]
-                , div [ class "text-alert" ]
                     [ text
                         (case model.success of
                             True ->
@@ -95,4 +94,5 @@ view model =
                     ]
                 ]
             ]
+        , Snackbar.view model.snackbar |> Html.map Snackbar
         ]

@@ -4,11 +4,30 @@ import Http
 import Signup.Types exposing (..)
 import Signup.Rest exposing (..)
 import Material
+import Material.Snackbar as Snackbar
+import Material.Helpers exposing (map1st, map2nd)
 
 
 init : Model
 init =
-    Model "" "" "" "" "" False Material.model
+    Model "" "" "" "" "" False Material.model Snackbar.model
+
+
+verifyFields : Model -> ( Bool, String )
+verifyFields model =
+    if
+        String.isEmpty model.username
+            || String.isEmpty model.email
+            || String.isEmpty model.password
+            || String.isEmpty model.confirmPassword
+    then
+        ( False, "Por favor, preencha todos os campos" )
+    else if model.password /= model.confirmPassword then
+        ( False, "A senha e a confirmação devem ser iguais" )
+    else if String.length model.password < 8 then
+        ( False, "A senha deve conter ao menos 8 caracteres" )
+    else
+        ( True, "" )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -27,7 +46,18 @@ update msg model =
             { model | email = newEmail } ! []
 
         Signup ->
-            ( model, fetchSignUp model )
+            let
+                ( verified, errorMsg ) =
+                    verifyFields model
+
+                ( snackbar, effect ) =
+                    Snackbar.add (Snackbar.snackbar 0 errorMsg "Fechar") model.snackbar
+                        |> map2nd (Cmd.map Snackbar)
+            in
+                if verified then
+                    ( model, fetchSignUp model )
+                else
+                    { model | snackbar = snackbar } ! [ effect ]
 
         OnFetchSignup (Ok errors) ->
             { model | success = True, error = "" } ! []
@@ -43,35 +73,35 @@ update msg model =
                             let
                                 errors =
                                     decodeErrors response.body
-
-                                error =
-                                    if errors.email /= [] then
-                                        List.head errors.email
-                                    else if errors.username /= [] then
-                                        List.head errors.username
-                                    else if errors.password1 /= [] then
-                                        List.head errors.password1
-                                    else if errors.password2 /= [] then
-                                        List.head errors.password2
-                                    else if errors.non_field_errors /= [] then
-                                        List.head errors.non_field_errors
-                                    else
-                                        Nothing
                             in
-                                case error of
-                                    Just error ->
-                                        error
-
-                                    Nothing ->
-                                        ""
+                                if errors.email /= [] then
+                                    "Já existe um usuário com este email cadastrado"
+                                else if errors.username /= [] then
+                                    "Já existe um usuário com este nome de usuário"
+                                else if errors.password1 /= [] then
+                                    "Senha muito simples"
+                                else
+                                    ""
 
                         _ ->
                             "Erro indefinido"
+
+                ( snackbar, effect ) =
+                    Snackbar.add (Snackbar.snackbar 0 errorMsg "Fechar") model.snackbar
+                        |> map2nd (Cmd.map Snackbar)
             in
-                { model | error = errorMsg } ! []
+                { model | error = errorMsg, snackbar = snackbar } ! [ effect ]
 
         NoOp ->
             model ! []
+
+        Snackbar (Snackbar.End a) ->
+            { model | snackbar = Snackbar.model } ! []
+
+        Snackbar msg ->
+            Snackbar.update msg model.snackbar
+                |> map1st (\s -> { model | snackbar = s })
+                |> map2nd (Cmd.map Snackbar)
 
         Mdl msg_ ->
             Material.update Mdl msg_ model

@@ -5,11 +5,13 @@ import VerifyEmail.Types exposing (..)
 import VerifyEmail.Rest exposing (..)
 import Login.State as Login
 import Material
+import Material.Helpers exposing (map1st, map2nd)
+import Material.Snackbar as Snackbar
 
 
 init : Model
 init =
-    Model "" "" "" Material.model Login.init
+    Model "" "" "" Login.init Snackbar.model Material.model
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -37,14 +39,15 @@ update msg model =
 
                         _ ->
                             toString error
+
+                ( snackbar, effect ) =
+                    Snackbar.add (Snackbar.snackbar 0 errorMsg "Fechar") model.snackbar
+                        |> map2nd (Cmd.map Snackbar)
             in
-                { model | error = errorMsg } ! []
+                { model | error = errorMsg, snackbar = snackbar } ! []
 
         NoOp ->
             model ! []
-
-        Mdl msg_ ->
-            Material.update Mdl msg_ model
 
         LoginMsg subMsg ->
             let
@@ -52,3 +55,14 @@ update msg model =
                     Login.update subMsg model.login
             in
                 { model | login = updatedLogin } ! [ Cmd.map LoginMsg cmd ]
+
+        Snackbar (Snackbar.End a) ->
+            { model | snackbar = Snackbar.model } ! []
+
+        Snackbar msg ->
+            Snackbar.update msg model.snackbar
+                |> map1st (\s -> { model | snackbar = s })
+                |> map2nd (Cmd.map Snackbar)
+
+        Mdl msg_ ->
+            Material.update Mdl msg_ model

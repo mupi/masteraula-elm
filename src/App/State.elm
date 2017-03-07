@@ -1,10 +1,12 @@
 port module App.State exposing (init, update, subscriptions)
 
 import Navigation exposing (Location)
+import App.Routing as Routing
 import App.Drawer exposing (..)
 import App.Routing exposing (parseLocation, Route(..))
 import App.Types exposing (..)
 import Login.State as Login
+import Login.Types as Login
 import Signup.State as Signup
 import VerifyEmail.State as VerifyEmail
 import VerifyEmail.Types as VerifyEmail
@@ -31,10 +33,10 @@ init savedStorage location =
                 Login.init
                 Signup.init
                 VerifyEmail.init
-                (questionInit savedStorage)
+                (initQuestion savedStorage)
                 currentRoute
-                (globalInit savedStorage)
-                (storageInit savedStorage)
+                (initGlobal savedStorage)
+                (initStorage savedStorage)
                 HomeDefault
                 mdl
             )
@@ -42,8 +44,26 @@ init savedStorage location =
         update (OnLocationChange location) initModel
 
 
-globalInit : Maybe LocalStorage -> Global
-globalInit savedStorage =
+initClear : Model
+initClear =
+    let
+        mdl =
+            Material.model
+    in
+        Model
+            Login.init
+            Signup.init
+            VerifyEmail.init
+            Question.init
+            Routing.IndexRoute
+            (initGlobal Nothing)
+            (initStorage Nothing)
+            HomeDefault
+            mdl
+
+
+initGlobal : Maybe LocalStorage -> Global
+initGlobal savedStorage =
     case savedStorage of
         Just storage ->
             Global storage.user storage.token
@@ -52,8 +72,8 @@ globalInit savedStorage =
             Global Nothing Nothing
 
 
-questionInit : Maybe LocalStorage -> Question.Model
-questionInit savedStorage =
+initQuestion : Maybe LocalStorage -> Question.Model
+initQuestion savedStorage =
     let
         question =
             Question.init
@@ -66,8 +86,8 @@ questionInit savedStorage =
                 question
 
 
-storageInit : Maybe LocalStorage -> LocalStorage
-storageInit savedStorage =
+initStorage : Maybe LocalStorage -> LocalStorage
+initStorage savedStorage =
     Maybe.withDefault (LocalStorage Nothing Nothing Question.initQuestionList) savedStorage
 
 
@@ -101,23 +121,24 @@ update msg model =
                 ( updatedLogin, cmd ) =
                     Login.update subMsg model.login
 
-                newGlobal =
-                    if updatedLogin.user == Nothing then
-                        Global Nothing Nothing
-                    else
-                        Global updatedLogin.user updatedLogin.token
-
                 newCmd =
                     Cmd.map LoginMsg cmd
-
-                newStorage =
-                    let
-                        localStorage =
-                            model.localStorage
-                    in
-                        { localStorage | user = newGlobal.user, token = newGlobal.token }
             in
-                ( { model | login = updatedLogin, global = newGlobal }, Cmd.batch [ setLocalStorage newStorage, newCmd ] )
+                if subMsg == Login.Logout then
+                    ( initClear, Cmd.batch [ setLocalStorage (initStorage Nothing), newCmd ] )
+                else
+                    let
+                        newGlobal =
+                            Global updatedLogin.user updatedLogin.token
+
+                        newStorage =
+                            let
+                                localStorage =
+                                    model.localStorage
+                            in
+                                { localStorage | user = newGlobal.user, token = newGlobal.token }
+                    in
+                        ( { model | login = updatedLogin, global = newGlobal }, Cmd.batch [ setLocalStorage newStorage, newCmd ] )
 
         SignupMsg subMsg ->
             let

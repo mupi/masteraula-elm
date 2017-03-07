@@ -1,8 +1,8 @@
 module Signup.Types exposing (..)
 
 import Http
-import User.Types as User
 import Material
+import Material.Snackbar as Snackbar
 
 
 type alias Model =
@@ -13,6 +13,7 @@ type alias Model =
     , error : String
     , success : Bool
     , mdl : Material.Model
+    , snackbar : Snackbar.Model Int
     }
 
 
@@ -33,4 +34,5 @@ type Msg
     | Signup
     | OnFetchSignup (Result Http.Error RestErrorModel)
     | NoOp
+    | Snackbar (Snackbar.Msg Int)
     | Mdl (Material.Msg Msg)

@@ -452,7 +452,12 @@ viewQuestionList model =
         div []
             [ Options.styled h1
                 [ Typo.display1, Typo.center ]
-                [ text "Lista de questões" ]
+                [ text <|
+                    if questionList.id == 0 then
+                        "Nova lista de questões"
+                    else
+                        String.concat [ "Editando a lista ", questionList.question_list_header ]
+                ]
             , Textfield.render Mdl
                 [ 5, 0 ]
                 model.mdl
@@ -525,6 +530,15 @@ viewQuestionListButtonEdit model =
             , Options.onClick QuestionListDelete
             ]
             [ text "Apagar lista" ]
+        , Button.render Mdl
+            [ 5, 3 ]
+            model.mdl
+            [ Button.ripple
+            , Button.colored
+            , Button.raised
+            , Options.onClick QuestionListCancel
+            ]
+            [ text "Cancelar" ]
         ]
 
 

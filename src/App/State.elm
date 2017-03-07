@@ -138,7 +138,7 @@ update msg model =
                             in
                                 { localStorage | user = newGlobal.user, token = newGlobal.token }
                     in
-                        ( { model | login = updatedLogin, global = newGlobal }, Cmd.batch [ setLocalStorage newStorage, newCmd ] )
+                        ( { model | login = updatedLogin, global = newGlobal, localStorage = newStorage }, Cmd.batch [ setLocalStorage newStorage, newCmd ] )
 
         SignupMsg subMsg ->
             let
@@ -182,7 +182,7 @@ update msg model =
                     in
                         { localStorage | user = newGlobal.user, token = newGlobal.token }
             in
-                ( { model | verifyEmail = newVerifyKey, global = newGlobal }, Cmd.batch [ setLocalStorage newStorage, newCmd ] )
+                ( { model | verifyEmail = newVerifyKey, global = newGlobal, localStorage = newStorage }, Cmd.batch [ setLocalStorage newStorage, newCmd ] )
 
         QuestionMsg subMsg ->
             let
@@ -196,7 +196,7 @@ update msg model =
                     in
                         { localStorage | questionList = updatedQuestion.questionListEdit }
             in
-                ( { model | question = updatedQuestion }, Cmd.batch [ setLocalStorage newStorage, Cmd.map QuestionMsg cmd ] )
+                ( { model | question = updatedQuestion, localStorage = newStorage }, Cmd.batch [ setLocalStorage newStorage, Cmd.map QuestionMsg cmd ] )
 
         OnLocationChange location ->
             let

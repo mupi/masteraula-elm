@@ -141,8 +141,8 @@ viewQuestion model =
         question =
             model.question
 
-        questions =
-            List.map (\q -> q.question) model.questionListEdit.questions
+        questionsId =
+            List.map (\q -> q.question.id) model.questionListEdit.questions
     in
         Grid.grid []
             [ Grid.cell
@@ -204,12 +204,12 @@ viewQuestion model =
                             , Color.text Color.white
                             , css "font-size" "11px"
                             , css "width" "33%"
-                            , if List.member question questions then
+                            , if List.member question.id questionsId then
                                 Button.disabled
                               else
                                 Options.onClick (QuestionListAdd question)
                             ]
-                            (if List.member question questions then
+                            (if List.member question.id questionsId then
                                 [ text "Adicionado" ]
                              else
                                 [ Icon.view "add" [ Icon.size18 ], text " Adicionar" ]
@@ -221,14 +221,14 @@ viewQuestion model =
 
 
 
--- Question Page View
+-- Question card view
 
 
 questionCardButton : Model -> Bool -> Question -> Card.Block Msg
 questionCardButton model add question =
     let
-        questions =
-            List.map (\q -> q.question) model.questionListEdit.questions
+        questionsId =
+            List.map (\q -> q.question.id) model.questionListEdit.questions
     in
         if add then
             Card.actions
@@ -253,12 +253,12 @@ questionCardButton model add question =
                     , Color.text Color.white
                     , css "font-size" "11px"
                     , css "width" "50%"
-                    , if List.member question questions then
+                    , if List.member question.id questionsId then
                         Button.disabled
                       else
                         Options.onClick (QuestionListAdd question)
                     ]
-                    (if List.member question questions then
+                    (if List.member question.id questionsId then
                         [ text "Adicionado" ]
                      else
                         [ Icon.view "add" [ Icon.size18 ], text " Adicionar" ]
@@ -323,6 +323,10 @@ questionCardView model add question =
             , (questionCardButton model add question)
             ]
         ]
+
+
+
+-- Question Page View
 
 
 searchTagChip : String -> Html Msg

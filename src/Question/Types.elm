@@ -19,6 +19,7 @@ type alias Model =
     , -- List docx file generation
       generateAfterSave : Bool
     , error : String
+    , dialog : DialogType
     , snackbar : Snackbar.Model Int
     , mdl : Material.Model
     }
@@ -85,6 +86,11 @@ type alias Answer =
     }
 
 
+type DialogType
+    = Delete
+    | Clear
+
+
 type Msg
     = GetQuestion QuestionId
     | GetQuestionPage PageNumber
@@ -122,6 +128,7 @@ type Msg
     | OnFetchDeleteQuestionList (Result Http.Error String)
     | OnFetchGetMineQuestionListPage (Result Http.Error QuestionListPage)
     | OnFetchGetQuestionList (Result Http.Error QuestionList)
+    | Dialog DialogType
     | NoOp
     | Snackbar (Snackbar.Msg Int)
     | Mdl (Material.Msg Msg)

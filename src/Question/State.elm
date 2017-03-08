@@ -46,6 +46,7 @@ init =
         0
         False
         ""
+        Delete
         Snackbar.model
         Material.model
 
@@ -372,6 +373,9 @@ update msg model global =
                             toString error
             in
                 { model | error = errorMsg } ! []
+
+        Dialog dialog ->
+            { model | dialog = dialog } ! []
 
         NoOp ->
             model ! []

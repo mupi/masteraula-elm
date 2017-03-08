@@ -44,7 +44,7 @@ update msg model =
                     Snackbar.add (Snackbar.snackbar 0 errorMsg "Fechar") model.snackbar
                         |> map2nd (Cmd.map Snackbar)
             in
-                { model | error = errorMsg, snackbar = snackbar } ! []
+                { model | error = errorMsg, snackbar = snackbar } ! [ effect ]
 
         NoOp ->
             model ! []

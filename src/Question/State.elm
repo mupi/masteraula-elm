@@ -46,6 +46,7 @@ init =
         0
         False
         ""
+        Delete
         Snackbar.model
         Material.model
 
@@ -126,7 +127,7 @@ update msg model global =
                     { questionList | questions = List.append questionList.questions [ QuestionOrder question 0 ] }
 
                 newQuestionList =
-                    { questionList | questions = List.indexedMap (\index questionOrder -> { questionOrder | order = index }) updQuestionList.questions }
+                    { questionList | questions = List.indexedMap (\index questionOrder -> { questionOrder | order = index + 1 }) updQuestionList.questions }
             in
                 { model | questionListEdit = newQuestionList } ! []
 
@@ -184,17 +185,7 @@ update msg model global =
                 { model | questionListEdit = newQuestionList } ! []
 
         QuestionListGenerate questionList ->
-            if model.questionListEdit.question_list_header == "" then
-                let
-                    ( snackbar, effect ) =
-                        Snackbar.add (Snackbar.snackbar 0 "Por favor, coloque o nome da lista anstes de gerá-la" "Fechar") model.snackbar
-                            |> map2nd (Cmd.map Snackbar)
-                in
-                    { model | snackbar = snackbar } ! [ effect ]
-            else if (model.questionListEdit == questionList) then
-                { model | generateAfterSave = True } ! [ fetchPostSaveQuestionList questionList global.token ]
-            else
-                model ! [ fetchGetGenerateList questionList.id global.token ]
+            model ! [ fetchGetGenerateList questionList.id global.token ]
 
         QuestionListDelete ->
             model ! [ fetchDeleteQuestionList model.questionListEdit global.token ]
@@ -382,6 +373,9 @@ update msg model global =
                             toString error
             in
                 { model | error = errorMsg } ! []
+
+        Dialog dialog ->
+            { model | dialog = dialog } ! []
 
         NoOp ->
             model ! []

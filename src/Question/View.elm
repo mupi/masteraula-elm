@@ -18,6 +18,7 @@ import Material.Toggles as Toggles
 import Material.Options as Options exposing (css)
 import Material.Grid exposing (grid, cell, size, offset, Device(..))
 import Material.Typography as Typo
+import Material.Dialog as Dialog
 import Material.Snackbar as Snackbar
 import Material.Color as Color
 import Utils.MDLUtils as Utils
@@ -88,11 +89,72 @@ drawerLink model =
         ]
 
 
+
+-- Dialog
+
+
+dialog : Model -> Html Msg
+dialog model =
+    case model.dialog of
+        Delete ->
+            Dialog.view
+                []
+                [ Dialog.title []
+                    [ text "Apagar Lista"
+                    ]
+                , Dialog.content []
+                    [ p [] [ text "Deseja mesmo apagar a lista de questões?" ]
+                    , p [] [ text "Esta ação não poderá ser desfeita." ]
+                    ]
+                , Dialog.actions []
+                    [ Button.render Mdl
+                        [ 0 ]
+                        model.mdl
+                        [ Dialog.closeOn "click"
+                        , Options.onClick QuestionListDelete
+                        ]
+                        [ text "Confirmar" ]
+                    , Button.render Mdl
+                        [ 1 ]
+                        model.mdl
+                        [ Dialog.closeOn "click" ]
+                        [ text "Cancelar" ]
+                    ]
+                ]
+
+        Clear ->
+            Dialog.view
+                []
+                [ Dialog.title []
+                    [ text "Limpar Lista"
+                    ]
+                , Dialog.content []
+                    [ p [] [ text "Deseja remover todos os exercícios desta lista de questões?" ]
+                    , p [] [ text "Esta ação não poderá ser desfeita." ]
+                    ]
+                , Dialog.actions []
+                    [ Button.render Mdl
+                        [ 0 ]
+                        model.mdl
+                        [ Dialog.closeOn "click"
+                        , Options.onClick QuestionListClear
+                        ]
+                        [ text "Confirmar" ]
+                    , Button.render Mdl
+                        [ 1 ]
+                        model.mdl
+                        [ Dialog.closeOn "click" ]
+                        [ text "Cancelar" ]
+                    ]
+                ]
+
+
 view : (Model -> Html Msg) -> Model -> Html Msg
 view method model =
     div []
         [ method model
         , Snackbar.view model.snackbar |> Html.map Snackbar
+        , dialog model
         ]
 
 
@@ -141,8 +203,8 @@ viewQuestion model =
         question =
             model.question
 
-        questions =
-            List.map (\q -> q.question) model.questionListEdit.questions
+        questionsId =
+            List.map (\q -> q.question.id) model.questionListEdit.questions
     in
         Grid.grid []
             [ Grid.cell
@@ -166,7 +228,7 @@ viewQuestion model =
                     , Card.text
                         [ css "min-height" "196px"
                         ]
-                        [ Markdown.toHtml [] question.question_header
+                        [ text question.question_header
                         , Markdown.toHtml [] question.question_text
                         , div [] (List.indexedMap answerView question.answers)
                         , correctAnswerView question.answers
@@ -204,12 +266,12 @@ viewQuestion model =
                             , Color.text Color.white
                             , css "font-size" "11px"
                             , css "width" "33%"
-                            , if List.member question questions then
+                            , if List.member question.id questionsId then
                                 Button.disabled
                               else
                                 Options.onClick (QuestionListAdd question)
                             ]
-                            (if List.member question questions then
+                            (if List.member question.id questionsId then
                                 [ text "Adicionado" ]
                              else
                                 [ Icon.view "add" [ Icon.size18 ], text " Adicionar" ]
@@ -221,14 +283,14 @@ viewQuestion model =
 
 
 
--- Question Page View
+-- Question card view
 
 
 questionCardButton : Model -> Bool -> Question -> Card.Block Msg
 questionCardButton model add question =
     let
-        questions =
-            List.map (\q -> q.question) model.questionListEdit.questions
+        questionsId =
+            List.map (\q -> q.question.id) model.questionListEdit.questions
     in
         if add then
             Card.actions
@@ -253,12 +315,12 @@ questionCardButton model add question =
                     , Color.text Color.white
                     , css "font-size" "11px"
                     , css "width" "50%"
-                    , if List.member question questions then
+                    , if List.member question.id questionsId then
                         Button.disabled
                       else
                         Options.onClick (QuestionListAdd question)
                     ]
-                    (if List.member question questions then
+                    (if List.member question.id questionsId then
                         [ text "Adicionado" ]
                      else
                         [ Icon.view "add" [ Icon.size18 ], text " Adicionar" ]
@@ -323,6 +385,10 @@ questionCardView model add question =
             , (questionCardButton model add question)
             ]
         ]
+
+
+
+-- Question Page View
 
 
 searchTagChip : String -> Html Msg
@@ -494,7 +560,13 @@ viewQuestionListButtonNew model =
             [ Button.ripple
             , Button.colored
             , Button.raised
-            , Options.onClick QuestionListClear
+            , Dialog.openOn "click"
+            , Options.onClick (Dialog Clear)
+            , if List.length model.questionListEdit.questions > 0 then
+                Options.nop
+              else
+                Button.disabled
+              -- , Options.onClick QuestionListClear
             ]
             [ text "Limpar lista" ]
         ]
@@ -518,7 +590,13 @@ viewQuestionListButtonEdit model =
             [ Button.ripple
             , Button.colored
             , Button.raised
-            , Options.onClick QuestionListClear
+            , Dialog.openOn "click"
+            , Options.onClick (Dialog Clear)
+            , if List.length model.questionListEdit.questions > 0 then
+                Options.nop
+              else
+                Button.disabled
+              -- , Options.onClick QuestionListClear
             ]
             [ text "Limpar lista" ]
         , Button.render Mdl
@@ -527,11 +605,13 @@ viewQuestionListButtonEdit model =
             [ Button.ripple
             , Button.colored
             , Button.raised
-            , Options.onClick QuestionListDelete
+            , Dialog.openOn "click"
+            , Options.onClick (Dialog Delete)
+              -- , Options.onClick QuestionListDelete
             ]
             [ text "Apagar lista" ]
         , Button.render Mdl
-            [ 5, 3 ]
+            [ 5, 4 ]
             model.mdl
             [ Button.ripple
             , Button.colored
@@ -600,6 +680,10 @@ viewSelectedQuestionList model =
                 , Button.colored
                 , Button.raised
                 , Options.onClick <| QuestionListGenerate questionList
+                , if List.length questionList.questions > 0 then
+                    Options.nop
+                  else
+                    Button.disabled
                 ]
                 [ text "Gerar Lista" ]
             , Button.render Mdl

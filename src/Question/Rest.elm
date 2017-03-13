@@ -145,11 +145,11 @@ urlBaseSearch page =
     String.concat [ Config.baseUrl, "search/question/?page=", toString page ]
 
 
-urlTagSearchQuestion : String -> List String -> String
-urlTagSearchQuestion baseUrl tags =
+urlSearchQuestion : String -> List String -> String
+urlSearchQuestion baseUrl tags =
     String.concat
         (baseUrl
-            :: "&tags="
+            :: "&text__content="
             :: List.map
                 (\t -> String.concat [ tagFormatter t, "," ])
                 tags
@@ -178,7 +178,7 @@ urlFilterSearchQuestion baseUrl levelFilter =
 urlSearch : PageNumber -> List String -> Int -> String
 urlSearch page tags levelFilter =
     if List.length tags > 0 then
-        urlFilterSearchQuestion (urlTagSearchQuestion (urlBaseSearch page) tags) levelFilter
+        urlFilterSearchQuestion (urlSearchQuestion (urlBaseSearch page) tags) levelFilter
     else
         urlFilterSearchQuestion (urlBaseSearch page) levelFilter
 

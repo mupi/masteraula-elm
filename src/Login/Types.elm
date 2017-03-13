@@ -6,7 +6,7 @@ import Material
 
 
 type alias Model =
-    { user : Maybe User.Model
+    { user : Maybe User.User
     , username : String
     , password : String
     , token : Maybe String
@@ -16,7 +16,7 @@ type alias Model =
 
 
 type alias LoginModel =
-    { user : User.Model
+    { user : User.User
     , token : String
     }
 

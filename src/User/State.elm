@@ -1,11 +1,16 @@
-module User.State exposing (init, update)
+module User.State exposing (init, initUser, update)
 
 import User.Types exposing (..)
 
 
 init : Model
 init =
-    Model 0 "" "" ""
+    Model initUser
+
+
+initUser : User
+initUser =
+    User 0 "" "" ""
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )

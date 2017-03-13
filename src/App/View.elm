@@ -19,7 +19,6 @@ import Material.Typography as Typo
 import Material.Options as Options
 import Material.Grid exposing (grid, cell, size, offset, Device(..))
 import Material.Button as Button
-import Material.Icon as Icon
 
 
 view : Model -> Html Msg
@@ -50,12 +49,7 @@ page model =
             index
 
         UsersRoute ->
-            case model.global.user of
-                Nothing ->
-                    div [] []
-
-                Just user ->
-                    Html.map UserMsg (User.view user)
+            Html.map UserMsg (User.view model.user)
 
         LoginRoute ->
             Html.map LoginMsg (Login.view model.login)

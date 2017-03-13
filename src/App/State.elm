@@ -7,6 +7,8 @@ import App.Routing exposing (parseLocation, Route(..))
 import App.Types exposing (..)
 import Login.State as Login
 import Login.Types as Login
+import User.State as User
+import User.Types as User
 import Signup.State as Signup
 import VerifyEmail.State as VerifyEmail
 import VerifyEmail.Types as VerifyEmail
@@ -34,6 +36,7 @@ init savedStorage location =
                 Signup.init
                 VerifyEmail.init
                 (initQuestion savedStorage)
+                (initUser savedStorage)
                 currentRoute
                 (initGlobal savedStorage)
                 (initStorage savedStorage)
@@ -55,6 +58,7 @@ initClear =
             Signup.init
             VerifyEmail.init
             Question.init
+            User.init
             Routing.IndexRoute
             (initGlobal Nothing)
             (initStorage Nothing)
@@ -86,6 +90,25 @@ initQuestion savedStorage =
                 question
 
 
+initUser : Maybe LocalStorage -> User.Model
+initUser savedStorage =
+    let
+        user =
+            User.init
+    in
+        case savedStorage of
+            Just storage ->
+                case storage.user of
+                    Just u ->
+                        { user | user = u }
+
+                    Nothing ->
+                        user
+
+            Nothing ->
+                user
+
+
 initStorage : Maybe LocalStorage -> LocalStorage
 initStorage savedStorage =
     Maybe.withDefault (LocalStorage Nothing Nothing Question.initQuestionList) savedStorage
@@ -96,25 +119,26 @@ update msg model =
     case msg of
         UserMsg subMsg ->
             let
+                ( updatedUser, cmd ) =
+                    User.update subMsg model.user
+
+                newCmd =
+                    Cmd.map UserMsg cmd
+
                 global =
                     model.global
 
-                ( user, cmd ) =
-                    case global.user of
-                        Nothing ->
-                            ( Nothing, Cmd.none )
-
-                        Just user ->
-                            let
-                                ( updatedUser, cmd ) =
-                                    User.update subMsg user
-                            in
-                                ( Just updatedUser, cmd )
-
                 newGlobal =
-                    { global | user = user }
+                    { global | user = Just updatedUser.user }
+
+                newStorage =
+                    let
+                        localStorage =
+                            model.localStorage
+                    in
+                        { localStorage | user = newGlobal.user }
             in
-                ( { model | global = newGlobal }, Cmd.map UserMsg cmd )
+                ( { model | user = updatedUser, global = newGlobal, localStorage = newStorage }, Cmd.batch [ setLocalStorage newStorage, newCmd ] )
 
         LoginMsg subMsg ->
             let

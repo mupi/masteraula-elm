@@ -11,7 +11,7 @@ type DrawerLinks
     | UsersView
 
 
-parseDrawerLink : Maybe User.Model -> Route -> DrawerLinks
+parseDrawerLink : Maybe User.User -> Route -> DrawerLinks
 parseDrawerLink user route =
     case user of
         Just user ->

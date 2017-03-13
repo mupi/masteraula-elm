@@ -15,7 +15,7 @@ import Utils.StringUtils as StringUtils
 
 initQuestion : Question
 initQuestion =
-    Question 0 "" "" Nothing User.init 0 [] []
+    Question 0 "" "" Nothing User.initUser 0 [] []
 
 
 initQuestionPage : QuestionPage
@@ -30,7 +30,7 @@ initQuestionListPage =
 
 initQuestionList : QuestionList
 initQuestionList =
-    QuestionList 0 "" False User.init [] ""
+    QuestionList 0 "" False User.initUser [] ""
 
 
 init : Model

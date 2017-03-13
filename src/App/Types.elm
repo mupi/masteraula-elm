@@ -16,6 +16,7 @@ type alias Model =
     , signup : Signup.Model
     , verifyEmail : VerifyEmail.Model
     , question : Question.Model
+    , user : User.Model
     , route : Route
     , global : Global
     , localStorage : LocalStorage
@@ -25,14 +26,14 @@ type alias Model =
 
 
 type alias LocalStorage =
-    { user : Maybe User.Model
+    { user : Maybe User.User
     , token : Maybe String
     , questionList : Question.QuestionList
     }
 
 
 type alias Global =
-    { user : Maybe User.Model
+    { user : Maybe User.User
     , token : Maybe String
     }
 

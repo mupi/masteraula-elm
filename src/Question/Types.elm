@@ -30,7 +30,7 @@ type alias Question =
     , question_header : String
     , question_text : String
     , level : Maybe String
-    , author : User.Model
+    , author : User.User
     , credit_cost : Int
     , tags : List String
     , answers : List Answer
@@ -47,7 +47,7 @@ type alias QuestionList =
     { id : Int
     , question_list_header : String
     , secret : Bool
-    , owner : User.Model
+    , owner : User.User
     , questions : List QuestionOrder
     , create_date : String
     }

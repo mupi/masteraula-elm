@@ -11,11 +11,14 @@ import User.Types exposing (..)
 
 view : Model -> Html Msg
 view model =
-    div [ id "signup-form" ]
-        [ Html.h1 [] [ text "User Details" ]
-        , p [] [ text (toString model.id) ]
-        , p [] [ text model.username ]
-        , p [] [ text model.name ]
-        , p [] [ text model.email ]
-        , text (toString model)
-        ]
+    let
+        user =
+            model.user
+    in
+        div [ id "signup-form" ]
+            [ Html.h1 [] [ text "User Details" ]
+            , p [] [ text user.username ]
+            , p [] [ text user.name ]
+            , p [] [ text user.email ]
+            , text (toString model)
+            ]

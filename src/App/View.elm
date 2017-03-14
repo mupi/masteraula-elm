@@ -210,6 +210,7 @@ signupCard =
                 , Options.cs "mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent"
                 , Options.css "line-height" "36px"
                 , Options.css "margin" "20px auto"
+                , Options.css "color" "#fff"
                 ]
                 [ text "Pedir convite" ]
             ]

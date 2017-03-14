@@ -240,8 +240,8 @@ viewQuestion model =
                     , Card.text
                         [ css "min-height" "196px"
                         ]
-                        [ Markdown.toHtml [] question.question_text
-                        , Markdown.toHtml [] question.question_header
+                        [ Markdown.toHtml [] question.question_header
+                        , Markdown.toHtml [] question.question_text
                         , div [] (List.indexedMap answerView question.answers)
                         , correctAnswerView question.answers
                         ]
@@ -393,7 +393,9 @@ questionCardView model add question =
             , Card.text
                 [ css "height" "196px"
                 ]
-                [ Markdown.toHtml [] question.question_header ]
+                [ Markdown.toHtml [] question.question_header
+                , Markdown.toHtml [] question.question_text
+                ]
             , (questionCardButton model add question)
             ]
         ]

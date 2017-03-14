@@ -12,6 +12,7 @@ import Material.Grid exposing (grid, cell, size, offset, Device(..))
 import Material.Typography as Typo
 import Material.Color as Color
 import Utils.MDLUtils as Utils
+import Material.Button as Button
 
 
 view : Model -> Html Msg
@@ -23,7 +24,16 @@ view model =
         , div [ class "banner-bg" ]
             [ Options.styled h1
                 [ Typo.display1, Typo.center ]
-                [ text "Não possui login? Cadastre-se agora" ]
+                [ text "Não possui conta?" ]
+            , Button.render Mdl
+                [ 1 ]
+                model.mdl
+                [ Button.ripple
+                , Button.colored
+                , Button.link "https://docs.google.com/forms/d/e/1FAIpQLSd1mB8fOBqxhGR5rWceGc9vXhRcIVDzsFdtDXJDLEt2jr_9ZA/viewform?c=0&w=1"
+                , Button.raised
+                ]
+                [ text "Clique aqui para pedir um convite" ]
             ]
         ]
 
@@ -33,7 +43,7 @@ viewForm model =
     div []
         [ Options.styled h1
             [ Typo.display1, Typo.center ]
-            [ text "Entrar no PrePaula" ]
+            [ text "Entrar no MasterAula" ]
         , div []
             [ Textfield.render Mdl
                 [ 2 ]
@@ -69,6 +79,6 @@ viewForm model =
                 , Button.colored
                 , Options.onClick Login
                 ]
-                [ text "Sign in" ]
+                [ text "Fazer login" ]
             ]
         ]

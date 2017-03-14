@@ -46,45 +46,58 @@ drawerLink model =
                 []
                 [ text "Filtros" ]
             ]
-        , text "nível: "
-        , div
-            []
-            [ Toggles.radio Mdl
-                [ 0 ]
-                model.mdl
-                [ Toggles.value (0 == model.filterId)
-                , Toggles.group "MyRadioGroup"
-                , Toggles.ripple
-                , Options.onToggle (Filter 0)
+        , Card.view
+            [ Color.background (Color.color Color.BlueGrey Color.S300)
+            , css "width" "192px"
+            , css "margin" "0 auto"
+            ]
+            [ Card.title [] [ Card.head [ Color.text Color.white ] [ text "Nível" ] ]
+            , Card.text [ Color.text Color.white ]
+                [ div [ class "radio_level" ]
+                    [ Toggles.radio Mdl
+                        [ 0 ]
+                        model.mdl
+                        [ Toggles.value (0 == model.filterId)
+                        , Toggles.group "QuestionLevel"
+                        , Toggles.ripple
+                        , Options.onToggle (Filter 0)
+                        ]
+                        [ text "Todos" ]
+                    ]
+                , div [ class "radio_level" ]
+                    [ Toggles.radio Mdl
+                        [ 1 ]
+                        model.mdl
+                        [ Toggles.value (1 == model.filterId)
+                        , Toggles.group "QuestionLevel"
+                        , Toggles.ripple
+                        , Options.onToggle (Filter 1)
+                        ]
+                        [ text "Fácil" ]
+                    ]
+                , div [ class "radio_level" ]
+                    [ Toggles.radio Mdl
+                        [ 2 ]
+                        model.mdl
+                        [ Toggles.value (2 == model.filterId)
+                        , Toggles.group "QuestionLevel"
+                        , Toggles.ripple
+                        , Options.onToggle (Filter 2)
+                        ]
+                        [ text "Médio" ]
+                    ]
+                , div [ class "radio_level" ]
+                    [ Toggles.radio Mdl
+                        [ 3 ]
+                        model.mdl
+                        [ Toggles.value (3 == model.filterId)
+                        , Toggles.group "QuestionLevel"
+                        , Toggles.ripple
+                        , Options.onToggle (Filter 3)
+                        ]
+                        [ text "Difícil" ]
+                    ]
                 ]
-                [ text "Todos" ]
-            , Toggles.radio Mdl
-                [ 1 ]
-                model.mdl
-                [ Toggles.value (1 == model.filterId)
-                , Toggles.group "MyRadioGroup"
-                , Toggles.ripple
-                , Options.onToggle (Filter 1)
-                ]
-                [ text "Fácil" ]
-            , Toggles.radio Mdl
-                [ 2 ]
-                model.mdl
-                [ Toggles.value (2 == model.filterId)
-                , Toggles.group "MyRadioGroup"
-                , Toggles.ripple
-                , Options.onToggle (Filter 2)
-                ]
-                [ text "Médio" ]
-            , Toggles.radio Mdl
-                [ 3 ]
-                model.mdl
-                [ Toggles.value (3 == model.filterId)
-                , Toggles.group "MyRadioGroup"
-                , Toggles.ripple
-                , Options.onToggle (Filter 3)
-                ]
-                [ text "Difícil" ]
             ]
         ]
 

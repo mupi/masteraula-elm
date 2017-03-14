@@ -40,7 +40,7 @@ view model =
                         [ 3 ]
                         model.mdl
                         [ Textfield.label "Email"
-                        , Textfield.text_
+                        , Textfield.email
                         , Textfield.floatingLabel
                         , Textfield.value model.email
                         , Options.onInput SetEmail

@@ -135,3 +135,15 @@ removeEnters text =
     replace All (regex "<\\/?[bB][rR]>*>") (\_ -> "") <|
         replace All (regex "<\\/?[pP]>*>") (\_ -> "") <|
             replace All (regex "\x0D\n\t") (\_ -> "") text
+
+
+validateEmail : String -> Bool
+validateEmail email =
+    let
+        emailRegex =
+            "^\\S+@\\S+\\.\\S+$"
+    in
+        if String.length (replace All (regex emailRegex) (\_ -> "") email) <= 0 then
+            True
+        else
+            False

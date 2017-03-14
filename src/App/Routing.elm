@@ -56,7 +56,7 @@ loginMatchers =
         ]
 
 
-parseLocation : Maybe User.Model -> Location -> Route
+parseLocation : Maybe User.User -> Location -> Route
 parseLocation user location =
     case user of
         Just user ->

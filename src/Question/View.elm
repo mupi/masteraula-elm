@@ -403,27 +403,34 @@ searchTagChip tag =
 
 searchView : Model -> Html Msg
 searchView model =
-    Options.div []
-        [ Textfield.render Mdl
-            [ 4, 0 ]
-            model.mdl
-            [ Options.onInput TagSearchInput
-            , Utils.onEnter TagSearchAdd
-            , Textfield.value model.currentTag
-            , Textfield.label "Search"
+    div []
+        [ Grid.grid []
+            [ Grid.cell [ size All 4 ]
+                [ Textfield.render Mdl
+                    [ 4, 0 ]
+                    model.mdl
+                    [ Options.onInput TagSearchInput
+                    , Utils.onEnter TagSearchAdd
+                    , Textfield.value model.currentTag
+                    , Textfield.label "Buscar questões"
+                    , Textfield.floatingLabel
+                    ]
+                    []
+                ]
+            , Grid.cell [ size All 8 ]
+                [ Button.render Mdl
+                    [ 4, 1 ]
+                    model.mdl
+                    [ Button.ripple
+                    , Button.colored
+                    , Button.raised
+                    , Options.onClick TagSearch
+                    ]
+                    [ text "Buscar" ]
+                ]
             ]
-            []
         , Grid.grid [] <|
             List.map (\tag -> Grid.cell [ size All 2 ] [ searchTagChip tag ]) model.tags
-        , Button.render Mdl
-            [ 4, 1 ]
-            model.mdl
-            [ Button.ripple
-            , Button.colored
-            , Button.raised
-            , Options.onClick TagSearch
-            ]
-            [ text "Search" ]
         ]
 
 

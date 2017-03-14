@@ -49,7 +49,10 @@ page model =
             index
 
         UsersRoute ->
-            Html.map UserMsg (User.view model.user)
+            Html.map UserMsg (User.view User.viewProfile model.user)
+
+        UserUpdateProfile ->
+            Html.map UserMsg (User.view User.viewUpdateProfile model.user)
 
         LoginRoute ->
             Html.map LoginMsg (Login.view model.login)

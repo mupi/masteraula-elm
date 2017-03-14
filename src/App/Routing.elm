@@ -10,6 +10,7 @@ import User.Types as User
 type Route
     = IndexRoute
     | UsersRoute
+    | UserUpdateProfile
     | LoginRoute
     | SignupRoute
     | VerifyEmailRoute VerifyEmail.EmailKey
@@ -53,6 +54,7 @@ loginMatchers =
         , map MineQuestionListRoute (s "questions" </> s "minequestionlists" </> int)
         , map QuestionTagSearchRoute (s "questions" </> s "tagsearch" </> int)
         , map UsersRoute (s "users")
+        , map UserUpdateProfile (s "users" </> s "updateprofile")
         ]
 
 

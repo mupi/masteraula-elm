@@ -27,8 +27,7 @@ type alias Model =
 
 type alias Question =
     { id : Int
-    , question_header : String
-    , question_text : String
+    , question_statement : String
     , level : Maybe String
     , author : User.User
     , credit_cost : Int

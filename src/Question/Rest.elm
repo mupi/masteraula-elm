@@ -25,8 +25,7 @@ questionDecoder : Decode.Decoder Question
 questionDecoder =
     decode Question
         |> required "id" Decode.int
-        |> required "question_header" Decode.string
-        |> required "question_text" Decode.string
+        |> required "question_statement" Decode.string
         |> required "level" (Decode.nullable Decode.string)
         |> required "author" User.userDecoder
         |> required "credit_cost" Decode.int

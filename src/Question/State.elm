@@ -15,7 +15,7 @@ import Utils.StringUtils as StringUtils
 
 initQuestion : Question
 initQuestion =
-    Question 0 "" "" Nothing User.initUser 0 [] []
+    Question 0 "" Nothing User.initUser 0 [] []
 
 
 initQuestionPage : QuestionPage

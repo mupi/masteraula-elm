@@ -28,7 +28,7 @@ update msg model =
             ( init, Navigation.newUrl "#index" )
 
         OnFetchLogin (Ok login) ->
-            { model | user = Just login.user, token = Just login.token, error = "" } ! [ Navigation.newUrl "#index" ]
+            { model | user = Just login.user, token = Just login.token, error = "" } ! [ Navigation.newUrl "#questions/1" ]
 
         OnFetchLogin (Err error) ->
             let

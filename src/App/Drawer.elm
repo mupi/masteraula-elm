@@ -16,7 +16,7 @@ parseDrawerLink user route =
     case user of
         Just user ->
             case route of
-                UsersRoute ->
+                UserRoute ->
                     UsersView
 
                 QuestionRoute a ->
@@ -42,7 +42,7 @@ parseDrawerLink user route =
 
         Nothing ->
             case route of
-                UsersRoute ->
+                UserRoute ->
                     UsersView
 
                 LoginRoute ->

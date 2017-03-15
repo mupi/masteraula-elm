@@ -6,6 +6,7 @@ import Signup.Rest exposing (..)
 import Material
 import Material.Snackbar as Snackbar
 import Material.Helpers exposing (map1st, map2nd)
+import Utils.StringUtils as Utils
 
 
 init : Model
@@ -22,6 +23,8 @@ verifyFields model =
             || String.isEmpty model.confirmPassword
     then
         ( False, "Por favor, preencha todos os campos" )
+    else if (Utils.validateEmail model.email == False) then
+        ( False, "Por favor, insira um e-mail válido" )
     else if model.password /= model.confirmPassword then
         ( False, "A senha e a confirmação devem ser iguais" )
     else if String.length model.password < 8 then

@@ -100,7 +100,7 @@ initUser savedStorage =
             Just storage ->
                 case storage.user of
                     Just u ->
-                        { user | user = u }
+                        { user | user = u, editUser = u }
 
                     Nothing ->
                         user
@@ -120,7 +120,7 @@ update msg model =
         UserMsg subMsg ->
             let
                 ( updatedUser, cmd ) =
-                    User.update subMsg model.user
+                    User.update subMsg model.user model.global
 
                 newCmd =
                     Cmd.map UserMsg cmd
@@ -161,8 +161,15 @@ update msg model =
                                     model.localStorage
                             in
                                 { localStorage | user = newGlobal.user, token = newGlobal.token }
+
+                        newUser =
+                            let
+                                user =
+                                    model.user
+                            in
+                                { user | user = Maybe.withDefault User.initUser newGlobal.user }
                     in
-                        ( { model | login = updatedLogin, global = newGlobal, localStorage = newStorage }, Cmd.batch [ setLocalStorage newStorage, newCmd ] )
+                        ( { model | login = updatedLogin, user = newUser, global = newGlobal, localStorage = newStorage }, Cmd.batch [ setLocalStorage newStorage, newCmd ] )
 
         SignupMsg subMsg ->
             let
@@ -232,6 +239,13 @@ update msg model =
 
                 ( newModel, cmd ) =
                     case newRoute of
+                        UserOtherRoute userId ->
+                            let
+                                ( updatedUser, cmd ) =
+                                    User.update (User.GetUser userId) model.user model.global
+                            in
+                                ( { model | user = updatedUser, currentDrawerLinks = QuestionDefault }, Cmd.map UserMsg cmd )
+
                         QuestionRoute questionId ->
                             let
                                 ( updatedQuestion, cmd ) =

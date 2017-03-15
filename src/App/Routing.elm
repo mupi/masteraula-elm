@@ -19,7 +19,7 @@ type Route
     | QuestionPageRoute Question.PageNumber
     | QuestionListRoute
     | SelectedQuestionListRoute Question.QuestionId
-    | MineQuestionListRoute Question.PageNumber
+    | UserQuestionListRoute Question.PageNumber
     | QuestionTagSearchRoute Question.PageNumber
     | NotFoundRote
 
@@ -51,7 +51,7 @@ loginMatchers =
         , map QuestionRoute (s "question" </> int)
         , map QuestionListRoute (s "questions" </> s "questionlist")
         , map SelectedQuestionListRoute (s "questions" </> s "questionlists" </> int)
-        , map MineQuestionListRoute (s "questions" </> s "minequestionlists" </> int)
+        , map UserQuestionListRoute (s "questions" </> s "user_lists" </> int)
         , map QuestionTagSearchRoute (s "questions" </> s "tagsearch" </> int)
         , map UserOtherRoute (s "users" </> int)
         , map UserRoute (s "users")

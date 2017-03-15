@@ -32,15 +32,15 @@ drawerLink model =
         [ Layout.link
             [ Layout.href "#questions/1"
             ]
-            [ text "Ver Questões" ]
+            [ Icon.view "view_module" [ Icon.size18 ], text " Ver Questões" ]
         , Layout.link
             [ Layout.href "#questions/questionlist/"
             ]
-            [ Icon.view "view_module" [ Icon.size18 ], text " Lista de questão atual" ]
+            [ Icon.view "list" [ Icon.size18 ], text " Lista de questão atual" ]
         , Layout.link
-            [ Layout.href "#questions/minequestionlists/1"
+            [ Layout.href "#questions/user_lists/1"
             ]
-            [ text "Minhas listas" ]
+            [ Icon.view "favorite" [ Icon.size18 ], text " Minhas listas" ]
         , Layout.row []
             [ Layout.title
                 []

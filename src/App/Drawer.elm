@@ -31,7 +31,7 @@ parseDrawerLink user route =
                 QuestionTagSearchRoute a ->
                     QuestionDefault
 
-                MineQuestionListRoute a ->
+                UserQuestionListRoute a ->
                     QuestionDefault
 
                 SelectedQuestionListRoute a ->
@@ -60,7 +60,7 @@ parseDrawerLink user route =
                 QuestionTagSearchRoute a ->
                     QuestionDefault
 
-                MineQuestionListRoute a ->
+                UserQuestionListRoute a ->
                     QuestionDefault
 
                 _ ->

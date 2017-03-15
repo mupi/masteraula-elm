@@ -84,7 +84,7 @@ page model =
         SelectedQuestionListRoute questionListId ->
             Html.map QuestionMsg (Question.view Question.viewSelectedQuestionList model.question)
 
-        MineQuestionListRoute page ->
+        UserQuestionListRoute page ->
             Html.map QuestionMsg (Question.view Question.viewQuestionListPage model.question)
 
         NotFoundRote ->
@@ -247,13 +247,8 @@ getDrawerLinks model =
                         , Options.onClick (Layout.toggleDrawer Mdl)
                         ]
                         [ text "Ver questões" ]
-                      -- , Layout.link
-                      --     [ Layout.href "#"
-                      --     , Options.onClick (Layout.toggleDrawer Mdl)
-                      --     ]
-                      --     [ text "Minhas questões" ]
                     , Layout.link
-                        [ Layout.href "#questions/minequestionlists/1"
+                        [ Layout.href "#questions/user_lists/1"
                         , Options.onClick (Layout.toggleDrawer Mdl)
                         ]
                         [ text "Minhas listas" ]
@@ -271,20 +266,20 @@ getDrawerLinks model =
                 Layout.navigation
                     []
                     [ Layout.link
-                        [ Layout.href "#"
+                        [ Layout.href "#questions/1"
                         , Options.onClick (Layout.toggleDrawer Mdl)
                         ]
-                        [ text "Minhas questões" ]
+                        [ Icon.view "view_module" [ Icon.size18 ], text " Ver questões" ]
                     , Layout.link
-                        [ Layout.href "#questions/minequestionlists/1"
+                        [ Layout.href "#questions/user_lists/1"
                         , Options.onClick (Layout.toggleDrawer Mdl)
                         ]
-                        [ text "Minhas listas" ]
+                        [ Icon.view "favorite" [ Icon.size18 ], text " Minhas listas" ]
                     , Layout.link
-                        [ Layout.href "#"
+                        [ Layout.href "#users"
                         , Options.onClick (Layout.toggleDrawer Mdl)
                         ]
-                        [ text "Alterar conta" ]
+                        [ Icon.view "person" [ Icon.size18 ], text " Alterar conta" ]
                     ]
 
 

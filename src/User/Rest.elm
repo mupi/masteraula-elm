@@ -119,3 +119,30 @@ patchProfileUpdate model token =
 fetchProfileUpdate : Model -> Maybe String -> Cmd Msg
 fetchProfileUpdate model token =
     Http.send OnFetchProfileUpdate (patchProfileUpdate model token)
+
+
+
+-- Get User
+
+
+urlUser : UserId -> String
+urlUser userId =
+    String.concat [ Config.baseUrl, "users/", (toString userId), "/" ]
+
+
+getUser : UserId -> Maybe String -> Http.Request User
+getUser userId token =
+    Http.request
+        { method = "GET"
+        , headers = (headerBuild token)
+        , url = (urlUser userId)
+        , body = Http.emptyBody
+        , expect = (Http.expectJson userDecoder)
+        , timeout = Nothing
+        , withCredentials = False
+        }
+
+
+fetchGetUser : UserId -> Maybe String -> Cmd Msg
+fetchGetUser userId token =
+    Http.send OnFetchGetUser (getUser userId token)

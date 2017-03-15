@@ -8,6 +8,7 @@ import Http
 type alias Model =
     { user : User
     , editUser : User
+    , otherUser : User
     , password : String
     , newPassword : String
     , confirmPassword : String
@@ -24,8 +25,13 @@ type alias User =
     }
 
 
+type alias UserId =
+    Int
+
+
 type Msg
-    = ProfileSee
+    = GetUser UserId
+    | ProfileSee
     | ProfileEdit
     | ProfileUpdate
     | SetName String
@@ -36,6 +42,7 @@ type Msg
     | PasswordChange
     | OnFetchPasswordChange (Result Http.Error String)
     | OnFetchProfileUpdate (Result Http.Error String)
+    | OnFetchGetUser (Result Http.Error User)
     | NoOp
     | Snackbar (Snackbar.Msg Int)
     | Mdl (Material.Msg Msg)

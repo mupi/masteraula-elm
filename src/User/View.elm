@@ -26,47 +26,68 @@ view method model =
         ]
 
 
+profile : Model -> User -> Html Msg
+profile model user =
+    grid []
+        [ cell [ size All 3, offset All 1 ]
+            [ Options.div []
+                [ Options.div
+                    [ css "text-align" "center" ]
+                    [ Options.img
+                        []
+                        [ Html.Attributes.src "http://www.hbc333.com/data/out/190/47199326-profile-pictures.png" ]
+                    ]
+                , Options.styled p
+                    [ Typo.headline ]
+                    [ text user.name ]
+                , Options.styled p
+                    [ Typo.title ]
+                    [ text user.username ]
+                , hr [] []
+                , Options.div [ Typo.subhead ]
+                    [ Icon.view "email" [ Icon.size18 ]
+                    , text (String.concat [ " ", user.email ])
+                    ]
+                , if model.user.id == user.id then
+                    Button.render Mdl
+                        [ 0 ]
+                        model.mdl
+                        [ Options.onClick ProfileEdit
+                        ]
+                        [ text "Editar conta" ]
+                  else
+                    Options.span [] []
+                ]
+            ]
+        , cell [ size All 8 ] [ viewInfo model ]
+        ]
+
+
 viewProfile : Model -> Html Msg
 viewProfile model =
     let
         user =
             model.user
     in
-        grid []
-            [ cell [ size All 3, offset All 1 ]
-                [ Options.div []
-                    [ Options.div
-                        [ css "text-align" "center" ]
-                        [ Options.img
-                            []
-                            [ Html.Attributes.src "http://www.hbc333.com/data/out/190/47199326-profile-pictures.png" ]
-                        ]
-                    , Options.styled p
-                        [ Typo.headline ]
-                        [ text user.name ]
-                    , Options.styled p
-                        [ Typo.title ]
-                        [ text user.username ]
-                    , hr [] []
-                    , Options.div [ Typo.subhead ]
-                        [ Icon.view "email" [ Icon.size18 ]
-                        , text (String.concat [ " ", user.email ])
-                        ]
-                    , Button.render Mdl
-                        [ 0 ]
-                        model.mdl
-                        [ Options.onClick ProfileEdit
-                        ]
-                        [ text "Editar conta" ]
-                    ]
-                ]
-            , cell [ size All 8 ] [ viewInfo model ]
-            ]
+        profile model user
+
+
+viewOtherProfile : Model -> Html Msg
+viewOtherProfile model =
+    let
+        user =
+            model.otherUser
+    in
+        profile model user
 
 
 viewInfo : Model -> Html Msg
 viewInfo model =
     Options.div [] []
+
+
+
+-- Update Profile
 
 
 viewUpdateProfile : Model -> Html Msg
@@ -90,18 +111,6 @@ viewUpdateProfile model =
                             , Textfield.floatingLabel
                             , Textfield.value user.name
                             , Options.onInput SetName
-                            ]
-                            []
-                        ]
-                    , Options.div []
-                        [ Textfield.render Mdl
-                            [ 0, 1 ]
-                            model.mdl
-                            [ Textfield.label "Email"
-                            , Textfield.text_
-                            , Textfield.floatingLabel
-                            , Textfield.value user.email
-                            , Options.onInput SetEmail
                             ]
                             []
                         ]

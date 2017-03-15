@@ -239,6 +239,13 @@ update msg model =
 
                 ( newModel, cmd ) =
                     case newRoute of
+                        UserOtherRoute userId ->
+                            let
+                                ( updatedUser, cmd ) =
+                                    User.update (User.GetUser userId) model.user model.global
+                            in
+                                ( { model | user = updatedUser, currentDrawerLinks = QuestionDefault }, Cmd.map UserMsg cmd )
+
                         QuestionRoute questionId ->
                             let
                                 ( updatedQuestion, cmd ) =

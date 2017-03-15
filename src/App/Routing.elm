@@ -9,8 +9,9 @@ import User.Types as User
 
 type Route
     = IndexRoute
-    | UsersRoute
-    | UserUpdateProfile
+    | UserRoute
+    | UserOtherRoute Int
+    | UserUpdateRoute
     | LoginRoute
     | SignupRoute
     | VerifyEmailRoute VerifyEmail.EmailKey
@@ -31,7 +32,6 @@ normalMatchers =
         , map LoginRoute (s "login")
         , map SignupRoute (s "signup")
         , map VerifyEmailRoute (s "verify-email" </> string)
-          -- , map QuestionPageRoute (s "questions" </> int)
           -- , map QuestionListRoute (s "questions" </> s "questionlist")
           -- , map SelectedQuestionListRoute (s "questions" </> s "questionlists" </> int)
           -- , map QuestionRoute (s "question" </> int)
@@ -53,8 +53,9 @@ loginMatchers =
         , map SelectedQuestionListRoute (s "questions" </> s "questionlists" </> int)
         , map MineQuestionListRoute (s "questions" </> s "minequestionlists" </> int)
         , map QuestionTagSearchRoute (s "questions" </> s "tagsearch" </> int)
-        , map UsersRoute (s "users")
-        , map UserUpdateProfile (s "users" </> s "updateprofile")
+        , map UserOtherRoute (s "users" </> int)
+        , map UserRoute (s "users")
+        , map UserUpdateRoute (s "users" </> s "updateprofile")
         ]
 
 

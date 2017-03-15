@@ -13,7 +13,7 @@ import Utils.StringUtils as Utils
 
 init : Model
 init =
-    Model initUser initUser "" "" "" Snackbar.model Material.model
+    Model initUser initUser initUser "" "" "" Snackbar.model Material.model
 
 
 initUser : User
@@ -56,6 +56,9 @@ verifyFieldsPassword model =
 update : Msg -> Model -> App.Global -> ( Model, Cmd Msg )
 update msg model global =
     case msg of
+        GetUser userId ->
+            model ! [ fetchGetUser userId global.token ]
+
         ProfileSee ->
             { model | editUser = model.user } ! [ Navigation.newUrl <| String.concat [ "#users/" ] ]
 
@@ -152,6 +155,12 @@ update msg model global =
                         |> map2nd (Cmd.map Snackbar)
             in
                 { model | snackbar = snackbar } ! [ effect ]
+
+        OnFetchGetUser (Ok newUser) ->
+            { model | otherUser = newUser } ! []
+
+        OnFetchGetUser (Err error) ->
+            model ! []
 
         Snackbar (Snackbar.End a) ->
             { model | snackbar = Snackbar.model } ! []

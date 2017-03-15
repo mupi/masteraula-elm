@@ -214,7 +214,6 @@ viewQuestion model =
                 [ Card.view
                     [ Color.background (Color.color Color.LightGreen Color.S500)
                     , css "width" "100%"
-                    , Options.onClick <| QuestionClick question
                     ]
                     [ Card.title
                         [ Color.text Color.white
@@ -381,7 +380,7 @@ questionCardView model add question =
             , Card.text
                 [ css "height" "196px"
                 ]
-                [ Markdown.toHtml [] (String.slice 0 100 question.question_header) ]
+                [ Markdown.toHtml [] question.question_header ]
             , (questionCardButton model add question)
             ]
         ]

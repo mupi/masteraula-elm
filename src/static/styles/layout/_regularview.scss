@@ -1,4 +1,9 @@
 .banner-bg{
   background-color: $light-grey;
   padding: 1em;
+  padding-bottom: 50px;
+  text-align: center;
+}
+.container .mdl-grid{
+  max-width: 1000px;
 }

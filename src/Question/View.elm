@@ -46,45 +46,58 @@ drawerLink model =
                 []
                 [ text "Filtros" ]
             ]
-        , text "nível: "
-        , div
-            []
-            [ Toggles.radio Mdl
-                [ 0 ]
-                model.mdl
-                [ Toggles.value (0 == model.filterId)
-                , Toggles.group "MyRadioGroup"
-                , Toggles.ripple
-                , Options.onToggle (Filter 0)
+        , Card.view
+            [ Color.background (Color.color Color.BlueGrey Color.S300)
+            , css "width" "192px"
+            , css "margin" "0 auto"
+            ]
+            [ Card.title [] [ Card.head [ Color.text Color.white ] [ text "Nível" ] ]
+            , Card.text [ Color.text Color.white ]
+                [ div [ class "radio_level" ]
+                    [ Toggles.radio Mdl
+                        [ 0 ]
+                        model.mdl
+                        [ Toggles.value (0 == model.filterId)
+                        , Toggles.group "QuestionLevel"
+                        , Toggles.ripple
+                        , Options.onToggle (Filter 0)
+                        ]
+                        [ text "Todos" ]
+                    ]
+                , div [ class "radio_level" ]
+                    [ Toggles.radio Mdl
+                        [ 1 ]
+                        model.mdl
+                        [ Toggles.value (1 == model.filterId)
+                        , Toggles.group "QuestionLevel"
+                        , Toggles.ripple
+                        , Options.onToggle (Filter 1)
+                        ]
+                        [ text "Fácil" ]
+                    ]
+                , div [ class "radio_level" ]
+                    [ Toggles.radio Mdl
+                        [ 2 ]
+                        model.mdl
+                        [ Toggles.value (2 == model.filterId)
+                        , Toggles.group "QuestionLevel"
+                        , Toggles.ripple
+                        , Options.onToggle (Filter 2)
+                        ]
+                        [ text "Médio" ]
+                    ]
+                , div [ class "radio_level" ]
+                    [ Toggles.radio Mdl
+                        [ 3 ]
+                        model.mdl
+                        [ Toggles.value (3 == model.filterId)
+                        , Toggles.group "QuestionLevel"
+                        , Toggles.ripple
+                        , Options.onToggle (Filter 3)
+                        ]
+                        [ text "Difícil" ]
+                    ]
                 ]
-                [ text "Todos" ]
-            , Toggles.radio Mdl
-                [ 1 ]
-                model.mdl
-                [ Toggles.value (1 == model.filterId)
-                , Toggles.group "MyRadioGroup"
-                , Toggles.ripple
-                , Options.onToggle (Filter 1)
-                ]
-                [ text "Fácil" ]
-            , Toggles.radio Mdl
-                [ 2 ]
-                model.mdl
-                [ Toggles.value (2 == model.filterId)
-                , Toggles.group "MyRadioGroup"
-                , Toggles.ripple
-                , Options.onToggle (Filter 2)
-                ]
-                [ text "Médio" ]
-            , Toggles.radio Mdl
-                [ 3 ]
-                model.mdl
-                [ Toggles.value (3 == model.filterId)
-                , Toggles.group "MyRadioGroup"
-                , Toggles.ripple
-                , Options.onToggle (Filter 3)
-                ]
-                [ text "Difícil" ]
             ]
         ]
 
@@ -227,7 +240,7 @@ viewQuestion model =
                     , Card.text
                         [ css "min-height" "196px"
                         ]
-                        [ text question.question_header
+                        [ Markdown.toHtml [] question.question_header
                         , Markdown.toHtml [] question.question_text
                         , div [] (List.indexedMap answerView question.answers)
                         , correctAnswerView question.answers
@@ -380,7 +393,9 @@ questionCardView model add question =
             , Card.text
                 [ css "height" "196px"
                 ]
-                [ Markdown.toHtml [] question.question_header ]
+                [ Markdown.toHtml [] question.question_header
+                , Markdown.toHtml [] question.question_text
+                ]
             , (questionCardButton model add question)
             ]
         ]
@@ -403,27 +418,34 @@ searchTagChip tag =
 
 searchView : Model -> Html Msg
 searchView model =
-    Options.div []
-        [ Textfield.render Mdl
-            [ 4, 0 ]
-            model.mdl
-            [ Options.onInput TagSearchInput
-            , Utils.onEnter TagSearchAdd
-            , Textfield.value model.currentTag
-            , Textfield.label "Search"
+    div []
+        [ Grid.grid []
+            [ Grid.cell [ size All 4 ]
+                [ Textfield.render Mdl
+                    [ 4, 0 ]
+                    model.mdl
+                    [ Options.onInput TagSearchInput
+                    , Utils.onEnter TagSearchAdd
+                    , Textfield.value model.currentTag
+                    , Textfield.label "Buscar questões"
+                    , Textfield.floatingLabel
+                    ]
+                    []
+                ]
+            , Grid.cell [ size All 8 ]
+                [ Button.render Mdl
+                    [ 4, 1 ]
+                    model.mdl
+                    [ Button.ripple
+                    , Button.colored
+                    , Button.raised
+                    , Options.onClick TagSearch
+                    ]
+                    [ text "Buscar" ]
+                ]
             ]
-            []
         , Grid.grid [] <|
             List.map (\tag -> Grid.cell [ size All 2 ] [ searchTagChip tag ]) model.tags
-        , Button.render Mdl
-            [ 4, 1 ]
-            model.mdl
-            [ Button.ripple
-            , Button.colored
-            , Button.raised
-            , Options.onClick TagSearch
-            ]
-            [ text "Search" ]
         ]
 
 

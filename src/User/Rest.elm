@@ -17,11 +17,11 @@ usersDecoder =
 
 userDecoder : Decode.Decoder User
 userDecoder =
-    Decode.map4 User
-        (field "id" Decode.int)
-        (field "username" Decode.string)
-        (field "name" Decode.string)
-        (field "email" Decode.string)
+    decode User
+        |> required "id" Decode.int
+        |> required "username" Decode.string
+        |> required "name" Decode.string
+        |> optional "email" Decode.string ""
 
 
 headerBuild : Maybe String -> List Http.Header

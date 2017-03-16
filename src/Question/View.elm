@@ -32,15 +32,15 @@ drawerLink model =
         [ Layout.link
             [ Layout.href "#questions/1"
             ]
-            [ text "Ver Questões" ]
+            [ Icon.view "view_module" [ Icon.size18 ], text " Ver Questões" ]
         , Layout.link
             [ Layout.href "#questions/questionlist/"
             ]
-            [ Icon.view "view_module" [ Icon.size18 ], text " Lista de questão atual" ]
+            [ Icon.view "list" [ Icon.size18 ], text " Lista de questão atual" ]
         , Layout.link
-            [ Layout.href "#questions/minequestionlists/1"
+            [ Layout.href "#questions/user_lists/1"
             ]
-            [ text "Minhas listas" ]
+            [ Icon.view "favorite" [ Icon.size18 ], text " Minhas listas" ]
         , Layout.row []
             [ Layout.title
                 []
@@ -225,13 +225,15 @@ viewQuestion model =
                 , Options.css "padding" "8px 8px"
                 ]
                 [ Card.view
-                    [ Color.background (Color.color Color.LightGreen Color.S500)
+                    [ Color.background (Color.color Color.BlueGrey Color.S50)
                     , css "width" "100%"
+                    , Options.cs "mdl-shadow--2dp"
                     ]
                     [ Card.title
                         [ Color.text Color.white
+                        , Color.background (Color.color Color.Green Color.S500)
                         , css "padding" "16px"
-                        , css "display" "flex"
+                        , css "align-items" "center"
                         , Card.border
                         ]
                         [ Icon.view "description" [ Icon.size36 ]
@@ -239,6 +241,7 @@ viewQuestion model =
                         ]
                     , Card.text
                         [ css "min-height" "196px"
+                        , Options.cs "question_card"
                         ]
                         [ Markdown.toHtml [] question.question_statement
                         , div [] (List.indexedMap answerView question.answers)
@@ -246,7 +249,7 @@ viewQuestion model =
                         ]
                     , Card.actions
                         [ Card.border
-                        , Color.background (Color.color Color.LightGreen Color.S900)
+                        , Color.background (Color.color Color.Blue Color.S600)
                         ]
                         [ Button.render Mdl
                             [ 2, 0, question.id ]
@@ -283,7 +286,7 @@ viewQuestion model =
                                 Options.onClick (QuestionListAdd question)
                             ]
                             (if List.member question.id questionsId then
-                                [ text "Adicionado" ]
+                                [ text "Adicionada" ]
                              else
                                 [ Icon.view "add" [ Icon.size18 ], text " Adicionar" ]
                             )
@@ -306,7 +309,7 @@ questionCardButton model add question =
         if add then
             Card.actions
                 [ Card.border
-                , Color.background (Color.color Color.LightGreen Color.S900)
+                , Color.background (Color.color Color.Blue Color.S700)
                 ]
                 [ Button.render Mdl
                     [ 2, 0, question.id ]
@@ -332,7 +335,7 @@ questionCardButton model add question =
                         Options.onClick (QuestionListAdd question)
                     ]
                     (if List.member question.id questionsId then
-                        [ text "Adicionado" ]
+                        [ Icon.i "done", text "Adicionada" ]
                      else
                         [ Icon.view "add" [ Icon.size18 ], text " Adicionar" ]
                     )
@@ -340,7 +343,7 @@ questionCardButton model add question =
         else
             Card.actions
                 [ Card.border
-                , Color.background (Color.color Color.LightGreen Color.S900)
+                , Color.background (Color.color Color.Red Color.S700)
                 ]
                 [ Button.render Mdl
                     [ 2, 0, question.id ]
@@ -373,8 +376,9 @@ questionCardView model add question =
         , Options.css "padding" "8px 8px"
         ]
         [ Card.view
-            [ Color.background (Color.color Color.LightGreen Color.S500)
+            [ Color.background (Color.white)
             , css "width" "100%"
+            , Options.cs "mdl-shadow--2dp"
             , Options.onClick <| QuestionClick question
             ]
             [ Card.title
@@ -383,7 +387,7 @@ questionCardView model add question =
                 , css "display" "flex"
                 , css "align-items" "center"
                 , css "justify-content" "center"
-                , Card.border
+                , Color.background (Color.color Color.Green Color.S500)
                   -- Clear default padding to encompass scrim
                 ]
                 [ Icon.view "description" [ Icon.size36 ]
@@ -391,6 +395,7 @@ questionCardView model add question =
                 ]
             , Card.text
                 [ css "height" "196px"
+                , Options.cs "question_card thumb"
                 ]
                 [ Markdown.toHtml [] question.question_statement
                 ]
@@ -534,7 +539,8 @@ viewQuestionList model =
         questionList =
             model.questionListEdit
     in
-        div []
+        div
+            []
             [ Options.styled h1
                 [ Typo.display1, Typo.center ]
                 [ text <|
@@ -547,6 +553,7 @@ viewQuestionList model =
                 [ 5, 0 ]
                 model.mdl
                 [ Options.onInput QuestionListHeaderInput
+                , Options.css "margin-left" "30px"
                 , Textfield.value questionList.question_list_header
                 , Textfield.floatingLabel
                 , Textfield.label "Nome da lista"
@@ -563,23 +570,25 @@ viewQuestionList model =
 
 viewQuestionListButtonNew : Model -> Html Msg
 viewQuestionListButtonNew model =
-    div []
+    Options.div
+        [ Color.background Color.primaryDark
+        , Options.cs "questions_list_action"
+        ]
         [ Button.render Mdl
             [ 5, 1 ]
             model.mdl
             [ Button.ripple
-            , Button.colored
-            , Button.raised
+            , Button.plain
+            , Color.text Color.white
             , Options.onClick QuestionListSave
             ]
-            [ text "Salvar" ]
+            [ Icon.i "save", text "Salvar" ]
         , Button.render Mdl
             [ 5, 2 ]
             model.mdl
             [ Button.ripple
-            , Button.colored
-            , Button.raised
             , Dialog.openOn "click"
+            , Color.text Color.white
             , Options.onClick (Dialog Clear)
             , if List.length model.questionListEdit.questions > 0 then
                 Options.nop
@@ -587,7 +596,7 @@ viewQuestionListButtonNew model =
                 Button.disabled
               -- , Options.onClick QuestionListClear
             ]
-            [ text "Limpar lista" ]
+            [ Icon.i "delete_forever", text "Limpar lista" ]
         ]
 
 
@@ -692,26 +701,31 @@ viewSelectedQuestionList model =
                 [ text questionList.question_list_header ]
             , Grid.grid []
                 (List.map (questionCardView model False) <| List.map (\q -> q.question) questionList.questions)
-            , Button.render Mdl
-                [ 5, 1 ]
-                model.mdl
-                [ Button.ripple
-                , Button.colored
-                , Button.raised
-                , Options.onClick <| QuestionListGenerate questionList
-                , if List.length questionList.questions > 0 then
-                    Options.nop
-                  else
-                    Button.disabled
+            , Options.div
+                [ Color.background Color.primaryDark
+                , Options.cs "questions_list_action"
                 ]
-                [ text "Gerar Lista" ]
-            , Button.render Mdl
-                [ 5, 2 ]
-                model.mdl
-                [ Button.ripple
-                , Button.colored
-                , Button.raised
-                , Options.onClick <| QuestionListEdit questionList
+                [ Button.render Mdl
+                    [ 5, 1 ]
+                    model.mdl
+                    [ Button.ripple
+                    , Button.plain
+                    , Color.text Color.white
+                    , Options.onClick <| QuestionListGenerate questionList
+                    , if List.length questionList.questions > 0 then
+                        Options.nop
+                      else
+                        Button.disabled
+                    ]
+                    [ Icon.i "file_download", text "Fazer download" ]
+                , Button.render Mdl
+                    [ 5, 2 ]
+                    model.mdl
+                    [ Button.ripple
+                    , Button.plain
+                    , Color.text Color.white
+                    , Options.onClick <| QuestionListEdit questionList
+                    ]
+                    [ Icon.i "mode_edit", text "Editar Lista" ]
                 ]
-                [ text "Editar Lista" ]
             ]

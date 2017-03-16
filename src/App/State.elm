@@ -267,7 +267,7 @@ update msg model =
                             in
                                 ( { model | question = updatedQuestion, currentDrawerLinks = QuestionDefault }, Cmd.map QuestionMsg cmd )
 
-                        MineQuestionListRoute page ->
+                        UserQuestionListRoute page ->
                             let
                                 ( updatedQuestion, cmd ) =
                                     Question.update (Question.GetMineQuestionListPage page) model.question model.global

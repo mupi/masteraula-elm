@@ -33,10 +33,7 @@ profile model user =
             [ Options.div []
                 [ Options.div
                     [ css "text-align" "center" ]
-                    [ Options.img
-                        []
-                        [ Html.Attributes.src "http://www.hbc333.com/data/out/190/47199326-profile-pictures.png" ]
-                    ]
+                    [ Icon.view "person" [ Icon.size36 ] ]
                 , Options.styled p
                     [ Typo.headline ]
                     [ text user.name ]

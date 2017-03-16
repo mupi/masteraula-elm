@@ -1,0 +1,20 @@
+.question_card{
+  &.thumb{
+    cursor: pointer;
+  }
+  img{
+    max-width: 100%;
+    display: block;
+  }
+}
+
+.questions_list_action{
+  height: 60px;
+  line-height: 60px;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  z-index: 1;
+  text-align: right;
+  left: 0;
+}

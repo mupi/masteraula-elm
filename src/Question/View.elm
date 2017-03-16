@@ -51,7 +51,10 @@ drawerLink model =
             , css "width" "192px"
             , css "margin" "0 auto"
             ]
-            [ Card.title [] [ Card.head [ Color.text Color.white ] [ text "Nível" ] ]
+            [ Card.title []
+                [ Card.head [ Color.text Color.white ]
+                    [ text "Grau de dificuldate" ]
+                ]
             , Card.text [ Color.text Color.white ]
                 [ div [ class "radio_level" ]
                     [ Toggles.radio Mdl
@@ -210,6 +213,17 @@ correctAnswerView answers =
         text <| String.toUpper <| String.concat [ "RESPOSTA: ", letter ]
 
 
+textToChip : String -> Html msg
+textToChip s =
+    Chip.span
+        [ Options.css "margin-right" "5px"
+        , Color.background (Color.color Color.Blue Color.S100)
+        ]
+        [ Chip.content []
+            [ text s ]
+        ]
+
+
 viewQuestion : Model -> Html Msg
 viewQuestion model =
     let
@@ -246,6 +260,8 @@ viewQuestion model =
                         [ Markdown.toHtml [] question.question_statement
                         , div [] (List.indexedMap answerView question.answers)
                         , correctAnswerView question.answers
+                        , (List.map textToChip question.tags)
+                            |> Options.styled div [ Options.css "margin" "10px 0" ]
                         ]
                     , Card.actions
                         [ Card.border

@@ -2,7 +2,6 @@ module App.View exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (class, src)
-import Html.Events exposing (onClick)
 import App.Drawer exposing (..)
 import App.Types exposing (..)
 import Login.View as Login
@@ -12,15 +11,12 @@ import Question.View as Question
 import Signup.View as Signup
 import User.View as User
 import App.Routing exposing (Route(..))
-import Material.Button as Button
 import Material.Options as Options exposing (css)
 import Material.Layout as Layout
 import Material.Typography as Typo
 import Material.Options as Options
 import Material.Grid exposing (grid, cell, size, offset, Device(..))
-import Material.Button as Button
 import Material.Card as Card
-import Material.Color as Color
 import Material.Icon as Icon
 
 

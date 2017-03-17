@@ -1,6 +1,12 @@
 .question_card{
+  h1 {
+    font-size: 1.2em;
+  }
   &.thumb{
     cursor: pointer;
+    h1 {
+      font-size: 1em;
+    }
   }
   img{
     max-width: 100%;
@@ -17,4 +23,9 @@
   z-index: 1;
   text-align: right;
   left: 0;
+}
+
+.question_source{
+  font-size: 0.8em;
+  text-align: right;
 }

@@ -34,6 +34,9 @@ type alias Question =
     , tags : List String
     , answers : List Answer
     , subjects : List Subject
+    , education_level : Maybe String
+    , year : Maybe Int
+    , level : Maybe String
     }
 
 

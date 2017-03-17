@@ -39,6 +39,9 @@ questionDecoder =
         |> required "tags" (Decode.list Decode.string)
         |> optional "answers" (Decode.list answerDecoder) []
         |> optional "subjects" (Decode.list subjectDecoder) []
+        |> required "education_level" (Decode.nullable Decode.string)
+        |> required "year" (Decode.nullable Decode.int)
+        |> required "source" (Decode.nullable Decode.string)
 
 
 questionOrderDecoder : Decode.Decoder QuestionOrder

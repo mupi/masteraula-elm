@@ -28,12 +28,12 @@ verifyFieldsProfile model =
             model.editUser
     in
         if
-            String.isEmpty user.email
-                || String.isEmpty user.name
+            String.isEmpty user.name
+            -- || String.isEmpty user.email
         then
             ( False, "Por favor, preencha todos os campos" )
-        else if (Utils.validateEmail user.email == False) then
-            ( False, "Por favor, insira um e-mail válido" )
+            -- else if (Utils.validateEmail user.email == False) then
+            --     ( False, "Por favor, insira um e-mail válido" )
         else
             ( True, "" )
 
@@ -43,9 +43,10 @@ verifyFieldsPassword model =
     if
         String.isEmpty model.password
             || String.isEmpty model.confirmPassword
+            || String.isEmpty model.newPassword
     then
         ( False, "Por favor, preencha todos os campos" )
-    else if model.password /= model.confirmPassword then
+    else if model.newPassword /= model.confirmPassword then
         ( False, "A senha e a confirmação devem ser iguais" )
     else if String.length model.password < 8 then
         ( False, "A senha deve conter ao menos 8 caracteres" )
@@ -97,10 +98,32 @@ update msg model global =
             { model | confirmPassword = newConfirmPassword } ! []
 
         ProfileUpdate ->
-            model ! [ fetchProfileUpdate model global.token ]
+            let
+                ( verified, errorMsg ) =
+                    verifyFieldsProfile model
+
+                ( snackbar, effect ) =
+                    Snackbar.add (Snackbar.snackbar 0 errorMsg "Fechar") model.snackbar
+                        |> map2nd (Cmd.map Snackbar)
+            in
+                if verified then
+                    model ! [ fetchProfileUpdate model global.token ]
+                else
+                    { model | snackbar = snackbar } ! [ effect ]
 
         PasswordChange ->
-            model ! [ fetchChangePassword model global.token ]
+            let
+                ( verified, errorMsg ) =
+                    verifyFieldsPassword model
+
+                ( snackbar, effect ) =
+                    Snackbar.add (Snackbar.snackbar 0 errorMsg "Fechar") model.snackbar
+                        |> map2nd (Cmd.map Snackbar)
+            in
+                if verified then
+                    model ! [ fetchChangePassword model global.token ]
+                else
+                    { model | snackbar = snackbar } ! [ effect ]
 
         OnFetchPasswordChange (Ok text) ->
             let

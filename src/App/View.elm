@@ -245,17 +245,17 @@ getDrawerLinks model =
                         [ Layout.href "#questions/1"
                         , Options.onClick (Layout.toggleDrawer Mdl)
                         ]
-                        [ text "Ver questões" ]
+                        [ Icon.view "view_module" [ Icon.size18 ], text " Ver questões" ]
                     , Layout.link
                         [ Layout.href "#questions/user_lists/1"
                         , Options.onClick (Layout.toggleDrawer Mdl)
                         ]
-                        [ text "Minhas listas" ]
+                        [ Icon.view "favorite" [ Icon.size18 ], text " Minhas listas" ]
                     , Layout.link
                         [ Layout.href "#users"
                         , Options.onClick (Layout.toggleDrawer Mdl)
                         ]
-                        [ text "Alterar conta" ]
+                        [ Icon.view "person" [ Icon.size18 ], text " Alterar conta" ]
                     ]
 
             QuestionDefault ->

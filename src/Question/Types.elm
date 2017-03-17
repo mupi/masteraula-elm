@@ -33,6 +33,13 @@ type alias Question =
     , credit_cost : Int
     , tags : List String
     , answers : List Answer
+    , subjects : List Subject
+    }
+
+
+type alias Subject =
+    { id : Int
+    , subject_name : String
     }
 
 

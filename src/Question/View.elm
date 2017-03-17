@@ -30,6 +30,10 @@ drawerLink model =
     Layout.navigation
         []
         [ Layout.link
+            [ Layout.href "https://goo.gl/forms/NckNklDbJM2uBf3I2"
+            ]
+            [ Icon.view "add_circle_outline" [ Icon.size18 ], text " Sugerir questão" ]
+        , Layout.link
             [ Layout.href "#questions/1"
             ]
             [ Icon.view "view_module" [ Icon.size18 ], text " Ver Questões" ]
@@ -53,7 +57,7 @@ drawerLink model =
             ]
             [ Card.title []
                 [ Card.head [ Color.text Color.white ]
-                    [ text "Grau de dificuldate" ]
+                    [ text "Grau de dificuldade" ]
                 ]
             , Card.text [ Color.text Color.white ]
                 [ div [ class "radio_level" ]
@@ -233,14 +237,13 @@ viewQuestion model =
         questionsId =
             List.map (\q -> q.question.id) model.questionListEdit.questions
     in
-        Grid.grid []
+        Grid.grid [ Color.background (Color.color Color.Grey Color.S50) ]
             [ Grid.cell
                 [ size All 12
                 , Options.css "padding" "8px 8px"
                 ]
                 [ Card.view
-                    [ Color.background (Color.color Color.BlueGrey Color.S50)
-                    , css "width" "100%"
+                    [ css "width" "100%"
                     , Options.cs "mdl-shadow--2dp"
                     ]
                     [ Card.title
@@ -429,6 +432,7 @@ searchTagChip tag =
     Chip.span
         [ Chip.deleteIcon "cancel"
         , Chip.deleteClick (TagSearchRemove tag)
+        , Options.css "margin-right" "5px"
         ]
         [ Chip.content []
             [ text tag ]
@@ -451,7 +455,7 @@ searchView model =
                     ]
                     []
                 ]
-            , Grid.cell [ size All 8 ]
+            , Grid.cell [ size All 2 ]
                 [ Button.render Mdl
                     [ 4, 1 ]
                     model.mdl
@@ -462,9 +466,25 @@ searchView model =
                     ]
                     [ text "Buscar" ]
                 ]
+            , Grid.cell
+                [ size All 6 ]
+                [ Button.render Mdl
+                    [ 4, 1 ]
+                    model.mdl
+                    [ Button.ripple
+                    , Button.colored
+                    , Button.flat
+                    , Button.link "https://goo.gl/forms/0wUWEPzVn212FTNg1"
+                    ]
+                    [ text "Não encontrou o que queria? Faça seu pedido!" ]
+                ]
             ]
-        , Grid.grid [] <|
-            List.map (\tag -> Grid.cell [ size All 2 ] [ searchTagChip tag ]) model.tags
+        , Options.styled div
+            [ Options.css "margin-left" "5px"
+            , Options.css "margin-top" "-25px"
+            ]
+          <|
+            List.map (\tag -> searchTagChip tag) model.tags
         ]
 
 
@@ -533,7 +553,8 @@ questionPageControls model =
 
 viewQuestionPage : Model -> Html Msg
 viewQuestionPage model =
-    div []
+    Options.styled div
+        [ Color.background (Color.color Color.Grey Color.S50) ]
         [ Grid.grid []
             [ Grid.cell [ size All 12 ]
                 [ searchView model ]

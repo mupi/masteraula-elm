@@ -13,6 +13,13 @@ import Utils.StringUtils exposing (..)
 -- Decoders
 
 
+subjectDecoder : Decode.Decoder Subject
+subjectDecoder =
+    Decode.map2 Subject
+        (field "id" Decode.int)
+        (field "subject_name" Decode.string)
+
+
 answerDecoder : Decode.Decoder Answer
 answerDecoder =
     Decode.map3 Answer
@@ -31,6 +38,7 @@ questionDecoder =
         |> required "credit_cost" Decode.int
         |> required "tags" (Decode.list Decode.string)
         |> optional "answers" (Decode.list answerDecoder) []
+        |> optional "subjects" (Decode.list subjectDecoder) []
 
 
 questionOrderDecoder : Decode.Decoder QuestionOrder

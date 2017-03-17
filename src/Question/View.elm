@@ -254,7 +254,18 @@ viewQuestion model =
                         , Card.border
                         ]
                         [ Icon.view "description" [ Icon.size36 ]
-                        , text "Português"
+                        , text <|
+                            if (List.length question.subjects > 1) then
+                                "Multidisciplinar"
+                            else if (List.length question.subjects <= 0) then
+                                ""
+                            else
+                                case List.head question.subjects of
+                                    Just s ->
+                                        s.subject_name
+
+                                    Nothing ->
+                                        ""
                         ]
                     , Card.text
                         [ css "min-height" "196px"
@@ -410,7 +421,18 @@ questionCardView model add question =
                   -- Clear default padding to encompass scrim
                 ]
                 [ Icon.view "description" [ Icon.size36 ]
-                , text "Português"
+                , text <|
+                    if (List.length question.subjects > 1) then
+                        "Multidisciplinar"
+                    else if (List.length question.subjects <= 0) then
+                        ""
+                    else
+                        case List.head question.subjects of
+                            Just s ->
+                                s.subject_name
+
+                            Nothing ->
+                                ""
                 ]
             , Card.text
                 [ css "height" "196px"
@@ -527,7 +549,7 @@ questionPageControls model =
                             (text <| toString number)
                 )
             <|
-                List.range 1 (ceiling <| (toFloat page.count) / 9)
+                List.range 1 (ceiling <| (toFloat page.count) / 12)
     in
         Grid.grid [] <|
             (if page.previous /= Nothing then
@@ -560,7 +582,7 @@ viewQuestionPage model =
                 [ searchView model ]
             ]
         , Grid.grid []
-            (List.map (questionCardView model True) (List.take 9 model.questionPage.questions))
+            (List.map (questionCardView model True) (List.take 12 model.questionPage.questions))
         , questionPageControls model
         , text model.error
         ]

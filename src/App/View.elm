@@ -245,7 +245,7 @@ getDrawerLinks model =
                         [ Layout.href "#questions/1"
                         , Options.onClick (Layout.toggleDrawer Mdl)
                         ]
-                        [ Icon.view "view_module" [ Icon.size18 ], text " Ver questões" ]
+                        [ Icon.view "view_module" [ Icon.size18 ], text " Selecionar Questões" ]
                     , Layout.link
                         [ Layout.href "#questions/user_lists/1"
                         , Options.onClick (Layout.toggleDrawer Mdl)
@@ -268,7 +268,7 @@ getDrawerLinks model =
                         [ Layout.href "#questions/1"
                         , Options.onClick (Layout.toggleDrawer Mdl)
                         ]
-                        [ Icon.view "view_module" [ Icon.size18 ], text " Ver questões" ]
+                        [ Icon.view "view_module" [ Icon.size18 ], text " Selecionar Questões" ]
                     , Layout.link
                         [ Layout.href "#questions/user_lists/1"
                         , Options.onClick (Layout.toggleDrawer Mdl)

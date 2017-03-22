@@ -164,7 +164,7 @@ index =
                 [ div [ class "thumb-circle" ]
                     [ img [ src "/static/img/clock.png" ] []
                     ]
-                , h4 [] [ text "Ganhe tempo ao preparar provas e testes" ]
+                , h4 [] [ text "Monte provas e testes em 5 minutos!" ]
                 , p [] [ text "Otimize seu tempo de preparar aulas encontrando materiais curados por educadores de todo o Brasil." ]
                 ]
             , cell [ size All 4 ]
@@ -245,7 +245,7 @@ getDrawerLinks model =
                         [ Layout.href "#questions/1"
                         , Options.onClick (Layout.toggleDrawer Mdl)
                         ]
-                        [ Icon.view "view_module" [ Icon.size18 ], text " Ver questões" ]
+                        [ Icon.view "view_module" [ Icon.size18 ], text " Selecionar Questões" ]
                     , Layout.link
                         [ Layout.href "#questions/user_lists/1"
                         , Options.onClick (Layout.toggleDrawer Mdl)
@@ -268,7 +268,7 @@ getDrawerLinks model =
                         [ Layout.href "#questions/1"
                         , Options.onClick (Layout.toggleDrawer Mdl)
                         ]
-                        [ Icon.view "view_module" [ Icon.size18 ], text " Ver questões" ]
+                        [ Icon.view "view_module" [ Icon.size18 ], text " Selecionar Questões" ]
                     , Layout.link
                         [ Layout.href "#questions/user_lists/1"
                         , Options.onClick (Layout.toggleDrawer Mdl)

@@ -36,15 +36,17 @@ drawerLink model =
         , Layout.link
             [ Layout.href "#questions/1"
             ]
-            [ Icon.view "view_module" [ Icon.size18 ], text " Ver Questões" ]
+            [ Icon.view "view_module" [ Icon.size18 ], text " Selecionar Questões" ]
         , Layout.link
             [ Layout.href "#questions/questionlist/"
             ]
-            [ Icon.view "list" [ Icon.size18 ], text " Lista de questão atual" ]
+            [ Icon.view "list" [ Icon.size18 ], text " Baixar questões" ]
         , Layout.link
             [ Layout.href "#questions/user_lists/1"
             ]
-            [ Icon.view "favorite" [ Icon.size18 ], text " Minhas listas" ]
+            [ Icon.view "favorite" [ Icon.size18 ]
+            , text " Minhas listas"
+            ]
         , Layout.row []
             [ Layout.title
                 []
@@ -228,6 +230,47 @@ textToChip s =
         ]
 
 
+cardTitle : Question -> Card.Block msg
+cardTitle question =
+    Card.title
+        [ Color.text Color.white
+        , Color.background (Color.color Color.Pink Color.S300)
+          -- Clear default padding to encompass scrim
+        ]
+        [ Options.div
+            []
+            -- Icon.view "description" [ Icon.size36 ]
+            [ Card.head []
+                [ text <|
+                    if (List.length question.subjects > 1) then
+                        "Multidisciplinar"
+                    else if (List.length question.subjects <= 0) then
+                        ""
+                    else
+                        case List.head question.subjects of
+                            Just s ->
+                                s.subject_name
+
+                            Nothing ->
+                                ""
+                ]
+            , Card.subhead
+                []
+                [ if question.credit_cost == 0 then
+                    text "Questão Gratuita!"
+                  else if question.credit_cost == 1 then
+                    toString question.credit_cost
+                        ++ " Crédito"
+                        |> text
+                  else
+                    toString question.credit_cost
+                        ++ " Créditos"
+                        |> text
+                ]
+            ]
+        ]
+
+
 viewQuestion : Model -> Html Msg
 viewQuestion model =
     let
@@ -246,27 +289,7 @@ viewQuestion model =
                     [ css "width" "100%"
                     , Options.cs "mdl-shadow--2dp"
                     ]
-                    [ Card.title
-                        [ Color.text Color.white
-                        , Color.background (Color.color Color.Green Color.S500)
-                        , css "padding" "16px"
-                        , css "align-items" "center"
-                        , Card.border
-                        ]
-                        [ Icon.view "description" [ Icon.size36 ]
-                        , text <|
-                            if (List.length question.subjects > 1) then
-                                "Multidisciplinar"
-                            else if (List.length question.subjects <= 0) then
-                                ""
-                            else
-                                case List.head question.subjects of
-                                    Just s ->
-                                        s.subject_name
-
-                                    Nothing ->
-                                        ""
-                        ]
+                    [ cardTitle question
                     , Card.text
                         [ css "min-height" "196px"
                         , Options.cs "question_card"
@@ -411,29 +434,7 @@ questionCardView model add question =
             , Options.cs "mdl-shadow--2dp"
             , Options.onClick <| QuestionClick question
             ]
-            [ Card.title
-                [ Color.text Color.white
-                , css "padding" "16px"
-                , css "display" "flex"
-                , css "align-items" "center"
-                , css "justify-content" "center"
-                , Color.background (Color.color Color.Green Color.S500)
-                  -- Clear default padding to encompass scrim
-                ]
-                [ Icon.view "description" [ Icon.size36 ]
-                , text <|
-                    if (List.length question.subjects > 1) then
-                        "Multidisciplinar"
-                    else if (List.length question.subjects <= 0) then
-                        ""
-                    else
-                        case List.head question.subjects of
-                            Just s ->
-                                s.subject_name
-
-                            Nothing ->
-                                ""
-                ]
+            [ cardTitle question
             , Card.text
                 [ css "height" "196px"
                 , Options.cs "question_card thumb"
@@ -600,7 +601,7 @@ viewQuestionList model =
     in
         div
             []
-            [ Options.styled h1
+            [ Options.styled h2
                 [ Typo.display1, Typo.center ]
                 [ text <|
                     if questionList.id == 0 then
@@ -615,10 +616,14 @@ viewQuestionList model =
                 , Options.css "margin-left" "30px"
                 , Textfield.value questionList.question_list_header
                 , Textfield.floatingLabel
-                , Textfield.label "Nome da lista"
+                , Textfield.label "Digite o Nome da lista"
                 ]
                 []
-            , Grid.grid []
+            , Options.styled p
+                [ Options.css "margin" "0 20px"
+                ]
+                [ text "Veja abaixo as questões que você selecionou. Para baixá-las, digite um nome para a lista no campo acima, clique em salvar e em seguida Fazer Download." ]
+            , Grid.grid [ Options.css "margin-bottom" "60px" ]
                 (List.map (questionCardView model False) <| List.map (\q -> q.question) questionList.questions)
             , if questionList.id == 0 then
                 viewQuestionListButtonNew model

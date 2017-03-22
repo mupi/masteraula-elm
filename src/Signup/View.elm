@@ -22,7 +22,7 @@ view model =
             [ cell [ size All 6, offset All 3, size Phone 12 ]
                 [ Options.styled h1
                     [ Typo.display1, Typo.center ]
-                    [ text "Cadastrar no PrePaula" ]
+                    [ text "Cadastrar no MasterAula" ]
                 , div []
                     [ Textfield.render Mdl
                         [ 2 ]
@@ -90,7 +90,7 @@ view model =
                         , Button.colored
                         , Options.onClick Signup
                         ]
-                        [ text "Sign up" ]
+                        [ text "Cadastrar" ]
                     ]
                 ]
             ]

@@ -36,7 +36,7 @@ type alias Question =
     , subjects : List Subject
     , education_level : Maybe String
     , year : Maybe Int
-    , level : Maybe String
+    , source : Maybe String
     }
 
 

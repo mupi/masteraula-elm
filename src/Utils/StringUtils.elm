@@ -147,3 +147,23 @@ validateEmail email =
             True
         else
             False
+
+
+maybeStringToString : Maybe String -> String
+maybeStringToString text =
+    case text of
+        Just t ->
+            t
+
+        Nothing ->
+            ""
+
+
+maybeIntToString : Maybe Int -> String
+maybeIntToString number =
+    case number of
+        Just t ->
+            toString t
+
+        Nothing ->
+            ""

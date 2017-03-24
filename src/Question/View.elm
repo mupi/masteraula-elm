@@ -279,6 +279,12 @@ viewQuestion model =
 
         questionsId =
             List.map (\q -> q.question.id) model.questionListEdit.questions
+
+        year_text =
+            StringUtils.maybeIntToString question.year
+
+        source_text =
+            StringUtils.maybeStringToString question.source
     in
         Grid.grid [ Color.background (Color.color Color.Grey Color.S50) ]
             [ Grid.cell
@@ -294,7 +300,16 @@ viewQuestion model =
                         [ css "min-height" "196px"
                         , Options.cs "question_card"
                         ]
-                        [ Markdown.toHtml [] question.question_statement
+                        [ (if (String.length year_text > 0) && (String.length source_text > 0) then
+                            text ("(" ++ year_text ++ " - " ++ source_text ++ ")")
+                           else if String.length year_text > 0 then
+                            text ("(" ++ year_text ++ ")")
+                           else if String.length source_text > 0 then
+                            text ("(" ++ source_text ++ ")")
+                           else
+                            text ""
+                          )
+                        , Markdown.toHtml [] question.question_statement
                         , div [] (List.indexedMap answerView question.answers)
                         , correctAnswerView question.answers
                         , (List.map textToChip question.tags)
@@ -311,20 +326,20 @@ viewQuestion model =
                             , Button.accent
                             , Color.text Color.white
                             , css "font-size" "11px"
-                            , css "width" "33%"
+                            , css "width" "50%"
                             , Options.onClick QuestionBack
                             ]
                             [ Icon.view "arrow_back" [ Icon.size18 ], text " Voltar" ]
-                        , Button.render Mdl
-                            [ 2, 1, question.id ]
-                            model.mdl
-                            [ Button.ripple
-                            , Button.accent
-                            , Color.text Color.white
-                            , css "font-size" "11px"
-                            , css "width" "33%"
-                            ]
-                            [ Icon.view "favorite" [ Icon.size18 ], text " Favoritar" ]
+                          -- , Button.render Mdl
+                          --     [ 2, 1, question.id ]
+                          --     model.mdl
+                          --     [ Button.ripple
+                          --     , Button.accent
+                          --     , Color.text Color.white
+                          --     , css "font-size" "11px"
+                          --     , css "width" "33%"
+                          --     ]
+                          --     [ Icon.view "favorite" [ Icon.size18 ], text " Favoritar" ]
                         , Button.render Mdl
                             [ 2, 2, question.id ]
                             model.mdl
@@ -332,7 +347,7 @@ viewQuestion model =
                             , Button.accent
                             , Color.text Color.white
                             , css "font-size" "11px"
-                            , css "width" "33%"
+                            , css "width" "50%"
                             , if List.member question.id questionsId then
                                 Button.disabled
                               else
@@ -364,24 +379,24 @@ questionCardButton model add question =
                 [ Card.border
                 , Color.background (Color.color Color.Blue Color.S700)
                 ]
-                [ Button.render Mdl
-                    [ 2, 0, question.id ]
-                    model.mdl
-                    [ Button.ripple
-                    , Button.accent
-                    , Color.text Color.white
-                    , css "font-size" "11px"
-                    , css "width" "50%"
-                    ]
-                    [ Icon.view "favorite" [ Icon.size18 ], text " Favoritar" ]
-                , Button.render Mdl
+                [ -- Button.render Mdl
+                  --     [ 2, 0, question.id ]
+                  --     model.mdl
+                  --     [ Button.ripple
+                  --     , Button.accent
+                  --     , Color.text Color.white
+                  --     , css "font-size" "11px"
+                  --     , css "width" "50%"
+                  --     ]
+                  --     [ Icon.view "favorite" [ Icon.size18 ], text " Favoritar" ],
+                  Button.render Mdl
                     [ 2, 1, question.id ]
                     model.mdl
                     [ Button.ripple
                     , Button.accent
                     , Color.text Color.white
                     , css "font-size" "11px"
-                    , css "width" "50%"
+                    , css "width" "100%"
                     , if List.member question.id questionsId then
                         Button.disabled
                       else
@@ -398,17 +413,17 @@ questionCardButton model add question =
                 [ Card.border
                 , Color.background (Color.color Color.Red Color.S700)
                 ]
-                [ Button.render Mdl
-                    [ 2, 0, question.id ]
-                    model.mdl
-                    [ Button.ripple
-                    , Button.accent
-                    , Color.text Color.white
-                    , css "font-size" "11px"
-                    , css "width" "50%"
-                    ]
-                    [ Icon.view "favorite" [ Icon.size18 ], text " Favoritar" ]
-                , Button.render Mdl
+                [ -- Button.render Mdl
+                  --     [ 2, 0, question.id ]
+                  --     model.mdl
+                  --     [ Button.ripple
+                  --     , Button.accent
+                  --     , Color.text Color.white
+                  --     , css "font-size" "11px"
+                  --     , css "width" "50%"
+                  --     ]
+                  --     [ Icon.view "favorite" [ Icon.size18 ], text " Favoritar" ],
+                  Button.render Mdl
                     [ 2, 1, question.id ]
                     model.mdl
                     [ Button.ripple
@@ -416,7 +431,7 @@ questionCardButton model add question =
                     , Options.onClick (QuestionListRemove question)
                     , Color.text Color.white
                     , css "font-size" "11px"
-                    , css "width" "50%"
+                    , css "width" "100%"
                     ]
                     [ Icon.view "remove" [ Icon.size18 ], text " Remover" ]
                 ]
@@ -424,26 +439,42 @@ questionCardButton model add question =
 
 questionCardView : Model -> Bool -> Question -> Grid.Cell Msg
 questionCardView model add question =
-    Grid.cell
-        [ size All 3
-        , Options.css "padding" "8px 8px"
-        ]
-        [ Card.view
-            [ Color.background (Color.white)
-            , css "width" "100%"
-            , Options.cs "mdl-shadow--2dp"
-            , Options.onClick <| QuestionClick question
+    let
+        year_text =
+            StringUtils.maybeIntToString question.year
+
+        source_text =
+            StringUtils.maybeStringToString question.source
+    in
+        Grid.cell
+            [ size All 3
+            , Options.css "padding" "8px 8px"
             ]
-            [ cardTitle question
-            , Card.text
-                [ css "height" "196px"
-                , Options.cs "question_card thumb"
+            [ Card.view
+                [ Color.background (Color.white)
+                , css "width" "100%"
+                , Options.cs "mdl-shadow--2dp"
+                , Options.onClick <| QuestionClick question
                 ]
-                [ Markdown.toHtml [] question.question_statement
+                [ cardTitle question
+                , Card.text
+                    [ css "height" "196px"
+                    , Options.cs "question_card thumb"
+                    ]
+                    [ (if (String.length year_text > 0) && (String.length source_text > 0) then
+                        text ("(" ++ year_text ++ " - " ++ source_text ++ ")")
+                       else if String.length year_text > 0 then
+                        text ("(" ++ year_text ++ ")")
+                       else if String.length source_text > 0 then
+                        text ("(" ++ source_text ++ ")")
+                       else
+                        text ""
+                      )
+                    , Markdown.toHtml [] question.question_statement
+                    ]
+                , (questionCardButton model add question)
                 ]
-            , (questionCardButton model add question)
             ]
-        ]
 
 
 
@@ -545,7 +576,7 @@ questionPageControls model =
                         pageButton model number Button.disabled (text <| toString page.actual)
                     else
                         pageButton model
-                            number
+                            (number + 1)
                             (Options.onClick <| ChangePage (number))
                             (text <| toString number)
                 )
@@ -555,7 +586,7 @@ questionPageControls model =
         Grid.grid [] <|
             (if page.previous /= Nothing then
                 [ pageButton model
-                    prevPage
+                    0
                     (Options.onClick <| ChangePage prevPage)
                     (Icon.view "chevron_left" [ Icon.size18 ])
                 ]
@@ -565,7 +596,7 @@ questionPageControls model =
                 ++ numberButtons
                 ++ (if page.next /= Nothing then
                         [ pageButton model
-                            nextPage
+                            1
                             (Options.onClick <| ChangePage nextPage)
                             (Icon.view "chevron_right" [ Icon.size18 ])
                         ]
@@ -631,7 +662,7 @@ viewQuestionList model =
                 [ Options.css "margin" "0 20px"
                 ]
                 [ text "Veja abaixo as questões que você selecionou. Para baixá-las, digite um nome para a lista no campo acima, clique em salvar e em seguida Fazer Download." ]
-            , Grid.grid [ Options.css "margin-bottom" "60px" ]
+            , Grid.grid [ Options.cs "questions_list_display" ]
                 (List.map (questionCardView model False) <| List.map (\q -> q.question) questionList.questions)
             , if questionList.id == 0 then
                 viewQuestionListButtonNew model
@@ -659,8 +690,9 @@ viewQuestionListButtonNew model =
             [ 5, 2 ]
             model.mdl
             [ Button.ripple
-            , Dialog.openOn "click"
+            , Button.plain
             , Color.text Color.white
+            , Dialog.openOn "click"
             , Options.onClick (Dialog Clear)
             , if List.length model.questionListEdit.questions > 0 then
                 Options.nop
@@ -674,22 +706,25 @@ viewQuestionListButtonNew model =
 
 viewQuestionListButtonEdit : Model -> Html Msg
 viewQuestionListButtonEdit model =
-    div []
+    Options.div
+        [ Color.background Color.primaryDark
+        , Options.cs "questions_list_action"
+        ]
         [ Button.render Mdl
             [ 5, 1 ]
             model.mdl
             [ Button.ripple
-            , Button.colored
-            , Button.raised
+            , Button.plain
+            , Color.text Color.white
             , Options.onClick QuestionListSave
             ]
-            [ text "Salvar" ]
+            [ Icon.i "save", text "Salvar" ]
         , Button.render Mdl
             [ 5, 2 ]
             model.mdl
             [ Button.ripple
-            , Button.colored
-            , Button.raised
+            , Button.plain
+            , Color.text Color.white
             , Dialog.openOn "click"
             , Options.onClick (Dialog Clear)
             , if List.length model.questionListEdit.questions > 0 then
@@ -698,24 +733,24 @@ viewQuestionListButtonEdit model =
                 Button.disabled
               -- , Options.onClick QuestionListClear
             ]
-            [ text "Limpar lista" ]
+            [ Icon.i "delete_forever", text "Limpar lista" ]
         , Button.render Mdl
             [ 5, 3 ]
             model.mdl
             [ Button.ripple
-            , Button.colored
-            , Button.raised
+            , Button.plain
+            , Color.text Color.white
             , Dialog.openOn "click"
             , Options.onClick (Dialog Delete)
               -- , Options.onClick QuestionListDelete
             ]
-            [ text "Apagar lista" ]
+            [ Icon.i "clear", text "Apagar lista" ]
         , Button.render Mdl
             [ 5, 4 ]
             model.mdl
             [ Button.ripple
-            , Button.colored
-            , Button.raised
+            , Button.plain
+            , Color.text Color.white
             , Options.onClick QuestionListCancel
             ]
             [ text "Cancelar" ]
@@ -771,7 +806,9 @@ viewSelectedQuestionList model =
             [ Options.styled h1
                 [ Typo.display1, Typo.center ]
                 [ text questionList.question_list_header ]
-            , Grid.grid []
+            , Grid.grid
+                [ Options.cs "questions_list_display"
+                ]
                 (List.map (questionCardView model False) <| List.map (\q -> q.question) questionList.questions)
             , Options.div
                 [ Color.background Color.primaryDark

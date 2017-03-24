@@ -581,6 +581,14 @@ viewQuestionPage model =
         [ Grid.grid []
             [ Grid.cell [ size All 12 ]
                 [ searchView model ]
+            , Grid.cell [ size All 12 ]
+                [ Options.styled p
+                    [ Typo.subhead, Options.css "margin" "0 10px" ]
+                    [ toString (model.questionPage.count)
+                        ++ " questões encontradas"
+                        |> text
+                    ]
+                ]
             ]
         , Grid.grid []
             (List.map (questionCardView model True) (List.take 12 model.questionPage.questions))

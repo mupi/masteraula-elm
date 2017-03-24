@@ -523,7 +523,7 @@ searchView model =
             , Grid.cell
                 [ size All 6 ]
                 [ Button.render Mdl
-                    [ 4, 1 ]
+                    [ 4, 2 ]
                     model.mdl
                     [ Button.ripple
                     , Button.colored
@@ -615,8 +615,13 @@ viewQuestionPage model =
             , Grid.cell [ size All 12 ]
                 [ Options.styled p
                     [ Typo.subhead, Options.css "margin" "0 10px" ]
-                    [ toString (model.questionPage.count)
-                        ++ " questões encontradas"
+                    [ (if model.questionPage.count == 0 then
+                        "Nenhuma questão encontrada"
+                       else if model.questionPage.count == 1 then
+                        "1 questão encontrada"
+                       else
+                        toString (model.questionPage.count) ++ " questões encontradas"
+                      )
                         |> text
                     ]
                 ]

@@ -37,6 +37,7 @@ questionDecoder =
         |> required "author" User.userDecoder
         |> required "credit_cost" Decode.int
         |> required "tags" (Decode.list Decode.string)
+        |> required "resolution" Decode.string
         |> optional "answers" (Decode.list answerDecoder) []
         |> optional "subjects" (Decode.list subjectDecoder) []
         |> required "education_level" (Decode.nullable Decode.string)

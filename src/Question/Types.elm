@@ -32,7 +32,7 @@ type alias Question =
     , author : User.User
     , credit_cost : Int
     , tags : List String
-    , resolution : String
+    , resolution : Maybe String
     , answers : List Answer
     , subjects : List Subject
     , education_level : Maybe String

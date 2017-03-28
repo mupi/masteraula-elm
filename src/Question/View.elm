@@ -311,7 +311,17 @@ viewQuestion model =
                           )
                         , Markdown.toHtml [] question.question_statement
                         , div [] (List.indexedMap answerView question.answers)
-                        , correctAnswerView question.answers
+                        , if (List.length question.answers) > 0 then
+                            p [] [ correctAnswerView question.answers ]
+                          else
+                            Options.span [] []
+                        , if (question.resolution /= "") then
+                            p []
+                                [ text "RESOLUÇÃO: "
+                                , Markdown.toHtml [] question.resolution
+                                ]
+                          else
+                            Options.span [] []
                         , (List.map textToChip question.tags)
                             |> Options.styled div [ Options.css "margin" "10px 0" ]
                         ]

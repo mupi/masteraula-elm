@@ -15,7 +15,7 @@ import Utils.StringUtils as StringUtils
 
 initQuestion : Question
 initQuestion =
-    Question 0 "" Nothing User.initUser 0 [] [] [] Nothing Nothing Nothing
+    Question 0 "" Nothing User.initUser 0 [] "" [] [] Nothing Nothing Nothing
 
 
 initQuestionPage : QuestionPage
@@ -70,7 +70,7 @@ update msg model global =
             model ! [ fetchGetQuestionFilterSearch questionPage model.tags model.filterId global.token ]
 
         ChangePage page ->
-            if model.tags == [] then
+            if model.tags == [] && model.filterId == 0 then
                 model ! [ Navigation.newUrl <| String.concat [ "#questions/", toString page ] ]
             else
                 model ! [ Navigation.newUrl <| String.concat [ "#questions/tagsearch/", toString page ] ]
@@ -100,7 +100,7 @@ update msg model global =
 
         TagSearchRemove tag ->
             let
-                tags =
+                newTags =
                     List.filterMap
                         (\t ->
                             if t == tag then
@@ -110,7 +110,10 @@ update msg model global =
                         )
                         model.tags
             in
-                { model | tags = tags } ! [ Navigation.newUrl "#questions/tagsearch/1" ]
+                if newTags == [] && model.filterId == 0 then
+                    { model | tags = newTags } ! [ Navigation.newUrl <| "#questions/1" ]
+                else
+                    { model | tags = newTags } ! [ Navigation.newUrl <| "#questions/tagsearch/1" ]
 
         QuestionClick question ->
             model ! [ Navigation.newUrl <| String.concat [ "#question/", toString question.id ] ]
@@ -204,7 +207,10 @@ update msg model global =
                 { model | questionListEdit = initQuestionList } ! [ Navigation.newUrl <| String.concat [ "#questions/questionlists/", toString questionListId ] ]
 
         Filter newFilterId ->
-            { model | filterId = newFilterId } ! [ fetchGetQuestionFilterSearch 1 model.tags newFilterId global.token ]
+            if model.tags == [] && newFilterId == 0 then
+                { model | filterId = newFilterId } ! [ Navigation.newUrl <| "#questions/1" ]
+            else
+                { model | filterId = newFilterId } ! [ Navigation.newUrl <| "#questions/tagsearch/1" ]
 
         OnFetchGetQuestion (Ok question) ->
             { model | question = question, error = "" } ! []

@@ -285,6 +285,9 @@ viewQuestion model =
 
         source_text =
             StringUtils.maybeStringToString question.source
+
+        resolution =
+            StringUtils.maybeStringToString question.resolution
     in
         Grid.grid [ Color.background (Color.color Color.Grey Color.S50) ]
             [ Grid.cell
@@ -315,10 +318,10 @@ viewQuestion model =
                             p [] [ correctAnswerView question.answers ]
                           else
                             Options.span [] []
-                        , if (question.resolution /= "") then
+                        , if (resolution /= "") then
                             p []
                                 [ text "RESOLUÇÃO: "
-                                , Markdown.toHtml [] question.resolution
+                                , Markdown.toHtml [] resolution
                                 ]
                           else
                             Options.span [] []

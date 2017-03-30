@@ -21,6 +21,9 @@ import Material
 port setLocalStorage : LocalStorage -> Cmd msg
 
 
+port displayDialog : String -> Cmd msg
+
+
 init : Maybe LocalStorage -> Location -> ( Model, Cmd Msg )
 init savedStorage location =
     let
@@ -226,8 +229,18 @@ update msg model =
                             model.localStorage
                     in
                         { localStorage | questionList = updatedQuestion.questionListEdit }
+
+                cmds =
+                    Cmd.batch <|
+                        [ setLocalStorage newStorage, Cmd.map QuestionMsg cmd ]
+                            ++ case subMsg of
+                                Question.Dialog a ->
+                                    [ displayDialog "elm-mdl-singleton-dialog" ]
+
+                                _ ->
+                                    []
             in
-                ( { model | question = updatedQuestion, localStorage = newStorage }, Cmd.batch [ setLocalStorage newStorage, Cmd.map QuestionMsg cmd ] )
+                ( { model | question = updatedQuestion, localStorage = newStorage }, cmds )
 
         OnLocationChange location ->
             let

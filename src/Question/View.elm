@@ -710,7 +710,6 @@ viewQuestionListButtonNew model =
             [ Button.ripple
             , Button.plain
             , Color.text Color.white
-            , Dialog.openOn "click"
             , Options.onClick (Dialog Clear)
             , if List.length model.questionListEdit.questions > 0 then
                 Options.nop
@@ -743,7 +742,6 @@ viewQuestionListButtonEdit model =
             [ Button.ripple
             , Button.plain
             , Color.text Color.white
-            , Dialog.openOn "click"
             , Options.onClick (Dialog Clear)
             , if List.length model.questionListEdit.questions > 0 then
                 Options.nop
@@ -758,7 +756,6 @@ viewQuestionListButtonEdit model =
             [ Button.ripple
             , Button.plain
             , Color.text Color.white
-            , Dialog.openOn "click"
             , Options.onClick (Dialog Delete)
               -- , Options.onClick QuestionListDelete
             ]

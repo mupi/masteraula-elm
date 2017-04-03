@@ -29,25 +29,45 @@ drawerLink : Model -> Html Msg
 drawerLink model =
     Layout.navigation
         []
-        [ Layout.link
+        ([ Layout.link
             [ Layout.href "https://goo.gl/forms/NckNklDbJM2uBf3I2"
             ]
             [ Icon.view "add_circle_outline" [ Icon.size18 ], text " Sugerir questão" ]
-        , Layout.link
-            [ Layout.href "#questions/1"
+         , Layout.link
+            [ Options.onClick <| DrawerLinkClick SelectQuestions
             ]
             [ Icon.view "view_module" [ Icon.size18 ], text " Selecionar Questões" ]
-        , Layout.link
-            [ Layout.href "#questions/questionlist/"
+         , Layout.link
+            [ Options.onClick <| DrawerLinkClick SelectedQuestions
             ]
-            [ Icon.view "list" [ Icon.size18 ], text " Baixar questões" ]
-        , Layout.link
-            [ Layout.href "#questions/user_lists/1"
+            [ Icon.view "list" [ Icon.size18 ], text " Questões Selecionadas" ]
+         , Layout.link
+            [ Options.onClick <| DrawerLinkClick MineLists
             ]
             [ Icon.view "favorite" [ Icon.size18 ]
             , text " Minhas listas"
             ]
-        , Layout.row []
+         ]
+            ++ if model.selectingQuestions then
+                filters model
+               else
+                []
+        )
+
+
+filters : Model -> List (Html Msg)
+filters model =
+    let
+        levelFilters =
+            model.filters.levelFilters
+
+        subjectFilters =
+            model.filters.subjectFilters
+
+        subjects =
+            model.subjects
+    in
+        [ Layout.row []
             [ Layout.title
                 []
                 [ text "Filtros" ]
@@ -63,49 +83,88 @@ drawerLink model =
                 ]
             , Card.text [ Color.text Color.white ]
                 [ div [ class "radio_level" ]
-                    [ Toggles.radio Mdl
-                        [ 0 ]
+                    [ Toggles.checkbox Mdl
+                        [ 8, 0 ]
                         model.mdl
-                        [ Toggles.value (0 == model.filterId)
-                        , Toggles.group "QuestionLevel"
+                        [ Toggles.value (levelFilters == [])
+                        , Toggles.group "FilterLevel"
                         , Toggles.ripple
-                        , Options.onToggle (Filter 0)
+                        , Options.onToggle (FilterLevel AllLevel)
                         ]
                         [ text "Todos" ]
                     ]
                 , div [ class "radio_level" ]
-                    [ Toggles.radio Mdl
-                        [ 1 ]
+                    [ Toggles.checkbox Mdl
+                        [ 8, 1 ]
                         model.mdl
-                        [ Toggles.value (1 == model.filterId)
-                        , Toggles.group "QuestionLevel"
+                        [ Toggles.value (List.member EasyLevel levelFilters)
+                        , Toggles.group "FilterLevel"
                         , Toggles.ripple
-                        , Options.onToggle (Filter 1)
+                        , Options.onToggle (FilterLevel EasyLevel)
                         ]
                         [ text "Fácil" ]
                     ]
                 , div [ class "radio_level" ]
-                    [ Toggles.radio Mdl
-                        [ 2 ]
+                    [ Toggles.checkbox Mdl
+                        [ 8, 2 ]
                         model.mdl
-                        [ Toggles.value (2 == model.filterId)
-                        , Toggles.group "QuestionLevel"
+                        [ Toggles.value (List.member MediumLevel levelFilters)
+                        , Toggles.group "FilterLevel"
                         , Toggles.ripple
-                        , Options.onToggle (Filter 2)
+                        , Options.onToggle (FilterLevel MediumLevel)
                         ]
                         [ text "Médio" ]
                     ]
                 , div [ class "radio_level" ]
-                    [ Toggles.radio Mdl
-                        [ 3 ]
+                    [ Toggles.checkbox Mdl
+                        [ 8, 3 ]
                         model.mdl
-                        [ Toggles.value (3 == model.filterId)
-                        , Toggles.group "QuestionLevel"
+                        [ Toggles.value (List.member HardLevel levelFilters)
+                        , Toggles.group "FilterLevel"
                         , Toggles.ripple
-                        , Options.onToggle (Filter 3)
+                        , Options.onToggle (FilterLevel HardLevel)
                         ]
                         [ text "Difícil" ]
                     ]
+                ]
+            ]
+        , Card.view
+            [ Color.background (Color.color Color.BlueGrey Color.S300)
+            , css "width" "192px"
+            , css "margin" "0 auto"
+            ]
+            [ Card.title []
+                [ Card.head [ Color.text Color.white ]
+                    [ text "Disciplinas" ]
+                ]
+            , Card.text [ Color.text Color.white ]
+                [ div [ class "radio_level" ]
+                    ([ Toggles.checkbox Mdl
+                        [ 9, 0 ]
+                        model.mdl
+                        [ Toggles.value (subjectFilters == [])
+                        , Toggles.group "FilterSubject"
+                        , Toggles.ripple
+                        , Options.onToggle (FilterSubject AllSubject)
+                        ]
+                        [ text "Todos" ]
+                     ]
+                        ++ List.indexedMap
+                            (\index subject ->
+                                div [ class "radio_level" ]
+                                    [ Toggles.checkbox Mdl
+                                        [ 9, index + 1 ]
+                                        model.mdl
+                                        [ Toggles.value (List.member subject.slug subjectFilters)
+                                        , Toggles.group "FilterSubject"
+                                        , Toggles.ripple
+                                        , Options.onToggle (FilterSubject (StringSubject subject.slug))
+                                        ]
+                                        [ text subject.name ]
+                                    ]
+                            )
+                            subjects
+                    )
                 ]
             ]
         ]
@@ -249,7 +308,7 @@ cardTitle question =
                     else
                         case List.head question.subjects of
                             Just s ->
-                                s.subject_name
+                                s.name
 
                             Nothing ->
                                 ""
@@ -551,7 +610,7 @@ searchView model =
             , Options.css "margin-top" "-25px"
             ]
           <|
-            List.map (\tag -> searchTagChip tag) model.tags
+            List.map (\tag -> searchTagChip tag) model.filters.tags
         ]
 
 

@@ -45,7 +45,7 @@ removeSpecialCharacters text =
 
 tagFormatter : String -> String
 tagFormatter tag =
-    removeSpecialCharacters <| spaceToTrace <| removeAccents tag
+    removeSpecialCharacters <| spaceToTrace <| removeAccents <| String.toLower tag
 
 
 monthToInt : Month -> Int

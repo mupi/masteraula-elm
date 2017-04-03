@@ -15,9 +15,11 @@ import Utils.StringUtils exposing (..)
 
 subjectDecoder : Decode.Decoder Subject
 subjectDecoder =
-    Decode.map2 Subject
+    Decode.map3
+        Subject
         (field "id" Decode.int)
         (field "subject_name" Decode.string)
+        (field "slug" Decode.string)
 
 
 answerDecoder : Decode.Decoder Answer
@@ -97,6 +99,33 @@ headerBuild token =
 -- Question
 
 
+urlSubject : String
+urlSubject =
+    String.concat [ Config.baseUrl, "subjects/" ]
+
+
+getSubject : Maybe String -> Http.Request (List Subject)
+getSubject token =
+    Http.request
+        { method = "GET"
+        , headers = (headerBuild token)
+        , url = urlSubject
+        , body = Http.emptyBody
+        , expect = (Http.expectJson (Decode.list subjectDecoder))
+        , timeout = Nothing
+        , withCredentials = False
+        }
+
+
+fetchGetSubject : Maybe String -> Cmd Msg
+fetchGetSubject token =
+    Http.send OnFetchGetSubjects (getSubject token)
+
+
+
+-- Question
+
+
 urlQuestion : QuestionId -> String
 urlQuestion questionId =
     String.concat [ Config.baseUrl, "questions/", (toString questionId), "/" ]
@@ -167,39 +196,58 @@ urlSearchQuestion baseUrl tags =
         )
 
 
-urlFilterSearchQuestion : String -> Int -> String
-urlFilterSearchQuestion baseUrl levelFilter =
+urlFilterSearchQuestion : String -> List LevelFilterType -> List String -> String
+urlFilterSearchQuestion baseUrl levelFilters subjectFilters =
     String.concat
-        [ baseUrl
-        , case levelFilter of
-            1 ->
-                "&level=Facil"
+        ([ baseUrl ]
+            ++ List.map
+                (\levelFilter ->
+                    case levelFilter of
+                        EasyLevel ->
+                            "&level=Facil"
 
-            2 ->
-                "&level=Medio"
+                        MediumLevel ->
+                            "&level=Medio"
 
-            3 ->
-                "&level=Dificil"
+                        HardLevel ->
+                            "&level=Dificil"
 
-            _ ->
-                ""
-        ]
+                        _ ->
+                            ""
+                )
+                levelFilters
+            ++ List.map
+                (\subjectFilter ->
+                    String.concat [ "&subjects=", tagFormatter subjectFilter ]
+                )
+                subjectFilters
+        )
 
 
-urlSearch : PageNumber -> List String -> Int -> String
-urlSearch page tags levelFilter =
-    if List.length tags > 0 then
-        urlFilterSearchQuestion (urlSearchQuestion (urlBaseSearch page) tags) levelFilter
-    else
-        urlFilterSearchQuestion (urlBaseSearch page) levelFilter
+urlSearch : PageNumber -> Filter -> String
+urlSearch page filters =
+    let
+        tags =
+            filters.tags
+
+        levelFilters =
+            filters.levelFilters
+
+        subjectFilters =
+            filters.subjectFilters
+    in
+        if List.length tags > 0 then
+            urlFilterSearchQuestion (urlSearchQuestion (urlBaseSearch page) tags) levelFilters subjectFilters
+        else
+            urlFilterSearchQuestion (urlBaseSearch page) levelFilters subjectFilters
 
 
-getQuestionFilterSearch : PageNumber -> List String -> Int -> Maybe String -> Http.Request QuestionPage
-getQuestionFilterSearch page tags levelFilter token =
+getQuestionFilterSearch : PageNumber -> Filter -> Maybe String -> Http.Request QuestionPage
+getQuestionFilterSearch page filters token =
     Http.request
         { method = "GET"
         , headers = (headerBuild token)
-        , url = (urlSearch page tags levelFilter)
+        , url = (urlSearch page filters)
         , body = Http.emptyBody
         , expect = (Http.expectJson <| questionPageDecoder page)
         , timeout = Nothing
@@ -207,9 +255,9 @@ getQuestionFilterSearch page tags levelFilter token =
         }
 
 
-fetchGetQuestionFilterSearch : PageNumber -> List String -> Int -> Maybe String -> Cmd Msg
-fetchGetQuestionFilterSearch page tags levelFilter token =
-    Http.send OnFetchGetQuestionFilterSearch (getQuestionFilterSearch page tags levelFilter token)
+fetchGetQuestionFilterSearch : PageNumber -> Filter -> Maybe String -> Cmd Msg
+fetchGetQuestionFilterSearch page filters token =
+    Http.send OnFetchGetQuestionFilterSearch (getQuestionFilterSearch page filters token)
 
 
 

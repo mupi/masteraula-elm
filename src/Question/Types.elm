@@ -14,11 +14,14 @@ type alias Model =
     , questionListPage : QuestionListPage
     , -- Search
       currentTag : String
-    , tags : List String
-    , filterId : Int
+    , filters : Filter
+    , subjects : List Subject
     , -- List docx file generation
       generateAfterSave : Bool
-    , error : String
+    , -- DrawerControl
+      selectingQuestions : Bool
+    , -- MDL
+      error : String
     , dialog : DialogType
     , snackbar : Snackbar.Model Int
     , mdl : Material.Model
@@ -41,9 +44,17 @@ type alias Question =
     }
 
 
+type alias Filter =
+    { levelFilters : List LevelFilterType
+    , subjectFilters : List String
+    , tags : List String
+    }
+
+
 type alias Subject =
     { id : Int
-    , subject_name : String
+    , name : String
+    , slug : String
     }
 
 
@@ -101,12 +112,31 @@ type DialogType
     | Clear
 
 
+type LevelFilterType
+    = AllLevel
+    | EasyLevel
+    | MediumLevel
+    | HardLevel
+
+
+type SubjectFilterType
+    = StringSubject String
+    | AllSubject
+
+
+type DrawerLink
+    = MineLists
+    | SelectQuestions
+    | SelectedQuestions
+
+
 type Msg
     = GetQuestion QuestionId
     | GetQuestionPage PageNumber
     | GetQuestionList QuestionId
     | GetMineQuestionListPage PageNumber
     | GetQuestionTagSearch PageNumber
+    | DrawerLinkClick DrawerLink
     | ChangePage PageNumber
       -- Tags
     | TagSearchInput String
@@ -128,7 +158,8 @@ type Msg
     | QuestionListClick Int
     | QuestionListEdit QuestionList
       -- Filter
-    | Filter Int
+    | FilterLevel LevelFilterType
+    | FilterSubject SubjectFilterType
       -- Fetch
     | OnFetchGetQuestion (Result Http.Error Question)
     | OnFetchGetQuestionPage (Result Http.Error QuestionPage)
@@ -138,6 +169,7 @@ type Msg
     | OnFetchDeleteQuestionList (Result Http.Error String)
     | OnFetchGetMineQuestionListPage (Result Http.Error QuestionListPage)
     | OnFetchGetQuestionList (Result Http.Error QuestionList)
+    | OnFetchGetSubjects (Result Http.Error (List Subject))
     | Dialog DialogType
     | NoOp
     | Snackbar (Snackbar.Msg Int)

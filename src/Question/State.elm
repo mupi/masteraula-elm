@@ -35,7 +35,7 @@ initQuestionList =
 
 initFilters : Filter
 initFilters =
-    Filter [] [] []
+    Filter [] [] [] []
 
 
 init : Model
@@ -59,7 +59,14 @@ init =
 
 emptyFilters : Filter -> Bool
 emptyFilters filters =
-    filters.tags == [] && filters.levelFilters == [] && filters.subjectFilters == []
+    filters.tags
+        == []
+        && filters.levelFilters
+        == []
+        && filters.subjectFilters
+        == []
+        && filters.educationLevelFilters
+        == []
 
 
 update : Msg -> Model -> App.Global -> ( Model, Cmd Msg )
@@ -325,6 +332,35 @@ update msg model global =
                             model.filters
                     in
                         { filters | subjectFilters = newsubjectFilters }
+            in
+                if emptyFilters newFilters then
+                    { model | filters = newFilters } ! [ Navigation.newUrl <| "#questions/1" ]
+                else
+                    { model | filters = newFilters } ! [ Navigation.newUrl <| "#questions/tagsearch/1" ]
+
+        FilterEducationLevel newFilter ->
+            let
+                neweducationLevelFilter =
+                    let
+                        educationLevelFilters =
+                            model.filters.educationLevelFilters
+                    in
+                        case newFilter of
+                            AllEducationLevel ->
+                                []
+
+                            StringEducationLevel educationLevelFilter ->
+                                if List.member educationLevelFilter educationLevelFilters then
+                                    List.filter (\level -> level /= educationLevelFilter) educationLevelFilters
+                                else
+                                    educationLevelFilter :: educationLevelFilters
+
+                newFilters =
+                    let
+                        filters =
+                            model.filters
+                    in
+                        { filters | educationLevelFilters = neweducationLevelFilter }
             in
                 if emptyFilters newFilters then
                     { model | filters = newFilters } ! [ Navigation.newUrl <| "#questions/1" ]

@@ -185,47 +185,8 @@ urlBaseSearch page =
     String.concat [ Config.baseUrl, "search/question/?page=", toString page ]
 
 
-urlSearchQuestion : String -> List String -> String
-urlSearchQuestion baseUrl tags =
-    String.concat
-        (baseUrl
-            :: "&text__content="
-            :: List.map
-                (\t -> String.concat [ tagFormatter t, "," ])
-                tags
-        )
-
-
-urlFilterSearchQuestion : String -> List LevelFilterType -> List String -> String
-urlFilterSearchQuestion baseUrl levelFilters subjectFilters =
-    String.concat
-        ([ baseUrl ]
-            ++ List.map
-                (\levelFilter ->
-                    case levelFilter of
-                        EasyLevel ->
-                            "&level=Facil"
-
-                        MediumLevel ->
-                            "&level=Medio"
-
-                        HardLevel ->
-                            "&level=Dificil"
-
-                        _ ->
-                            ""
-                )
-                levelFilters
-            ++ List.map
-                (\subjectFilter ->
-                    String.concat [ "&subjects=", tagFormatter subjectFilter ]
-                )
-                subjectFilters
-        )
-
-
-urlSearch : PageNumber -> Filter -> String
-urlSearch page filters =
+urlFilterSearchQuestion : String -> Filter -> String
+urlFilterSearchQuestion baseUrl filters =
     let
         tags =
             filters.tags
@@ -235,11 +196,52 @@ urlSearch page filters =
 
         subjectFilters =
             filters.subjectFilters
+
+        educationLevelFilters =
+            filters.educationLevelFilters
     in
-        if List.length tags > 0 then
-            urlFilterSearchQuestion (urlSearchQuestion (urlBaseSearch page) tags) levelFilters subjectFilters
-        else
-            urlFilterSearchQuestion (urlBaseSearch page) levelFilters subjectFilters
+        String.concat
+            ([ baseUrl ]
+                ++ if List.length tags > 0 then
+                    ([ "&text__content=" ]
+                        ++ List.map
+                            (\t -> String.concat [ tagFormatter t, "," ])
+                            tags
+                    )
+                   else
+                    []
+                        ++ List.map
+                            (\levelFilter ->
+                                case levelFilter of
+                                    EasyLevel ->
+                                        "&level=Facil"
+
+                                    MediumLevel ->
+                                        "&level=Medio"
+
+                                    HardLevel ->
+                                        "&level=Dificil"
+
+                                    _ ->
+                                        ""
+                            )
+                            levelFilters
+                        ++ List.map
+                            (\subjectFilter ->
+                                String.concat [ "&subjects=", tagFormatter subjectFilter ]
+                            )
+                            subjectFilters
+                        ++ List.map
+                            (\educationLevelFilter ->
+                                String.concat [ "&education_level=", tagFormatter educationLevelFilter ]
+                            )
+                            educationLevelFilters
+            )
+
+
+urlSearch : PageNumber -> Filter -> String
+urlSearch page filters =
+    urlFilterSearchQuestion (urlBaseSearch page) filters
 
 
 getQuestionFilterSearch : PageNumber -> Filter -> Maybe String -> Http.Request QuestionPage

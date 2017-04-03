@@ -2,7 +2,6 @@ module Question.View exposing (..)
 
 import Html exposing (..)
 import Date
-import Html.Attributes exposing (id, type_, for, value, class, href)
 import Html.Events exposing (..)
 import Question.Types exposing (..)
 import Markdown
@@ -64,6 +63,9 @@ filters model =
         subjectFilters =
             model.filters.subjectFilters
 
+        educationLevelFilters =
+            model.filters.educationLevelFilters
+
         subjects =
             model.subjects
     in
@@ -82,7 +84,7 @@ filters model =
                     [ text "Grau de dificuldade" ]
                 ]
             , Card.text [ Color.text Color.white ]
-                [ div [ class "radio_level" ]
+                [ Options.div [ Options.cs "radio_level" ]
                     [ Toggles.checkbox Mdl
                         [ 8, 0 ]
                         model.mdl
@@ -90,10 +92,11 @@ filters model =
                         , Toggles.group "FilterLevel"
                         , Toggles.ripple
                         , Options.onToggle (FilterLevel AllLevel)
+                        , Options.cs "question_radio_span"
                         ]
                         [ text "Todos" ]
                     ]
-                , div [ class "radio_level" ]
+                , Options.div [ Options.cs "radio_level" ]
                     [ Toggles.checkbox Mdl
                         [ 8, 1 ]
                         model.mdl
@@ -101,10 +104,11 @@ filters model =
                         , Toggles.group "FilterLevel"
                         , Toggles.ripple
                         , Options.onToggle (FilterLevel EasyLevel)
+                        , Options.cs "question_radio_span"
                         ]
                         [ text "Fácil" ]
                     ]
-                , div [ class "radio_level" ]
+                , Options.div [ Options.cs "radio_level" ]
                     [ Toggles.checkbox Mdl
                         [ 8, 2 ]
                         model.mdl
@@ -112,10 +116,11 @@ filters model =
                         , Toggles.group "FilterLevel"
                         , Toggles.ripple
                         , Options.onToggle (FilterLevel MediumLevel)
+                        , Options.cs "question_radio_span"
                         ]
                         [ text "Médio" ]
                     ]
-                , div [ class "radio_level" ]
+                , Options.div [ Options.cs "radio_level" ]
                     [ Toggles.checkbox Mdl
                         [ 8, 3 ]
                         model.mdl
@@ -123,6 +128,7 @@ filters model =
                         , Toggles.group "FilterLevel"
                         , Toggles.ripple
                         , Options.onToggle (FilterLevel HardLevel)
+                        , Options.cs "question_radio_span"
                         ]
                         [ text "Difícil" ]
                     ]
@@ -138,34 +144,77 @@ filters model =
                     [ text "Disciplinas" ]
                 ]
             , Card.text [ Color.text Color.white ]
-                [ div [ class "radio_level" ]
-                    ([ Toggles.checkbox Mdl
+                ([ Options.div [ Options.cs "radio_level" ]
+                    [ Toggles.checkbox Mdl
                         [ 9, 0 ]
                         model.mdl
                         [ Toggles.value (subjectFilters == [])
                         , Toggles.group "FilterSubject"
                         , Toggles.ripple
                         , Options.onToggle (FilterSubject AllSubject)
+                        , Options.cs "question_radio_span"
                         ]
                         [ text "Todos" ]
-                     ]
-                        ++ List.indexedMap
-                            (\index subject ->
-                                div [ class "radio_level" ]
-                                    [ Toggles.checkbox Mdl
-                                        [ 9, index + 1 ]
-                                        model.mdl
-                                        [ Toggles.value (List.member subject.slug subjectFilters)
-                                        , Toggles.group "FilterSubject"
-                                        , Toggles.ripple
-                                        , Options.onToggle (FilterSubject (StringSubject subject.slug))
-                                        ]
-                                        [ text subject.name ]
+                    ]
+                 ]
+                    ++ List.indexedMap
+                        (\index subject ->
+                            Options.div [ Options.cs "radio_level" ]
+                                [ Toggles.checkbox Mdl
+                                    [ 9, index + 1 ]
+                                    model.mdl
+                                    [ Toggles.value (List.member subject.slug subjectFilters)
+                                    , Toggles.group "FilterSubject"
+                                    , Toggles.ripple
+                                    , Options.onToggle (FilterSubject (StringSubject subject.slug))
+                                    , Options.cs "question_radio_span"
                                     ]
-                            )
-                            subjects
-                    )
+                                    [ text subject.name ]
+                                ]
+                        )
+                        subjects
+                )
+            ]
+        , Card.view
+            [ Color.background (Color.color Color.BlueGrey Color.S300)
+            , css "width" "192px"
+            , css "margin" "0 auto"
+            ]
+            [ Card.title []
+                [ Card.head [ Color.text Color.white ]
+                    [ text "Nível de educação" ]
                 ]
+            , Card.text [ Color.text Color.white ]
+                ([ Options.div [ Options.cs "radio_level" ]
+                    [ Toggles.checkbox Mdl
+                        [ 10, 0 ]
+                        model.mdl
+                        [ Toggles.value (educationLevelFilters == [])
+                        , Toggles.group "FilterEducationLevel"
+                        , Toggles.ripple
+                        , Options.onToggle (FilterEducationLevel AllEducationLevel)
+                        , Options.cs "question_radio_span"
+                        ]
+                        [ text "Todos" ]
+                    ]
+                 ]
+                    ++ List.indexedMap
+                        (\index educationLevel ->
+                            Options.div [ Options.cs "radio_level" ]
+                                [ Toggles.checkbox Mdl
+                                    [ 10, index + 1 ]
+                                    model.mdl
+                                    [ Toggles.value (List.member educationLevel educationLevelFilters)
+                                    , Toggles.group "FilterEducationLevel"
+                                    , Toggles.ripple
+                                    , Options.onToggle (FilterEducationLevel (StringEducationLevel educationLevel))
+                                    , Options.cs "question_radio_span"
+                                    ]
+                                    [ text educationLevel ]
+                                ]
+                        )
+                        [ "Ensino Médio", "Fundamental II - anos finais", "Fundamental II - anos iniciais", "Ensino Superior" ]
+                )
             ]
         ]
 

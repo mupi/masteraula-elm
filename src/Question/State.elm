@@ -51,6 +51,7 @@ init =
         []
         False
         False
+        False
         ""
         Delete
         Snackbar.model
@@ -73,7 +74,10 @@ update : Msg -> Model -> App.Global -> ( Model, Cmd Msg )
 update msg model global =
     case msg of
         GetQuestion questionId ->
-            { model | selectingQuestions = False } ! [ fetchGetQuestion questionId global.token ]
+            if model.question.id == questionId then
+                { model | selectingQuestions = False } ! []
+            else
+                { model | selectingQuestions = False, redirected = True } ! [ fetchGetQuestion questionId global.token ]
 
         GetQuestionPage questionPage ->
             let
@@ -190,7 +194,7 @@ update msg model global =
                     { model | filters = newFilters } ! [ Navigation.newUrl <| "#questions/tagsearch/1" ]
 
         QuestionClick question ->
-            model ! [ Navigation.newUrl <| String.concat [ "#question/", toString question.id ] ]
+            { model | question = question } ! [ Navigation.newUrl <| String.concat [ "#question/", toString question.id ] ]
 
         QuestionBack ->
             model ! [ Navigation.back 1 ]
@@ -368,7 +372,10 @@ update msg model global =
                     { model | filters = newFilters } ! [ Navigation.newUrl <| "#questions/tagsearch/1" ]
 
         OnFetchGetQuestion (Ok question) ->
-            { model | question = question, error = "" } ! []
+            if model.redirected then
+                { model | question = question, redirected = False } ! []
+            else
+                { model | question = question, error = "" } ! [ Navigation.newUrl <| String.concat [ "#question/", toString question.id ] ]
 
         OnFetchGetQuestion (Err error) ->
             let

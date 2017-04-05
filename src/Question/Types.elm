@@ -21,8 +21,10 @@ type alias Model =
     , -- DrawerControl
       selectingQuestions : Bool
     , -- MDL
-      error : String
-    , dialog : DialogType
+      redirected : Bool
+    , error : String
+    , --Mdl
+      dialog : DialogType
     , snackbar : Snackbar.Model Int
     , mdl : Material.Model
     }

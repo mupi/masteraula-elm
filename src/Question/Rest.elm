@@ -15,9 +15,11 @@ import Utils.StringUtils exposing (..)
 
 subjectDecoder : Decode.Decoder Subject
 subjectDecoder =
-    Decode.map2 Subject
+    Decode.map3
+        Subject
         (field "id" Decode.int)
         (field "subject_name" Decode.string)
+        (field "slug" Decode.string)
 
 
 answerDecoder : Decode.Decoder Answer
@@ -97,6 +99,33 @@ headerBuild token =
 -- Question
 
 
+urlSubject : String
+urlSubject =
+    String.concat [ Config.baseUrl, "subjects/" ]
+
+
+getSubject : Maybe String -> Http.Request (List Subject)
+getSubject token =
+    Http.request
+        { method = "GET"
+        , headers = (headerBuild token)
+        , url = urlSubject
+        , body = Http.emptyBody
+        , expect = (Http.expectJson (Decode.list subjectDecoder))
+        , timeout = Nothing
+        , withCredentials = False
+        }
+
+
+fetchGetSubject : Maybe String -> Cmd Msg
+fetchGetSubject token =
+    Http.send OnFetchGetSubjects (getSubject token)
+
+
+
+-- Question
+
+
 urlQuestion : QuestionId -> String
 urlQuestion questionId =
     String.concat [ Config.baseUrl, "questions/", (toString questionId), "/" ]
@@ -156,50 +185,71 @@ urlBaseSearch page =
     String.concat [ Config.baseUrl, "search/question/?page=", toString page ]
 
 
-urlSearchQuestion : String -> List String -> String
-urlSearchQuestion baseUrl tags =
-    String.concat
-        (baseUrl
-            :: "&text__content="
-            :: List.map
-                (\t -> String.concat [ tagFormatter t, "," ])
-                tags
-        )
+urlFilterSearchQuestion : String -> Filter -> String
+urlFilterSearchQuestion baseUrl filters =
+    let
+        tags =
+            filters.tags
+
+        levelFilters =
+            filters.levelFilters
+
+        subjectFilters =
+            filters.subjectFilters
+
+        educationLevelFilters =
+            filters.educationLevelFilters
+    in
+        String.concat
+            ([ baseUrl ]
+                ++ if List.length tags > 0 then
+                    ([ "&text__content=" ]
+                        ++ List.map
+                            (\t -> String.concat [ tagFormatter t, "," ])
+                            tags
+                    )
+                   else
+                    []
+                        ++ List.map
+                            (\levelFilter ->
+                                case levelFilter of
+                                    EasyLevel ->
+                                        "&level=Facil"
+
+                                    MediumLevel ->
+                                        "&level=Medio"
+
+                                    HardLevel ->
+                                        "&level=Dificil"
+
+                                    _ ->
+                                        ""
+                            )
+                            levelFilters
+                        ++ List.map
+                            (\subjectFilter ->
+                                String.concat [ "&subjects=", tagFormatter subjectFilter ]
+                            )
+                            subjectFilters
+                        ++ List.map
+                            (\educationLevelFilter ->
+                                String.concat [ "&education_level=", tagFormatter educationLevelFilter ]
+                            )
+                            educationLevelFilters
+            )
 
 
-urlFilterSearchQuestion : String -> Int -> String
-urlFilterSearchQuestion baseUrl levelFilter =
-    String.concat
-        [ baseUrl
-        , case levelFilter of
-            1 ->
-                "&level=Facil"
-
-            2 ->
-                "&level=Medio"
-
-            3 ->
-                "&level=Dificil"
-
-            _ ->
-                ""
-        ]
+urlSearch : PageNumber -> Filter -> String
+urlSearch page filters =
+    urlFilterSearchQuestion (urlBaseSearch page) filters
 
 
-urlSearch : PageNumber -> List String -> Int -> String
-urlSearch page tags levelFilter =
-    if List.length tags > 0 then
-        urlFilterSearchQuestion (urlSearchQuestion (urlBaseSearch page) tags) levelFilter
-    else
-        urlFilterSearchQuestion (urlBaseSearch page) levelFilter
-
-
-getQuestionFilterSearch : PageNumber -> List String -> Int -> Maybe String -> Http.Request QuestionPage
-getQuestionFilterSearch page tags levelFilter token =
+getQuestionFilterSearch : PageNumber -> Filter -> Maybe String -> Http.Request QuestionPage
+getQuestionFilterSearch page filters token =
     Http.request
         { method = "GET"
         , headers = (headerBuild token)
-        , url = (urlSearch page tags levelFilter)
+        , url = (urlSearch page filters)
         , body = Http.emptyBody
         , expect = (Http.expectJson <| questionPageDecoder page)
         , timeout = Nothing
@@ -207,9 +257,9 @@ getQuestionFilterSearch page tags levelFilter token =
         }
 
 
-fetchGetQuestionFilterSearch : PageNumber -> List String -> Int -> Maybe String -> Cmd Msg
-fetchGetQuestionFilterSearch page tags levelFilter token =
-    Http.send OnFetchGetQuestionFilterSearch (getQuestionFilterSearch page tags levelFilter token)
+fetchGetQuestionFilterSearch : PageNumber -> Filter -> Maybe String -> Cmd Msg
+fetchGetQuestionFilterSearch page filters token =
+    Http.send OnFetchGetQuestionFilterSearch (getQuestionFilterSearch page filters token)
 
 
 

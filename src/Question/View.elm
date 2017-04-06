@@ -18,6 +18,7 @@ import Material.Options as Options exposing (css)
 import Material.Grid exposing (grid, cell, size, offset, Device(..))
 import Material.Typography as Typo
 import Material.Dialog as Dialog
+import Material.Spinner as Loading
 import Material.Snackbar as Snackbar
 import Material.Color as Color
 import Utils.MDLUtils as Utils
@@ -282,7 +283,12 @@ dialog model =
 view : (Model -> Html Msg) -> Model -> Html Msg
 view method model =
     div []
-        [ method model
+        [ (if model.loading then
+            Options.div [ Options.cs "question_loader_div" ] [ Options.div [ Options.cs "question_loader" ] [ Loading.spinner [ Loading.active model.loading ] ] ]
+           else
+            span [] []
+          )
+        , method model
         , Snackbar.view model.snackbar |> Html.map Snackbar
         , dialog model
         ]

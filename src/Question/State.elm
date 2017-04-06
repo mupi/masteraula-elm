@@ -25,7 +25,7 @@ initQuestionPage =
 
 initQuestionListPage : QuestionListPage
 initQuestionListPage =
-    QuestionListPage 0 1 Nothing Nothing []
+    QuestionListPage 0 0 Nothing Nothing []
 
 
 initQuestionList : QuestionList
@@ -49,6 +49,7 @@ init =
         ""
         initFilters
         []
+        False
         False
         False
         False
@@ -80,15 +81,16 @@ update msg model global =
                 { model | selectingQuestions = False, redirected = True } ! [ fetchGetQuestion questionId global.token ]
 
         GetQuestionPage questionPage ->
-            let
-                newFilters =
-                    let
-                        filters =
-                            model.filters
-                    in
-                        { filters | tags = [], levelFilters = [], subjectFilters = [] }
-            in
-                { model | filters = newFilters, selectingQuestions = True } ! [ fetchGetQuestionPage questionPage global.token, fetchGetSubject global.token ]
+            if model.questionPage.actual == questionPage && emptyFilters model.filters then
+                model ! []
+            else
+                { model | filters = initFilters, selectingQuestions = True, redirected = True, loading = True } ! [ fetchGetQuestionPage questionPage global.token ]
+
+        GetQuestionPageSearch questionPage ->
+            if model.questionPage.actual == questionPage && not (emptyFilters model.filters) then
+                model ! []
+            else
+                { model | selectingQuestions = True, redirected = True, loading = True } ! [ fetchGetQuestionFilterSearch questionPage model.filters global.token ]
 
         GetMineQuestionListPage questionPage ->
             let
@@ -112,9 +114,6 @@ update msg model global =
             in
                 { model | filters = newFilters, selectingQuestions = False } ! [ fetchGetQuestionList questionListId global.token ]
 
-        GetQuestionTagSearch questionPage ->
-            { model | selectingQuestions = True } ! [ fetchGetQuestionFilterSearch questionPage model.filters global.token ]
-
         DrawerLinkClick drawerLink ->
             case drawerLink of
                 MineLists ->
@@ -128,9 +127,9 @@ update msg model global =
 
         ChangePage page ->
             if emptyFilters model.filters then
-                model ! [ Navigation.newUrl <| String.concat [ "#questions/", toString page ] ]
+                { model | loading = True } ! [ fetchGetQuestionPage page global.token ]
             else
-                model ! [ Navigation.newUrl <| String.concat [ "#questions/tagsearch/", toString page ] ]
+                { model | loading = True } ! [ fetchGetQuestionFilterSearch page model.filters global.token ]
 
         TagSearchInput newCurrentTag ->
             { model | currentTag = newCurrentTag } ! []
@@ -189,9 +188,9 @@ update msg model global =
                         { filters | tags = newTags }
             in
                 if emptyFilters newFilters then
-                    { model | filters = newFilters } ! [ Navigation.newUrl <| "#questions/1" ]
+                    { model | filters = newFilters, loading = True } ! [ fetchGetQuestionPage 1 global.token, fetchGetSubject global.token ]
                 else
-                    { model | filters = newFilters } ! [ Navigation.newUrl <| "#questions/tagsearch/1" ]
+                    { model | filters = newFilters, loading = True } ! [ fetchGetQuestionFilterSearch 1 newFilters global.token ]
 
         QuestionClick question ->
             { model | question = question } ! [ Navigation.newUrl <| String.concat [ "#question/", toString question.id ] ]
@@ -373,7 +372,7 @@ update msg model global =
 
         OnFetchGetQuestion (Ok question) ->
             if model.redirected then
-                { model | question = question, redirected = False } ! []
+                { model | question = question, error = "", redirected = False } ! []
             else
                 { model | question = question, error = "" } ! [ Navigation.newUrl <| String.concat [ "#question/", toString question.id ] ]
 
@@ -393,7 +392,10 @@ update msg model global =
                 { model | error = errorMsg } ! []
 
         OnFetchGetQuestionPage (Ok questionPage) ->
-            { model | questionPage = questionPage, error = "" } ! []
+            if model.redirected then
+                { model | questionPage = questionPage, error = "", redirected = False, loading = False } ! []
+            else
+                { model | questionPage = questionPage, error = "", loading = False } ! [ Navigation.newUrl <| String.concat [ "#questions/", toString questionPage.actual ] ]
 
         OnFetchGetQuestionPage (Err error) ->
             let
@@ -411,7 +413,10 @@ update msg model global =
                 { model | error = errorMsg } ! []
 
         OnFetchGetQuestionFilterSearch (Ok questionPage) ->
-            { model | questionPage = questionPage, error = "" } ! []
+            if model.redirected then
+                { model | questionPage = questionPage, error = "", loading = False, redirected = False } ! []
+            else
+                { model | questionPage = questionPage, error = "", loading = False } ! [ Navigation.newUrl <| String.concat [ "#questions/tagsearch/", toString questionPage.actual ] ]
 
         OnFetchGetQuestionFilterSearch (Err error) ->
             let

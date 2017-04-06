@@ -905,6 +905,7 @@ questionListItems model questionList =
                 ]
                 [ text questionList.question_list_header
                 , Lists.subtitle [] [ text <| String.concat [ "Lista criada em: ", StringUtils.dateToString createdDate, " às ", StringUtils.timeToString createdDate ] ]
+                , Lists.subtitle [] [ text <| String.concat [ toString questionList.question_count, " questões." ] ]
                 ]
               -- , Lists.content2 []
               --     [ Toggles.checkbox Mdl

@@ -74,6 +74,7 @@ type alias QuestionList =
     , secret : Bool
     , owner : User.User
     , questions : List QuestionOrder
+    , question_count : Int
     , create_date : String
     }
 

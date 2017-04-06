@@ -20,7 +20,7 @@ initQuestion =
 
 initQuestionPage : QuestionPage
 initQuestionPage =
-    QuestionPage 0 1 Nothing Nothing []
+    QuestionPage 0 0 Nothing Nothing []
 
 
 initQuestionListPage : QuestionListPage
@@ -30,7 +30,7 @@ initQuestionListPage =
 
 initQuestionList : QuestionList
 initQuestionList =
-    QuestionList 0 "" False User.initUser [] ""
+    QuestionList 0 "" False User.initUser [] 0 ""
 
 
 initFilters : Filter
@@ -84,24 +84,16 @@ update msg model global =
             if model.questionPage.actual == questionPage && emptyFilters model.filters then
                 model ! []
             else
-                { model | filters = initFilters, selectingQuestions = True, redirected = True, loading = True } ! [ fetchGetQuestionPage questionPage global.token ]
+                { model | filters = initFilters, selectingQuestions = True, redirected = True, loading = True } ! [ fetchGetQuestionPage questionPage global.token, fetchGetSubject global.token ]
 
         GetQuestionPageSearch questionPage ->
             if model.questionPage.actual == questionPage && not (emptyFilters model.filters) then
                 model ! []
             else
-                { model | selectingQuestions = True, redirected = True, loading = True } ! [ fetchGetQuestionFilterSearch questionPage model.filters global.token ]
+                { model | selectingQuestions = True, redirected = True, loading = True } ! [ fetchGetQuestionFilterSearch questionPage model.filters global.token, fetchGetSubject global.token ]
 
         GetMineQuestionListPage questionPage ->
-            let
-                newFilters =
-                    let
-                        filters =
-                            model.filters
-                    in
-                        { filters | tags = [] }
-            in
-                { model | filters = newFilters, selectingQuestions = False } ! [ fetchGetMineQuestionList questionPage global.token ]
+            { model | selectingQuestions = False } ! [ fetchGetMineQuestionList questionPage global.token ]
 
         GetQuestionList questionListId ->
             let
@@ -136,59 +128,59 @@ update msg model global =
 
         TagSearch ->
             let
-                newTags =
-                    if (StringUtils.removeSpaces model.currentTag) == "" then
-                        model.filters.tags
-                    else
-                        model.currentTag :: model.filters.tags
-
                 newFilters =
                     let
                         filters =
                             model.filters
+
+                        newTags =
+                            if (StringUtils.removeSpaces model.currentTag) == "" then
+                                model.filters.tags
+                            else
+                                model.currentTag :: model.filters.tags
                     in
                         { filters | tags = newTags }
             in
-                { model | filters = newFilters, currentTag = "" } ! [ Navigation.newUrl "#questions/tagsearch/1" ]
+                { model | filters = newFilters, currentTag = "", loading = True } ! [ fetchGetQuestionFilterSearch 1 newFilters global.token ]
 
         TagSearchAdd ->
             let
-                tags =
-                    if (StringUtils.removeSpaces model.currentTag) == "" then
-                        model.filters.tags
-                    else
-                        model.currentTag :: model.filters.tags
-
                 newFilters =
                     let
                         filters =
                             model.filters
+
+                        newtags =
+                            if (StringUtils.removeSpaces model.currentTag) == "" then
+                                model.filters.tags
+                            else
+                                model.currentTag :: model.filters.tags
                     in
-                        { filters | tags = tags }
+                        { filters | tags = newtags }
             in
-                { model | filters = newFilters, currentTag = "" } ! [ Navigation.newUrl "#questions/tagsearch/1" ]
+                { model | filters = newFilters, currentTag = "", loading = True } ! [ fetchGetQuestionFilterSearch 1 newFilters global.token ]
 
         TagSearchRemove tag ->
             let
-                newTags =
-                    List.filterMap
-                        (\t ->
-                            if t == tag then
-                                Nothing
-                            else
-                                Just t
-                        )
-                        model.filters.tags
-
                 newFilters =
                     let
                         filters =
                             model.filters
+
+                        newTags =
+                            List.filterMap
+                                (\t ->
+                                    if t == tag then
+                                        Nothing
+                                    else
+                                        Just t
+                                )
+                                model.filters.tags
                     in
                         { filters | tags = newTags }
             in
                 if emptyFilters newFilters then
-                    { model | filters = newFilters, loading = True } ! [ fetchGetQuestionPage 1 global.token, fetchGetSubject global.token ]
+                    { model | filters = newFilters, loading = True } ! [ fetchGetQuestionPage 1 global.token ]
                 else
                     { model | filters = newFilters, loading = True } ! [ fetchGetQuestionFilterSearch 1 newFilters global.token ]
 
@@ -285,90 +277,90 @@ update msg model global =
 
         FilterLevel newFilter ->
             let
-                newlevelFilters =
-                    let
-                        levelFilters =
-                            model.filters.levelFilters
-                    in
-                        case newFilter of
-                            AllLevel ->
-                                []
-
-                            _ ->
-                                if List.member newFilter levelFilters then
-                                    List.filter (\level -> level /= newFilter) levelFilters
-                                else
-                                    newFilter :: levelFilters
-
                 newFilters =
                     let
                         filters =
                             model.filters
+
+                        newlevelFilters =
+                            let
+                                levelFilters =
+                                    model.filters.levelFilters
+                            in
+                                case newFilter of
+                                    AllLevel ->
+                                        []
+
+                                    _ ->
+                                        if List.member newFilter levelFilters then
+                                            List.filter (\level -> level /= newFilter) levelFilters
+                                        else
+                                            newFilter :: levelFilters
                     in
                         { filters | levelFilters = newlevelFilters }
             in
                 if emptyFilters newFilters then
-                    { model | filters = newFilters } ! [ Navigation.newUrl <| "#questions/1" ]
+                    { model | filters = newFilters, loading = True } ! [ fetchGetQuestionPage 1 global.token ]
                 else
-                    { model | filters = newFilters } ! [ Navigation.newUrl <| "#questions/tagsearch/1" ]
+                    { model | filters = newFilters, loading = True } ! [ fetchGetQuestionFilterSearch 1 newFilters global.token ]
 
         FilterSubject newFilter ->
             let
-                newsubjectFilters =
-                    let
-                        subjectFilters =
-                            model.filters.subjectFilters
-                    in
-                        case newFilter of
-                            AllSubject ->
-                                []
-
-                            StringSubject subjectFilter ->
-                                if List.member subjectFilter subjectFilters then
-                                    List.filter (\subject -> subject /= subjectFilter) subjectFilters
-                                else
-                                    subjectFilter :: subjectFilters
-
                 newFilters =
                     let
                         filters =
                             model.filters
+
+                        newsubjectFilters =
+                            let
+                                subjectFilters =
+                                    model.filters.subjectFilters
+                            in
+                                case newFilter of
+                                    AllSubject ->
+                                        []
+
+                                    StringSubject subjectFilter ->
+                                        if List.member subjectFilter subjectFilters then
+                                            List.filter (\subject -> subject /= subjectFilter) subjectFilters
+                                        else
+                                            subjectFilter :: subjectFilters
                     in
                         { filters | subjectFilters = newsubjectFilters }
             in
                 if emptyFilters newFilters then
-                    { model | filters = newFilters } ! [ Navigation.newUrl <| "#questions/1" ]
+                    { model | filters = newFilters, loading = True } ! [ fetchGetQuestionPage 1 global.token, fetchGetSubject global.token ]
                 else
-                    { model | filters = newFilters } ! [ Navigation.newUrl <| "#questions/tagsearch/1" ]
+                    { model | filters = newFilters, loading = True } ! [ fetchGetQuestionFilterSearch 1 newFilters global.token ]
 
         FilterEducationLevel newFilter ->
             let
-                neweducationLevelFilter =
-                    let
-                        educationLevelFilters =
-                            model.filters.educationLevelFilters
-                    in
-                        case newFilter of
-                            AllEducationLevel ->
-                                []
-
-                            StringEducationLevel educationLevelFilter ->
-                                if List.member educationLevelFilter educationLevelFilters then
-                                    List.filter (\level -> level /= educationLevelFilter) educationLevelFilters
-                                else
-                                    educationLevelFilter :: educationLevelFilters
-
                 newFilters =
                     let
                         filters =
                             model.filters
+
+                        neweducationLevelFilter =
+                            let
+                                educationLevelFilters =
+                                    model.filters.educationLevelFilters
+                            in
+                                case newFilter of
+                                    AllEducationLevel ->
+                                        []
+
+                                    StringEducationLevel educationLevelFilter ->
+                                        if List.member educationLevelFilter educationLevelFilters then
+                                            List.filter (\level -> level /= educationLevelFilter) educationLevelFilters
+                                        else
+                                            educationLevelFilter :: educationLevelFilters
                     in
                         { filters | educationLevelFilters = neweducationLevelFilter }
             in
                 if emptyFilters newFilters then
-                    { model | filters = newFilters } ! [ Navigation.newUrl <| "#questions/1" ]
+                    { model | filters = newFilters, loading = True } ! [ fetchGetQuestionPage 1 global.token, fetchGetSubject global.token ]
                 else
-                    { model | filters = newFilters } ! [ Navigation.newUrl <| "#questions/tagsearch/1" ]
+                    { model | filters = newFilters, loading = True } ! [ fetchGetQuestionFilterSearch 1 newFilters global.token ]
 
         OnFetchGetQuestion (Ok question) ->
             if model.redirected then

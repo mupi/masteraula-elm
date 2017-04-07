@@ -104,7 +104,10 @@ update msg model global =
                     in
                         { filters | tags = [] }
             in
-                { model | filters = newFilters, selectingQuestions = False } ! [ fetchGetQuestionList questionListId global.token ]
+                if model.questionListSelected.id == questionListId then
+                    model ! []
+                else
+                    { model | filters = newFilters, selectingQuestions = False, redirected = True, loading = True } ! [ fetchGetQuestionList questionListId global.token ]
 
         DrawerLinkClick drawerLink ->
             case drawerLink of
@@ -263,7 +266,7 @@ update msg model global =
             model ! [ fetchDeleteQuestionList model.questionListEdit global.token ]
 
         QuestionListClick questionListId ->
-            model ! [ Navigation.newUrl <| String.concat [ "#questions/questionlists/", toString questionListId ] ]
+            { model | loading = True } ! [ fetchGetQuestionList questionListId global.token ]
 
         QuestionListEdit questionList ->
             { model | questionListEdit = questionList } ! [ Navigation.newUrl <| String.concat [ "#questions/questionlist" ] ]
@@ -522,7 +525,10 @@ update msg model global =
                 { model | error = errorMsg } ! []
 
         OnFetchGetQuestionList (Ok questionList) ->
-            { model | questionListSelected = questionList, error = "" } ! []
+            if model.redirected then
+                { model | questionListSelected = questionList, error = "", loading = False, redirected = False } ! []
+            else
+                { model | questionListSelected = questionList, error = "", loading = False } ! [ Navigation.newUrl <| String.concat [ "#questions/questionlists/", toString questionList.id ] ]
 
         OnFetchGetQuestionList (Err error) ->
             let

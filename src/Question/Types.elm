@@ -23,6 +23,7 @@ type alias Model =
     , -- flags
       redirected : Bool
     , loading : Bool
+    , downloading : Bool
     , error : String
     , -- MDL
       dialog : DialogType

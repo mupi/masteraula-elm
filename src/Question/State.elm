@@ -53,6 +53,7 @@ init =
         False
         False
         False
+        False
         ""
         Delete
         Snackbar.model
@@ -247,7 +248,7 @@ update msg model global =
                 in
                     { model | snackbar = snackbar } ! [ effect ]
             else
-                { model | generateAfterSave = False } ! [ fetchPostSaveQuestionList model.questionListEdit global.token ]
+                { model | generateAfterSave = False, loading = True } ! [ fetchPostSaveQuestionList model.questionListEdit global.token ]
 
         QuestionListClear ->
             let
@@ -260,7 +261,7 @@ update msg model global =
                 { model | questionListEdit = newQuestionList } ! []
 
         QuestionListGenerate questionList ->
-            model ! [ fetchGetGenerateList questionList.id global.token ]
+            { model | downloading = True } ! [ fetchGetGenerateList questionList.id global.token ]
 
         QuestionListDelete ->
             model ! [ fetchDeleteQuestionList model.questionListEdit global.token ]
@@ -405,7 +406,7 @@ update msg model global =
                         _ ->
                             toString error
             in
-                { model | error = errorMsg } ! []
+                { model | error = errorMsg, loading = False } ! []
 
         OnFetchGetQuestionFilterSearch (Ok questionPage) ->
             if model.redirected then
@@ -426,14 +427,14 @@ update msg model global =
                         _ ->
                             toString error
             in
-                { model | error = errorMsg } ! []
+                { model | error = errorMsg, loading = False } ! []
 
         OnFecthQuestionListGenerate (Ok id) ->
             let
                 newUrl =
                     String.concat [ Config.baseUrl, "question_lists/", id, "/get_list/" ]
             in
-                { model | error = "" } ! [ Navigation.load newUrl ]
+                { model | error = "", downloading = False } ! [ Navigation.load newUrl ]
 
         OnFecthQuestionListGenerate (Err error) ->
             let
@@ -448,7 +449,7 @@ update msg model global =
                         _ ->
                             toString error
             in
-                { model | error = errorMsg } ! []
+                { model | error = errorMsg, downloading = False } ! []
 
         OnFetchSaveQuestionList (Ok newId) ->
             let
@@ -467,7 +468,7 @@ update msg model global =
                     else
                         [ Navigation.newUrl <| String.concat [ "#questions/questionlists/", toString newId ] ]
             in
-                { model | questionListEdit = newQuestionList, generateAfterSave = False } ! cmds
+                { model | questionListEdit = newQuestionList, generateAfterSave = False, loading = False } ! cmds
 
         OnFetchSaveQuestionList (Err error) ->
             let
@@ -482,7 +483,7 @@ update msg model global =
                         _ ->
                             toString error
             in
-                { model | error = errorMsg } ! []
+                { model | error = errorMsg, loading = False } ! []
 
         OnFetchDeleteQuestionList (Ok text) ->
             { model | questionListEdit = initQuestionList } ! []

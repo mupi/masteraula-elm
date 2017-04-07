@@ -275,11 +275,11 @@ urlQuestionList questionListId =
         String.concat [ Config.baseUrl, "question_lists/", toString questionListId, "/" ]
 
 
-questionEncoder : QuestionOrder -> Value
-questionEncoder questionOrder =
+questionEncoder : Int -> QuestionOrder -> Value
+questionEncoder newOrder questionOrder =
     object
         [ ( "question", int questionOrder.question.id )
-        , ( "order", int questionOrder.order )
+        , ( "order", int (newOrder + 1) )
         ]
 
 
@@ -287,7 +287,7 @@ saveQuestionListEncoder : QuestionList -> Value
 saveQuestionListEncoder questionList =
     object
         [ ( "private", bool False )
-        , ( "questions", list (List.map questionEncoder questionList.questions) )
+        , ( "questions", list (List.indexedMap questionEncoder questionList.questions) )
         , ( "question_list_header", string questionList.question_list_header )
         ]
 

@@ -951,7 +951,7 @@ viewSelectedQuestionList model =
                     , Button.plain
                     , Color.text Color.white
                     , Options.onClick <| QuestionListGenerate questionList
-                    , if List.length questionList.questions > 0 then
+                    , if List.length questionList.questions > 0 && not model.downloading then
                         Options.nop
                       else
                         Button.disabled

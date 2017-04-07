@@ -18,6 +18,7 @@ import Material.Options as Options exposing (css)
 import Material.Grid exposing (grid, cell, size, offset, Device(..))
 import Material.Typography as Typo
 import Material.Dialog as Dialog
+import Material.Spinner as Loading
 import Material.Snackbar as Snackbar
 import Material.Color as Color
 import Utils.MDLUtils as Utils
@@ -282,7 +283,12 @@ dialog model =
 view : (Model -> Html Msg) -> Model -> Html Msg
 view method model =
     div []
-        [ method model
+        [ (if model.loading then
+            Options.div [ Options.cs "question_loader_div" ] [ Options.div [ Options.cs "question_loader" ] [ Loading.spinner [ Loading.active model.loading ] ] ]
+           else
+            span [] []
+          )
+        , method model
         , Snackbar.view model.snackbar |> Html.map Snackbar
         , dialog model
         ]
@@ -899,6 +905,7 @@ questionListItems model questionList =
                 ]
                 [ text questionList.question_list_header
                 , Lists.subtitle [] [ text <| String.concat [ "Lista criada em: ", StringUtils.dateToString createdDate, " às ", StringUtils.timeToString createdDate ] ]
+                , Lists.subtitle [] [ text <| String.concat [ toString questionList.question_count, " questões." ] ]
                 ]
               -- , Lists.content2 []
               --     [ Toggles.checkbox Mdl
@@ -944,7 +951,7 @@ viewSelectedQuestionList model =
                     , Button.plain
                     , Color.text Color.white
                     , Options.onClick <| QuestionListGenerate questionList
-                    , if List.length questionList.questions > 0 then
+                    , if List.length questionList.questions > 0 && not model.downloading then
                         Options.nop
                       else
                         Button.disabled

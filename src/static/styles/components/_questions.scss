@@ -37,3 +37,18 @@
 .question_radio_span{
   height: inherit;
 }
+
+.question_loader_div{
+    position:fixed;
+    width: calc(100% - 240px);
+    height:100%;
+    z-index: 100;
+    background-color: rgba(256, 256, 256, 0.7);
+}
+
+.question_loader{
+    position: relative;
+    top: 50%;
+    left: 50%;
+    transform: translateY(-50%);
+}

@@ -20,9 +20,13 @@ type alias Model =
       generateAfterSave : Bool
     , -- DrawerControl
       selectingQuestions : Bool
+    , -- flags
+      redirected : Bool
+    , loading : Bool
+    , downloading : Bool
+    , error : String
     , -- MDL
-      error : String
-    , dialog : DialogType
+      dialog : DialogType
     , snackbar : Snackbar.Model Int
     , mdl : Material.Model
     }
@@ -71,6 +75,7 @@ type alias QuestionList =
     , secret : Bool
     , owner : User.User
     , questions : List QuestionOrder
+    , question_count : Int
     , create_date : String
     }
 
@@ -139,9 +144,9 @@ type DrawerLink
 type Msg
     = GetQuestion QuestionId
     | GetQuestionPage PageNumber
-    | GetQuestionList QuestionId
+    | GetQuestionPageSearch PageNumber
     | GetMineQuestionListPage PageNumber
-    | GetQuestionTagSearch PageNumber
+    | GetQuestionList QuestionId
     | DrawerLinkClick DrawerLink
     | ChangePage PageNumber
       -- Tags

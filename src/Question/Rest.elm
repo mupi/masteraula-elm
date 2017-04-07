@@ -61,7 +61,8 @@ questionListDecoder =
         |> required "question_list_header" Decode.string
         |> required "private" Decode.bool
         |> required "owner" User.userDecoder
-        |> required "questions" (Decode.list questionOrderDecoder)
+        |> optional "questions" (Decode.list questionOrderDecoder) []
+        |> required "question_count" Decode.int
         |> required "create_date" Decode.string
 
 
@@ -202,40 +203,40 @@ urlFilterSearchQuestion baseUrl filters =
     in
         String.concat
             ([ baseUrl ]
-                ++ if List.length tags > 0 then
-                    ([ "&text__content=" ]
-                        ++ List.map
-                            (\t -> String.concat [ tagFormatter t, "," ])
-                            tags
+                ++ (if List.length tags > 0 then
+                        [ "&text__content=" ]
+                            ++ List.map
+                                (\t -> String.concat [ tagFormatter t, "," ])
+                                tags
+                    else
+                        []
+                   )
+                ++ List.map
+                    (\levelFilter ->
+                        case levelFilter of
+                            EasyLevel ->
+                                "&level=Facil"
+
+                            MediumLevel ->
+                                "&level=Medio"
+
+                            HardLevel ->
+                                "&level=Dificil"
+
+                            _ ->
+                                ""
                     )
-                   else
-                    []
-                        ++ List.map
-                            (\levelFilter ->
-                                case levelFilter of
-                                    EasyLevel ->
-                                        "&level=Facil"
-
-                                    MediumLevel ->
-                                        "&level=Medio"
-
-                                    HardLevel ->
-                                        "&level=Dificil"
-
-                                    _ ->
-                                        ""
-                            )
-                            levelFilters
-                        ++ List.map
-                            (\subjectFilter ->
-                                String.concat [ "&subjects=", tagFormatter subjectFilter ]
-                            )
-                            subjectFilters
-                        ++ List.map
-                            (\educationLevelFilter ->
-                                String.concat [ "&education_level=", tagFormatter educationLevelFilter ]
-                            )
-                            educationLevelFilters
+                    levelFilters
+                ++ List.map
+                    (\subjectFilter ->
+                        String.concat [ "&subjects=", tagFormatter subjectFilter ]
+                    )
+                    subjectFilters
+                ++ List.map
+                    (\educationLevelFilter ->
+                        String.concat [ "&education_level=", tagFormatter educationLevelFilter ]
+                    )
+                    educationLevelFilters
             )
 
 
@@ -274,11 +275,11 @@ urlQuestionList questionListId =
         String.concat [ Config.baseUrl, "question_lists/", toString questionListId, "/" ]
 
 
-questionEncoder : QuestionOrder -> Value
-questionEncoder questionOrder =
+questionEncoder : Int -> QuestionOrder -> Value
+questionEncoder newOrder questionOrder =
     object
         [ ( "question", int questionOrder.question.id )
-        , ( "order", int questionOrder.order )
+        , ( "order", int (newOrder + 1) )
         ]
 
 
@@ -286,7 +287,7 @@ saveQuestionListEncoder : QuestionList -> Value
 saveQuestionListEncoder questionList =
     object
         [ ( "private", bool False )
-        , ( "questions", list (List.map questionEncoder questionList.questions) )
+        , ( "questions", list (List.indexedMap questionEncoder questionList.questions) )
         , ( "question_list_header", string questionList.question_list_header )
         ]
 

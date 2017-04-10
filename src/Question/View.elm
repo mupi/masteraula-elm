@@ -6,6 +6,7 @@ import Html.Events exposing (..)
 import Question.Types exposing (..)
 import Markdown
 import Material.Textfield as Textfield
+import Material.Badge as Badge
 import Material.Button as Button
 import Material.Grid as Grid
 import Material.Card as Card
@@ -229,7 +230,8 @@ dialog model =
     case model.dialog of
         Delete ->
             Dialog.view
-                []
+                [ Options.cs "question_dialog"
+                ]
                 [ Dialog.title []
                     [ text "Apagar Lista"
                     ]
@@ -255,7 +257,8 @@ dialog model =
 
         Clear ->
             Dialog.view
-                []
+                [ Options.cs "question_dialog"
+                ]
                 [ Dialog.title []
                     [ text "Limpar Lista"
                     ]
@@ -756,7 +759,24 @@ viewQuestionPage model =
         , Grid.grid []
             (List.map (questionCardView model True) (List.take 12 model.questionPage.questions))
         , questionPageControls model
-        , text model.error
+        , Button.render Mdl
+            [ 10 ]
+            model.mdl
+            [ Options.css "margin-right" "40px"
+            , Options.cs "question_selected_button"
+            , (if List.length model.questionListEdit.questions > 0 then
+                Badge.add <| toString <| List.length model.questionListEdit.questions
+               else
+                Options.nop
+              )
+            , Badge.overlap
+            , Color.text Color.white
+            , Button.ripple
+            , Button.colored
+            , Button.raised
+            , Options.onClick (DrawerLinkClick SelectedQuestions)
+            ]
+            [ text "Questões selecionadas" ]
         ]
 
 

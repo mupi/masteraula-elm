@@ -11,7 +11,7 @@ type alias Model =
     , questionPage : QuestionPage
     , questionListEdit : QuestionList
     , questionListSelected : QuestionList
-    , questionListPage : QuestionListPage
+    , mineQuestionLists : List QuestionList
     , -- Search
       currentTag : String
     , filters : Filter
@@ -179,7 +179,7 @@ type Msg
     | OnFecthQuestionListGenerate (Result Http.Error String)
     | OnFetchSaveQuestionList (Result Http.Error Int)
     | OnFetchDeleteQuestionList (Result Http.Error String)
-    | OnFetchGetMineQuestionListPage (Result Http.Error QuestionListPage)
+    | OnFetchGetMineQuestionListPage (Result Http.Error (List QuestionList))
     | OnFetchGetQuestionList (Result Http.Error QuestionList)
     | OnFetchGetSubjects (Result Http.Error (List Subject))
     | Dialog DialogType

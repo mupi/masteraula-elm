@@ -942,7 +942,7 @@ questionListItems model questionList =
 viewQuestionListPage : Model -> Html Msg
 viewQuestionListPage model =
     div []
-        [ Lists.ul [] <| List.map (questionListItems model) model.questionListPage.questionLists
+        [ Lists.ul [] <| List.map (questionListItems model) model.mineQuestionLists
         ]
 
 

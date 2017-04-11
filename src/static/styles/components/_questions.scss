@@ -52,3 +52,23 @@
     left: 50%;
     transform: translateY(-50%);
 }
+
+.question_selected_button{
+    position :fixed;
+    display: block;
+    right :0;
+    bottom: 0;
+    margin-right: 40px;
+    margin-bottom :40px;
+    z-index: 800;
+    overflow: visible;
+}
+
+.question_selected_button::after{
+    color:white;
+}
+
+.question_dialog{
+    position: fixed;
+    top: calc(50% - 140px);
+}

@@ -364,14 +364,14 @@ urlListMineQuestionList page =
     String.concat [ Config.baseUrl, "question_lists/user_list_questions/?page=", (toString page) ]
 
 
-getMineQuestionList : PageNumber -> Maybe String -> Http.Request QuestionListPage
+getMineQuestionList : PageNumber -> Maybe String -> Http.Request (List QuestionList)
 getMineQuestionList page token =
     Http.request
         { method = "GET"
         , headers = (headerBuild token)
         , url = (urlListMineQuestionList page)
         , body = Http.emptyBody
-        , expect = (Http.expectJson <| questionListPageDecoder page)
+        , expect = (Http.expectJson <| Decode.list questionListDecoder)
         , timeout = Nothing
         , withCredentials = False
         }

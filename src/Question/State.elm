@@ -45,7 +45,7 @@ init =
         initQuestionPage
         initQuestionList
         initQuestionList
-        initQuestionListPage
+        []
         ""
         initFilters
         []
@@ -507,8 +507,8 @@ update msg model global =
             in
                 { model | error = errorMsg, snackbar = snackbar } ! [ effect ]
 
-        OnFetchGetMineQuestionListPage (Ok questionListPage) ->
-            { model | questionListPage = questionListPage, error = "" } ! []
+        OnFetchGetMineQuestionListPage (Ok mineQuestionLists) ->
+            { model | mineQuestionLists = mineQuestionLists, error = "" } ! []
 
         OnFetchGetMineQuestionListPage (Err error) ->
             let

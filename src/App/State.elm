@@ -1,8 +1,10 @@
 port module App.State exposing (init, update, subscriptions)
 
 import Navigation exposing (Location)
+import Json.Decode as Decode exposing (..)
 import App.Routing as Routing
 import App.Drawer exposing (..)
+import App.Rest exposing (..)
 import App.Routing exposing (parseLocation, Route(..))
 import App.Types exposing (..)
 import Login.State as Login
@@ -24,9 +26,26 @@ port setLocalStorage : LocalStorage -> Cmd msg
 port displayDialog : String -> Cmd msg
 
 
-init : Maybe LocalStorage -> Location -> ( Model, Cmd Msg )
-init savedStorage location =
+init : Maybe String -> Location -> ( Model, Cmd Msg )
+init storage location =
     let
+        savedStorage =
+            case storage of
+                Just str ->
+                    case Decode.decodeString localStorageDecoder str of
+                        Ok value ->
+                            Just value
+
+                        Err error ->
+                            let
+                                a =
+                                    Debug.log "1" error
+                            in
+                                Nothing
+
+                Nothing ->
+                    Nothing
+
         currentRoute =
             parseLocation Nothing location
 

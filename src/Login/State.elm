@@ -9,7 +9,7 @@ import Material
 
 init : Model
 init =
-    Model Nothing "" "" Nothing "" Material.model
+    Model Nothing "" "" Nothing Nothing "" Material.model
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -28,7 +28,12 @@ update msg model =
             ( init, Navigation.newUrl "#index" )
 
         OnFetchLogin (Ok login) ->
-            { model | user = Just login.user, token = Just login.token, error = "" } ! [ Navigation.newUrl "#questions/1" ]
+            case model.redirectHash of
+                Just redHash ->
+                    { model | user = Just login.user, token = Just login.token, error = "" } ! [ Navigation.newUrl redHash ]
+
+                Nothing ->
+                    { model | user = Just login.user, token = Just login.token, error = "" } ! [ Navigation.newUrl "#questions/1" ]
 
         OnFetchLogin (Err error) ->
             let

@@ -10,6 +10,7 @@ type alias Model =
     , username : String
     , password : String
     , token : Maybe String
+    , redirectHash : Maybe String
     , error : String
     , mdl : Material.Model
     }

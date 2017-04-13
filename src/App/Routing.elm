@@ -21,7 +21,9 @@ type Route
     | SelectedQuestionListRoute Question.QuestionId
     | UserQuestionListRoute Question.PageNumber
     | QuestionTagSearchRoute Question.PageNumber
-    | NotFoundRote
+    | RedirectRouteAux Route
+    | RedirectRoute String
+    | NotFoundRoute
 
 
 normalMatchers : Parser (Route -> a) a
@@ -32,10 +34,15 @@ normalMatchers =
         , map LoginRoute (s "login")
         , map SignupRoute (s "signup")
         , map VerifyEmailRoute (s "verify-email" </> string)
-          -- , map QuestionListRoute (s "questions" </> s "questionlist")
-          -- , map SelectedQuestionListRoute (s "questions" </> s "questionlists" </> int)
-          -- , map QuestionRoute (s "question" </> int)
-          -- , map QuestionTagSearchRoute (s "questions" </> s "tagsearch" </> int)
+        , map RedirectRouteAux <| map QuestionPageRoute (s "questions" </> int)
+        , map RedirectRouteAux <| map QuestionRoute (s "question" </> int)
+        , map RedirectRouteAux <| map QuestionListRoute (s "questions" </> s "questionlist")
+        , map RedirectRouteAux <| map SelectedQuestionListRoute (s "questions" </> s "questionlists" </> int)
+        , map RedirectRouteAux <| map UserQuestionListRoute (s "questions" </> s "user_lists" </> int)
+        , map RedirectRouteAux <| map QuestionTagSearchRoute (s "questions" </> s "tagsearch" </> int)
+        , map RedirectRouteAux <| map UserOtherRoute (s "users" </> int)
+        , map RedirectRouteAux <| map UserRoute (s "users")
+        , map RedirectRouteAux <| map UserUpdateRoute (s "users" </> s "updateprofile")
         ]
 
 
@@ -68,12 +75,17 @@ parseLocation user location =
                     route
 
                 Nothing ->
-                    NotFoundRote
+                    NotFoundRoute
 
         Nothing ->
             case (parseHash normalMatchers location) of
                 Just route ->
-                    route
+                    case route of
+                        RedirectRouteAux route ->
+                            RedirectRoute location.hash
+
+                        _ ->
+                            route
 
                 Nothing ->
-                    NotFoundRote
+                    NotFoundRoute

@@ -13,6 +13,7 @@ import User.View as User
 import App.Routing exposing (Route(..))
 import Material.Options as Options exposing (css)
 import Material.Layout as Layout
+import Material.Button as Button
 import Material.Typography as Typo
 import Material.Options as Options
 import Material.Grid exposing (grid, cell, size, offset, Device(..))
@@ -83,8 +84,14 @@ page model =
         UserQuestionListRoute page ->
             Html.map QuestionMsg (Question.view Question.viewQuestionListPage model.question)
 
-        NotFoundRote ->
-            notFoundView
+        RedirectRoute redirectRoute ->
+            Html.map LoginMsg (Login.view model.login)
+
+        NotFoundRoute ->
+            notFoundView model
+
+        _ ->
+            notFoundView model
 
 
 header : Model -> List (Html Msg)
@@ -176,17 +183,6 @@ index =
                 ]
             ]
         ]
-
-
-notFoundView : Html Msg
-notFoundView =
-    let
-        a =
-            Debug.log "location" 1
-    in
-        div []
-            [ text "404 - Page Not found!"
-            ]
 
 
 
@@ -287,3 +283,31 @@ drawer model =
     [ Layout.title [] [ text "MasterAula" ]
     , getDrawerLinks model
     ]
+
+
+notFoundView : Model -> Html Msg
+notFoundView model =
+    Options.div [ Options.cs "not-found" ]
+        [ Options.styled p
+            [ Typo.display4
+            , Typo.center
+            ]
+            [ text "404" ]
+        , Options.styled p
+            [ Typo.display3
+            , Typo.center
+            ]
+            [ text "Página não encontrada" ]
+        , Layout.link
+            [ Layout.href "#"
+            , Options.center
+            ]
+            [ Button.render Mdl
+                [ 0 ]
+                model.mdl
+                [ Button.raised
+                , Button.colored
+                ]
+                [ text "Home" ]
+            ]
+        ]

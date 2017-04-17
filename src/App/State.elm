@@ -1,8 +1,10 @@
 port module App.State exposing (init, update, subscriptions)
 
 import Navigation exposing (Location)
+import Json.Decode as Decode exposing (..)
 import App.Routing as Routing
 import App.Drawer exposing (..)
+import App.Rest exposing (..)
 import App.Routing exposing (parseLocation, Route(..))
 import App.Types exposing (..)
 import Login.State as Login
@@ -24,9 +26,22 @@ port setLocalStorage : LocalStorage -> Cmd msg
 port displayDialog : String -> Cmd msg
 
 
-init : Maybe LocalStorage -> Location -> ( Model, Cmd Msg )
-init savedStorage location =
+init : Maybe String -> Location -> ( Model, Cmd Msg )
+init storage location =
     let
+        savedStorage =
+            case storage of
+                Just str ->
+                    case Decode.decodeString localStorageDecoder str of
+                        Ok value ->
+                            Just value
+
+                        Err error ->
+                            Nothing
+
+                Nothing ->
+                    Nothing
+
         currentRoute =
             parseLocation Nothing location
 
@@ -41,6 +56,7 @@ init savedStorage location =
                 (initQuestion savedStorage)
                 (initUser savedStorage)
                 currentRoute
+                Nothing
                 (initGlobal savedStorage)
                 (initStorage savedStorage)
                 HomeDefault
@@ -63,6 +79,7 @@ initClear =
             Question.init
             User.init
             Routing.IndexRoute
+            Nothing
             (initGlobal Nothing)
             (initStorage Nothing)
             HomeDefault
@@ -145,14 +162,21 @@ update msg model =
 
         LoginMsg subMsg ->
             let
+                newLoginModel =
+                    let
+                        loginModel =
+                            model.login
+                    in
+                        { loginModel | redirectHash = model.redirectHash }
+
                 ( updatedLogin, cmd ) =
-                    Login.update subMsg model.login
+                    Login.update subMsg newLoginModel
 
                 newCmd =
                     Cmd.map LoginMsg cmd
             in
                 if subMsg == Login.Logout then
-                    ( initClear, Cmd.batch [ setLocalStorage (initStorage Nothing), newCmd ] )
+                    initClear ! [ setLocalStorage (initStorage Nothing), newCmd ]
                 else
                     let
                         newGlobal =
@@ -172,7 +196,7 @@ update msg model =
                             in
                                 { user | user = Maybe.withDefault User.initUser newGlobal.user }
                     in
-                        ( { model | login = updatedLogin, user = newUser, global = newGlobal, localStorage = newStorage }, Cmd.batch [ setLocalStorage newStorage, newCmd ] )
+                        { model | login = updatedLogin, user = newUser, global = newGlobal, localStorage = newStorage } ! [ setLocalStorage newStorage, newCmd ]
 
         SignupMsg subMsg ->
             let
@@ -300,6 +324,9 @@ update msg model =
                                     VerifyEmail.update (VerifyEmail.VerifyKey emailKey) model.verifyEmail
                             in
                                 ( { model | verifyEmail = updatedKey, currentDrawerLinks = QuestionDefault }, Cmd.map VerifyEmailMsg cmd )
+
+                        RedirectRoute redirectHash ->
+                            { model | redirectHash = Just redirectHash } ! []
 
                         _ ->
                             ( model, Cmd.none )

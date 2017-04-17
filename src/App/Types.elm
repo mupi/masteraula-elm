@@ -18,6 +18,7 @@ type alias Model =
     , question : Question.Model
     , user : User.Model
     , route : Route
+    , redirectHash : Maybe String
     , global : Global
     , localStorage : LocalStorage
     , currentDrawerLinks : DrawerLinks

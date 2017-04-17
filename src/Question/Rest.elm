@@ -59,7 +59,7 @@ questionListDecoder =
     decode QuestionList
         |> required "id" Decode.int
         |> required "question_list_header" Decode.string
-        |> required "private" Decode.bool
+        |> required "secret" Decode.bool
         |> required "owner" User.userDecoder
         |> optional "questions" (Decode.list questionOrderDecoder) []
         |> required "question_count" Decode.int

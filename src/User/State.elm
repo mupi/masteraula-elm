@@ -8,7 +8,6 @@ import Material
 import Material.Helpers exposing (map1st, map2nd)
 import Material.Snackbar as Snackbar
 import Navigation
-import Utils.StringUtils as Utils
 
 
 init : Model

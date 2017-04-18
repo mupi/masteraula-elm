@@ -45,10 +45,10 @@ verifyFieldsPassword model =
             || String.isEmpty model.newPassword
     then
         ( False, "Por favor, preencha todos os campos" )
+    else if String.length model.newPassword < 8 then
+        ( False, "A senha deve conter ao menos 8 caracteres" )
     else if model.newPassword /= model.confirmPassword then
         ( False, "A senha e a confirmação devem ser iguais" )
-    else if String.length model.password < 8 then
-        ( False, "A senha deve conter ao menos 8 caracteres" )
     else
         ( True, "" )
 

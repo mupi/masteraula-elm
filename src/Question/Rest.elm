@@ -286,7 +286,7 @@ questionEncoder newOrder questionOrder =
 saveQuestionListEncoder : QuestionList -> Value
 saveQuestionListEncoder questionList =
     object
-        [ ( "private", bool False )
+        [ ( "secret", bool False )
         , ( "questions", list (List.indexedMap questionEncoder questionList.questions) )
         , ( "question_list_header", string questionList.question_list_header )
         ]

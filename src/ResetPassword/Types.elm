@@ -7,13 +7,14 @@ import Login.Types as Login
 
 
 type alias Model =
-    { codUser : String
+    { email : String
+    , codUser : String
     , key : String
     , newPassword : String
     , confirmPassword : String
+    , reseting : Bool
     , error : String
-    , success : String
-    , login : Login.Model
+    , success : Bool
     , snackbar : Snackbar.Model Int
     , mdl : Material.Model
     }
@@ -24,12 +25,15 @@ type alias EmailKey =
 
 
 type Msg
-    = ResetPassword String String
+    = SetEmail String
+    | SendEmail
+    | ResetPassword String String
     | SetNewPassword String
     | SetConfirmationPassword String
     | Reset
+    | Send
+    | OnFetchSendEmail (Result Http.Error String)
     | OnFetchResetPassword (Result Http.Error String)
     | NoOp
-    | LoginMsg Login.Msg
     | Snackbar (Snackbar.Msg Int)
     | Mdl (Material.Msg Msg)

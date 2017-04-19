@@ -2,10 +2,47 @@ module ResetPassword.Rest exposing (..)
 
 import App.Config as Config
 import Http exposing (..)
-import Json.Decode as Decode exposing (field)
-import Json.Decode.Pipeline exposing (decode, required, optional, hardcoded)
 import Json.Encode as Encode exposing (Value, encode, object, string)
 import ResetPassword.Types exposing (..)
+
+
+urlSendEmail : String
+urlSendEmail =
+    String.concat [ Config.baseUrl, "auth/password/reset/" ]
+
+
+sendEmailEncoder : Model -> Value
+sendEmailEncoder model =
+    object
+        [ ( "email", string model.email )
+        ]
+
+
+bodyBuildSendEmail : Model -> Body
+bodyBuildSendEmail model =
+    stringBody "application/json" (encode 0 (sendEmailEncoder model))
+
+
+postSendEmail : Model -> Http.Request String
+postSendEmail model =
+    Http.request
+        { method = "POST"
+        , headers = []
+        , url = urlSendEmail
+        , body = (bodyBuildSendEmail model)
+        , expect = (Http.expectString)
+        , timeout = Nothing
+        , withCredentials = False
+        }
+
+
+fetchSendEmail : Model -> Cmd Msg
+fetchSendEmail model =
+    Http.send OnFetchSendEmail (postSendEmail model)
+
+
+
+--
 
 
 url : String
@@ -13,8 +50,8 @@ url =
     String.concat [ Config.baseUrl, "auth/password/reset/confirm/" ]
 
 
-resetPassowrdEncoder : Model -> Value
-resetPassowrdEncoder model =
+resetPasswordEncoder : Model -> Value
+resetPasswordEncoder model =
     object
         [ ( "uid", string model.codUser )
         , ( "token", string model.key )
@@ -25,7 +62,7 @@ resetPassowrdEncoder model =
 
 bodyBuild : Model -> Body
 bodyBuild model =
-    stringBody "application/json" (encode 0 (resetPassowrdEncoder model))
+    stringBody "application/json" (encode 0 (resetPasswordEncoder model))
 
 
 postResetPassword : Model -> Http.Request String

@@ -374,6 +374,13 @@ update msg model =
                             in
                                 ( { model | resetPassword = updatedPassword, currentDrawerLinks = QuestionDefault }, Cmd.map ResetPasswordMsg cmd )
 
+                        ResetPasswordEmailRoute ->
+                            let
+                                ( updatedPassword, cmd ) =
+                                    ResetPassword.update (ResetPassword.SendEmail) model.resetPassword
+                            in
+                                ( { model | resetPassword = updatedPassword, currentDrawerLinks = QuestionDefault }, Cmd.map ResetPasswordMsg cmd )
+
                         RedirectRoute redirectHash ->
                             { model | redirectHash = Just redirectHash } ! []
 

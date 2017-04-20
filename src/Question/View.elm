@@ -282,6 +282,42 @@ dialog model =
                     ]
                 ]
 
+        GenerateList questionList ->
+            Dialog.view
+                [ Options.cs "question_dialog"
+                ]
+                [ Dialog.title []
+                    [ text "Download"
+                    ]
+                , Dialog.content []
+                    [ Options.styled p
+                        [ Typo.title ]
+                        [ text "Opções:" ]
+                    , Toggles.checkbox Mdl
+                        [ 0 ]
+                        model.mdl
+                        [ Options.onToggle ToggleGenerateWithAnswer
+                        , Toggles.ripple
+                        , Toggles.value model.generateWithAnswer
+                        ]
+                        [ text "Com gabarito" ]
+                    ]
+                , Dialog.actions []
+                    [ Button.render Mdl
+                        [ 0 ]
+                        model.mdl
+                        [ Dialog.closeOn "click"
+                        , Options.onClick <| QuestionListGenerate questionList
+                        ]
+                        [ text "Download" ]
+                    , Button.render Mdl
+                        [ 1 ]
+                        model.mdl
+                        [ Dialog.closeOn "click" ]
+                        [ text "Cancelar" ]
+                    ]
+                ]
+
 
 view : (Model -> Html Msg) -> Model -> Html Msg
 view method model =
@@ -970,7 +1006,7 @@ viewSelectedQuestionList model =
                     [ Button.ripple
                     , Button.plain
                     , Color.text Color.white
-                    , Options.onClick <| QuestionListGenerate questionList
+                    , Options.onClick <| Dialog (GenerateList questionList)
                     , if List.length questionList.questions > 0 && not model.downloading then
                         Options.nop
                       else

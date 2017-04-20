@@ -54,6 +54,7 @@ init =
         False
         False
         False
+        False
         ""
         Delete
         Snackbar.model
@@ -261,7 +262,7 @@ update msg model global =
                 { model | questionListEdit = newQuestionList } ! []
 
         QuestionListGenerate questionList ->
-            { model | downloading = True } ! [ fetchGetGenerateList questionList.id global.token ]
+            { model | downloading = True, generateWithAnswer = False } ! [ fetchGetGenerateList questionList.id global.token model.generateWithAnswer ]
 
         QuestionListDelete ->
             model ! [ fetchDeleteQuestionList model.questionListEdit global.token ]
@@ -271,6 +272,9 @@ update msg model global =
 
         QuestionListEdit questionList ->
             { model | questionListEdit = questionList } ! [ Navigation.newUrl <| String.concat [ "#questions/questionlist" ] ]
+
+        ToggleGenerateWithAnswer ->
+            { model | generateWithAnswer = not model.generateWithAnswer } ! []
 
         QuestionListCancel ->
             let
@@ -464,7 +468,7 @@ update msg model global =
 
                 cmds =
                     if model.generateAfterSave then
-                        [ fetchGetGenerateList newId global.token ]
+                        [ fetchGetGenerateList newId global.token model.generateWithAnswer ]
                     else
                         [ Navigation.newUrl <| String.concat [ "#questions/questionlists/", toString newId ] ]
             in

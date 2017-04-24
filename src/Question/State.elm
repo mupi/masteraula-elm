@@ -241,15 +241,33 @@ update msg model global =
                 { model | questionListEdit = newQuestionList } ! []
 
         QuestionListSave ->
-            if model.questionListEdit.question_list_header == "" then
-                let
-                    ( snackbar, effect ) =
-                        Snackbar.add (Snackbar.snackbar 0 "Por favor, coloque o nome da lista anstes de salvá-la" "Fechar") model.snackbar
-                            |> map2nd (Cmd.map Snackbar)
-                in
-                    { model | snackbar = snackbar } ! [ effect ]
-            else
-                { model | generateAfterSave = False, loading = True } ! [ fetchPostSaveQuestionList model.questionListEdit global.token ]
+            let
+                ( valid, error ) =
+                    let
+                        question_list_header =
+                            model.questionListEdit.question_list_header
+
+                        question_list =
+                            model.questionListEdit
+                    in
+                        if question_list_header == "" then
+                            ( False, "Por favor, coloque o nome da lista antes de salvá-la" )
+                        else if List.length question_list.questions <= 0 then
+                            ( False, "Por favor, adicione pelo menos uma questão antes de salvá-la" )
+                        else if (not <| StringUtils.hasNoSpecialCharacters question_list_header) then
+                            ( False, "Por favor, coloque apenas letras (sem acentos), números e espaços no nome da lista." )
+                        else
+                            ( True, "" )
+            in
+                if not valid then
+                    let
+                        ( snackbar, effect ) =
+                            Snackbar.add (Snackbar.snackbar 0 error "Fechar") model.snackbar
+                                |> map2nd (Cmd.map Snackbar)
+                    in
+                        { model | snackbar = snackbar } ! [ effect ]
+                else
+                    { model | generateAfterSave = False, loading = True } ! [ fetchPostSaveQuestionList model.questionListEdit global.token ]
 
         QuestionListClear ->
             let
@@ -488,7 +506,7 @@ update msg model global =
                 { model | error = errorMsg, loading = False } ! []
 
         OnFetchDeleteQuestionList (Ok text) ->
-            { model | questionListEdit = initQuestionList } ! []
+            { model | questionListEdit = initQuestionList } ! [ Navigation.newUrl "#questions/user_lists/1" ]
 
         OnFetchDeleteQuestionList (Err error) ->
             let

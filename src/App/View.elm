@@ -7,6 +7,7 @@ import App.Types exposing (..)
 import Login.View as Login
 import Login.Types as Login
 import VerifyEmail.View as VerifyEmail
+import ResetPassword.View as ResetPassword
 import Question.View as Question
 import Signup.View as Signup
 import User.View as User
@@ -66,6 +67,12 @@ page model =
         VerifyEmailRoute emailKey ->
             Html.map VerifyEmailMsg (VerifyEmail.view model.verifyEmail)
 
+        ResetPasswordRoute codUser key ->
+            Html.map ResetPasswordMsg (ResetPassword.view model.resetPassword)
+
+        ResetPasswordEmailRoute ->
+            Html.map ResetPasswordMsg (ResetPassword.view model.resetPassword)
+
         QuestionRoute questionId ->
             Html.map QuestionMsg (Question.view Question.viewQuestion model.question)
 
@@ -90,7 +97,7 @@ page model =
         NotFoundRoute ->
             notFoundView model
 
-        _ ->
+        RedirectRouteAux a ->
             notFoundView model
 
 
@@ -135,7 +142,9 @@ header model =
                         [ Layout.href "#users" ]
                         [ text "Minha conta" ]
                     , Layout.link
-                        [ Options.onClick (LoginMsg Login.Logout) ]
+                        [ Options.onClick (LoginMsg Login.Logout)
+                        , css "cursor" "pointer"
+                        ]
                         [ text "Sair ", Icon.i "exit_to_app" ]
                     ]
                 ]

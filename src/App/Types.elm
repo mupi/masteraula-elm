@@ -6,6 +6,7 @@ import App.Drawer exposing (DrawerLinks)
 import Login.Types as Login
 import Signup.Types as Signup
 import VerifyEmail.Types as VerifyEmail
+import ResetPassword.Types as ResetPassword
 import Question.Types as Question
 import User.Types as User
 import Material
@@ -15,6 +16,7 @@ type alias Model =
     { login : Login.Model
     , signup : Signup.Model
     , verifyEmail : VerifyEmail.Model
+    , resetPassword : ResetPassword.Model
     , question : Question.Model
     , user : User.Model
     , route : Route
@@ -48,6 +50,7 @@ type Msg
     | LoginMsg Login.Msg
     | SignupMsg Signup.Msg
     | VerifyEmailMsg VerifyEmail.Msg
+    | ResetPasswordMsg ResetPassword.Msg
     | QuestionMsg Question.Msg
     | OnLocationChange Location
     | ShowIndex

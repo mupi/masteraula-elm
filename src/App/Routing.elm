@@ -15,6 +15,8 @@ type Route
     | LoginRoute
     | SignupRoute
     | VerifyEmailRoute VerifyEmail.EmailKey
+    | ResetPasswordRoute String String
+    | ResetPasswordEmailRoute
     | QuestionRoute Question.QuestionId
     | QuestionPageRoute Question.PageNumber
     | QuestionListRoute
@@ -34,6 +36,8 @@ normalMatchers =
         , map LoginRoute (s "login")
         , map SignupRoute (s "signup")
         , map VerifyEmailRoute (s "verify-email" </> string)
+        , map ResetPasswordRoute (s "reset-password" </> string </> string)
+        , map ResetPasswordEmailRoute (s "reset-password")
         , map RedirectRouteAux <| map QuestionPageRoute (s "questions" </> int)
         , map RedirectRouteAux <| map QuestionRoute (s "question" </> int)
         , map RedirectRouteAux <| map QuestionListRoute (s "questions" </> s "questionlist")

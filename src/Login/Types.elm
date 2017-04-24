@@ -27,6 +27,7 @@ type Msg
     | SetPassword String
     | Login
     | Logout
+    | ResetPassword
     | OnFetchLogin (Result Http.Error LoginModel)
     | NoOp
     | Mdl (Material.Msg Msg)

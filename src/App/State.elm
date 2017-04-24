@@ -12,6 +12,8 @@ import Login.Types as Login
 import User.State as User
 import User.Types as User
 import Signup.State as Signup
+import ResetPassword.State as ResetPassword
+import ResetPassword.Types as ResetPassword
 import VerifyEmail.State as VerifyEmail
 import VerifyEmail.Types as VerifyEmail
 import Question.State as Question
@@ -53,6 +55,7 @@ init storage location =
                 Login.init
                 Signup.init
                 VerifyEmail.init
+                ResetPassword.init
                 (initQuestion savedStorage)
                 (initUser savedStorage)
                 currentRoute
@@ -76,6 +79,7 @@ initClear =
             Login.init
             Signup.init
             VerifyEmail.init
+            ResetPassword.init
             Question.init
             User.init
             Routing.IndexRoute
@@ -242,6 +246,44 @@ update msg model =
             in
                 ( { model | verifyEmail = newVerifyKey, global = newGlobal, localStorage = newStorage }, Cmd.batch [ setLocalStorage newStorage, newCmd ] )
 
+        ResetPasswordMsg subMsg ->
+            let
+                ( updatedResetPassword, cmd ) =
+                    ResetPassword.update subMsg model.resetPassword
+
+                -- Threats the login that can be done using verifyEmail page
+                -- updatedLogin =
+                --     updatedVerifyKey.login
+                --
+                -- newGlobal =
+                --     if updatedLogin.user == Nothing then
+                --         Global Nothing Nothing
+                --     else
+                --         Global updatedLogin.user updatedLogin.token
+                --
+                newCmd =
+                    Cmd.map ResetPasswordMsg cmd
+
+                --     if updatedLogin.user == Nothing then
+                --         Cmd.map VerifyEmailMsg cmd
+                --     else
+                --         Navigation.newUrl "#index"
+                -- Do a "logout" in the verifyEmail login model to prevent a loop
+                -- newVerifyKey =
+                --     if updatedLogin.user == Nothing then
+                --         updatedVerifyKey
+                --     else
+                --         { updatedVerifyKey | login = Login.init }
+                --
+                -- newStorage =
+                --     let
+                --         localStorage =
+                --             model.localStorage
+                --     in
+                --         { localStorage | user = newGlobal.user, token = newGlobal.token }
+            in
+                { model | resetPassword = updatedResetPassword } ! [ newCmd ]
+
         QuestionMsg subMsg ->
             let
                 ( updatedQuestion, cmd ) =
@@ -324,6 +366,20 @@ update msg model =
                                     VerifyEmail.update (VerifyEmail.VerifyKey emailKey) model.verifyEmail
                             in
                                 ( { model | verifyEmail = updatedKey, currentDrawerLinks = QuestionDefault }, Cmd.map VerifyEmailMsg cmd )
+
+                        ResetPasswordRoute codUser key ->
+                            let
+                                ( updatedPassword, cmd ) =
+                                    ResetPassword.update (ResetPassword.ResetPassword codUser key) model.resetPassword
+                            in
+                                ( { model | resetPassword = updatedPassword, currentDrawerLinks = QuestionDefault }, Cmd.map ResetPasswordMsg cmd )
+
+                        ResetPasswordEmailRoute ->
+                            let
+                                ( updatedPassword, cmd ) =
+                                    ResetPassword.update (ResetPassword.SendEmail) model.resetPassword
+                            in
+                                ( { model | resetPassword = updatedPassword, currentDrawerLinks = QuestionDefault }, Cmd.map ResetPasswordMsg cmd )
 
                         RedirectRoute redirectHash ->
                             { model | redirectHash = Just redirectHash } ! []

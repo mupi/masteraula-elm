@@ -22,10 +22,13 @@ update msg model =
             { model | password = newPassword } ! []
 
         Login ->
-            ( model, fetchLogin model )
+            ( { model | error = "" }, fetchLogin model )
 
         Logout ->
             ( init, Navigation.newUrl "#index" )
+
+        ResetPassword ->
+            model ! [ Navigation.newUrl "#reset-password" ]
 
         OnFetchLogin (Ok login) ->
             case model.redirectHash of

@@ -83,13 +83,13 @@ update msg model global =
 
         GetQuestionPage questionPage ->
             if model.questionPage.actual == questionPage && emptyFilters model.filters then
-                model ! []
+                { model | selectingQuestions = True } ! []
             else
                 { model | filters = initFilters, selectingQuestions = True, redirected = True, loading = True } ! [ fetchGetQuestionPage questionPage global.token, fetchGetSubject global.token ]
 
         GetQuestionPageSearch questionPage ->
             if model.questionPage.actual == questionPage && not (emptyFilters model.filters) then
-                model ! []
+                { model | selectingQuestions = True } ! []
             else
                 { model | selectingQuestions = True, redirected = True, loading = True } ! [ fetchGetQuestionFilterSearch questionPage model.filters global.token, fetchGetSubject global.token ]
 

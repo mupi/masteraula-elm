@@ -457,14 +457,12 @@ update msg model global =
 
         OnFetchSaveQuestionList (Ok newId) ->
             let
-                questionList =
-                    model.questionListEdit
-
                 newQuestionList =
-                    if model.generateAfterSave then
+                    let
+                        questionList =
+                            model.questionListEdit
+                    in
                         { questionList | id = newId }
-                    else
-                        initQuestionList
 
                 cmds =
                     if model.generateAfterSave then
@@ -472,7 +470,7 @@ update msg model global =
                     else
                         [ Navigation.newUrl <| String.concat [ "#questions/questionlists/", toString newId ] ]
             in
-                { model | questionListEdit = newQuestionList, generateAfterSave = False, loading = False } ! cmds
+                { model | questionListSelected = newQuestionList, questionListEdit = initQuestionList, generateAfterSave = False, loading = False } ! cmds
 
         OnFetchSaveQuestionList (Err error) ->
             let

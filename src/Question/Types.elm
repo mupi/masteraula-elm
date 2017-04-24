@@ -143,6 +143,12 @@ type DrawerLink
     | SelectedQuestions
 
 
+type QuestionButtonType
+    = AddQuestionButton
+    | RemoveQuestionButton
+    | NoneQuestionButton
+
+
 type Msg
     = GetQuestion QuestionId
     | GetQuestionPage PageNumber

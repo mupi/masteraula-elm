@@ -46,6 +46,7 @@ type alias Question =
     , education_level : Maybe String
     , year : Maybe Int
     , source : Maybe String
+    , question_lists : List QuestionListInfo
     }
 
 
@@ -67,6 +68,16 @@ type alias Subject =
 type alias QuestionOrder =
     { question : Question
     , order : Int
+    }
+
+
+type alias QuestionListInfo =
+    { id : Int
+    , question_list_header : String
+    , secret : Bool
+    , owner : User.User
+    , question_count : Int
+    , create_date : String
     }
 
 

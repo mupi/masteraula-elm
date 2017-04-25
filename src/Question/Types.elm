@@ -18,6 +18,7 @@ type alias Model =
     , subjects : List Subject
     , -- List docx file generation
       generateAfterSave : Bool
+    , generateWithAnswer : Bool
     , -- DrawerControl
       selectingQuestions : Bool
     , -- flags
@@ -116,6 +117,7 @@ type alias Answer =
 type DialogType
     = Delete
     | Clear
+    | GenerateList QuestionList
 
 
 type LevelFilterType
@@ -139,6 +141,12 @@ type DrawerLink
     = MineLists
     | SelectQuestions
     | SelectedQuestions
+
+
+type QuestionButtonType
+    = AddQuestionButton
+    | RemoveQuestionButton
+    | NoneQuestionButton
 
 
 type Msg
@@ -168,6 +176,7 @@ type Msg
       -- Question List Page
     | QuestionListClick Int
     | QuestionListEdit QuestionList
+    | ToggleGenerateWithAnswer
       -- Filter
     | FilterLevel LevelFilterType
     | FilterSubject SubjectFilterType

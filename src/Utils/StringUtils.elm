@@ -7,25 +7,37 @@ import Date exposing (..)
 removeAccents : String -> String
 removeAccents text =
     let
-        lowerText =
-            String.toLower text
-
         removeA =
-            replace All (regex "[áàãâ]") (\_ -> "a") lowerText
+            replace All (regex "[ÁÀÃÂ]") (\_ -> "A") text
 
         removeE =
-            replace All (regex "[éê]") (\_ -> "e") removeA
+            replace All (regex "[ÉÊ]") (\_ -> "E") removeA
 
         removeI =
-            replace All (regex "[í]") (\_ -> "i") removeE
+            replace All (regex "[Í]") (\_ -> "I") removeE
 
         removeO =
-            replace All (regex "[óõô]") (\_ -> "o") removeI
+            replace All (regex "[ÓÕÔ]") (\_ -> "O") removeI
 
         removeU =
-            replace All (regex "[ú]") (\_ -> "u") removeO
+            replace All (regex "[Ú]") (\_ -> "U") removeO
+
+        removea =
+            replace All (regex "[áàãâ]") (\_ -> "a") removeU
+
+        removee =
+            replace All (regex "[éê]") (\_ -> "e") removea
+
+        removei =
+            replace All (regex "[í]") (\_ -> "i") removee
+
+        removeo =
+            replace All (regex "[óõô]") (\_ -> "o") removei
+
+        removeu =
+            replace All (regex "[ú]") (\_ -> "u") removeo
     in
-        removeU
+        removeu
 
 
 spaceToTrace : String -> String
@@ -167,3 +179,12 @@ maybeIntToString number =
 
         Nothing ->
             ""
+
+
+hasNoSpecialCharacters : String -> Bool
+hasNoSpecialCharacters text =
+    let
+        newText =
+            replace All (regex "[^a-z\\A-Z 0-9]") (\_ -> "") <| removeAccents text
+    in
+        text == newText

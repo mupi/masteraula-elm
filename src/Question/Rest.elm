@@ -386,17 +386,26 @@ fetchGetMineQuestionList page token =
 -- Question List (Docx file generation)
 
 
-urlGenerateList : Int -> String
-urlGenerateList id =
-    String.concat [ Config.baseUrl, "question_lists/", toString id, "/generate_list/" ]
+urlGenerateList : Int -> Bool -> String
+urlGenerateList id answers =
+    String.concat
+        [ Config.baseUrl
+        , "question_lists/"
+        , toString id
+        , "/generate_list/?answers="
+        , if answers then
+            "True"
+          else
+            "False"
+        ]
 
 
-getGenerateList : Int -> Maybe String -> Http.Request String
-getGenerateList id token =
+getGenerateList : Int -> Maybe String -> Bool -> Http.Request String
+getGenerateList id token answers =
     Http.request
         { method = "GET"
         , headers = (headerBuild token)
-        , url = (urlGenerateList id)
+        , url = (urlGenerateList id answers)
         , body = Http.emptyBody
         , expect = (Http.expectJson (field "code" Decode.string))
         , timeout = Nothing
@@ -404,6 +413,6 @@ getGenerateList id token =
         }
 
 
-fetchGetGenerateList : Int -> Maybe String -> Cmd Msg
-fetchGetGenerateList id token =
-    Http.send OnFecthQuestionListGenerate (getGenerateList id token)
+fetchGetGenerateList : Int -> Maybe String -> Bool -> Cmd Msg
+fetchGetGenerateList id token answers =
+    Http.send OnFecthQuestionListGenerate (getGenerateList id token answers)

@@ -54,6 +54,7 @@ init =
         False
         False
         False
+        False
         ""
         Delete
         Snackbar.model
@@ -240,15 +241,33 @@ update msg model global =
                 { model | questionListEdit = newQuestionList } ! []
 
         QuestionListSave ->
-            if model.questionListEdit.question_list_header == "" then
-                let
-                    ( snackbar, effect ) =
-                        Snackbar.add (Snackbar.snackbar 0 "Por favor, coloque o nome da lista anstes de salvá-la" "Fechar") model.snackbar
-                            |> map2nd (Cmd.map Snackbar)
-                in
-                    { model | snackbar = snackbar } ! [ effect ]
-            else
-                { model | generateAfterSave = False, loading = True } ! [ fetchPostSaveQuestionList model.questionListEdit global.token ]
+            let
+                ( valid, error ) =
+                    let
+                        question_list_header =
+                            model.questionListEdit.question_list_header
+
+                        question_list =
+                            model.questionListEdit
+                    in
+                        if question_list_header == "" then
+                            ( False, "Por favor, coloque o nome da lista antes de salvá-la" )
+                        else if List.length question_list.questions <= 0 then
+                            ( False, "Por favor, adicione pelo menos uma questão antes de salvá-la" )
+                        else if (not <| StringUtils.hasNoSpecialCharacters question_list_header) then
+                            ( False, "Por favor, coloque apenas letras (sem acentos), números e espaços no nome da lista." )
+                        else
+                            ( True, "" )
+            in
+                if not valid then
+                    let
+                        ( snackbar, effect ) =
+                            Snackbar.add (Snackbar.snackbar 0 error "Fechar") model.snackbar
+                                |> map2nd (Cmd.map Snackbar)
+                    in
+                        { model | snackbar = snackbar } ! [ effect ]
+                else
+                    { model | generateAfterSave = False, loading = True } ! [ fetchPostSaveQuestionList model.questionListEdit global.token ]
 
         QuestionListClear ->
             let
@@ -261,7 +280,7 @@ update msg model global =
                 { model | questionListEdit = newQuestionList } ! []
 
         QuestionListGenerate questionList ->
-            { model | downloading = True } ! [ fetchGetGenerateList questionList.id global.token ]
+            { model | downloading = True, generateWithAnswer = False } ! [ fetchGetGenerateList questionList.id global.token model.generateWithAnswer ]
 
         QuestionListDelete ->
             model ! [ fetchDeleteQuestionList model.questionListEdit global.token ]
@@ -271,6 +290,9 @@ update msg model global =
 
         QuestionListEdit questionList ->
             { model | questionListEdit = questionList } ! [ Navigation.newUrl <| String.concat [ "#questions/questionlist" ] ]
+
+        ToggleGenerateWithAnswer ->
+            { model | generateWithAnswer = not model.generateWithAnswer } ! []
 
         QuestionListCancel ->
             let
@@ -453,22 +475,20 @@ update msg model global =
 
         OnFetchSaveQuestionList (Ok newId) ->
             let
-                questionList =
-                    model.questionListEdit
-
                 newQuestionList =
-                    if model.generateAfterSave then
+                    let
+                        questionList =
+                            model.questionListEdit
+                    in
                         { questionList | id = newId }
-                    else
-                        initQuestionList
 
                 cmds =
                     if model.generateAfterSave then
-                        [ fetchGetGenerateList newId global.token ]
+                        [ fetchGetGenerateList newId global.token model.generateWithAnswer ]
                     else
                         [ Navigation.newUrl <| String.concat [ "#questions/questionlists/", toString newId ] ]
             in
-                { model | questionListEdit = newQuestionList, generateAfterSave = False, loading = False } ! cmds
+                { model | questionListSelected = newQuestionList, questionListEdit = initQuestionList, generateAfterSave = False, loading = False } ! cmds
 
         OnFetchSaveQuestionList (Err error) ->
             let
@@ -486,7 +506,7 @@ update msg model global =
                 { model | error = errorMsg, loading = False } ! []
 
         OnFetchDeleteQuestionList (Ok text) ->
-            { model | questionListEdit = initQuestionList } ! []
+            { model | questionListEdit = initQuestionList } ! [ Navigation.newUrl "#questions/user_lists/1" ]
 
         OnFetchDeleteQuestionList (Err error) ->
             let

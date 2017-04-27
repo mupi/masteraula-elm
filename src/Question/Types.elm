@@ -19,6 +19,7 @@ type alias Model =
     , -- List docx file generation
       generateAfterSave : Bool
     , generateWithAnswer : Bool
+    , generateWithResolution : Bool
     , -- DrawerControl
       selectingQuestions : Bool
     , -- flags
@@ -188,6 +189,7 @@ type Msg
     | QuestionListClick Int
     | QuestionListEdit QuestionList
     | ToggleGenerateWithAnswer
+    | ToggleGenerateWithResolution
       -- Filter
     | FilterLevel LevelFilterType
     | FilterSubject SubjectFilterType

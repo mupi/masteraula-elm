@@ -294,13 +294,21 @@ dialog model =
                         [ Typo.title ]
                         [ text "Opções:" ]
                     , Toggles.checkbox Mdl
-                        [ 0 ]
+                        [ 0, 0 ]
                         model.mdl
                         [ Options.onToggle ToggleGenerateWithAnswer
                         , Toggles.ripple
                         , Toggles.value model.generateWithAnswer
                         ]
                         [ text "Com gabarito" ]
+                    , Toggles.checkbox Mdl
+                        [ 0, 1 ]
+                        model.mdl
+                        [ Options.onToggle ToggleGenerateWithResolution
+                        , Toggles.ripple
+                        , Toggles.value model.generateWithResolution
+                        ]
+                        [ text "Com resolução" ]
                     ]
                 , Dialog.actions []
                     [ Button.render Mdl

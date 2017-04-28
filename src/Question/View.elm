@@ -1,5 +1,7 @@
 module Question.View exposing (..)
 
+import Html.Attributes exposing (class, placeholder, autofocus, value, name)
+import Html.Events exposing (onInput)
 import Html exposing (..)
 import Date
 import Html.Events exposing (..)
@@ -832,24 +834,14 @@ viewQuestionList model =
         questionList =
             model.questionListEdit
     in
-        div
+        Options.div
             []
-            [ Options.styled h2
-                [ Typo.display1, Typo.center ]
-                [ text <|
-                    if questionList.id == 0 then
-                        "Nova lista de questões"
-                    else
-                        String.concat [ "Editando a lista ", questionList.question_list_header ]
-                ]
-            , Textfield.render Mdl
-                [ 5, 0 ]
-                model.mdl
-                [ Options.onInput QuestionListHeaderInput
-                , Options.css "margin-left" "30px"
-                , Textfield.value questionList.question_list_header
-                , Textfield.floatingLabel
-                , Textfield.label "Digite o Nome da lista"
+            [ input
+                [ class "new-list-header"
+                , autofocus True
+                , placeholder "Nome da nova lista"
+                , value questionList.question_list_header
+                , onInput QuestionListHeaderInput
                 ]
                 []
             , Options.styled p

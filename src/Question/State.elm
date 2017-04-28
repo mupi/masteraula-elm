@@ -263,8 +263,12 @@ update msg model global =
                 if not valid then
                     let
                         ( snackbar, effect ) =
-                            Snackbar.add (Snackbar.snackbar 0 error "Fechar") model.snackbar
-                                |> map2nd (Cmd.map Snackbar)
+                            let
+                                contents =
+                                    Snackbar.snackbar 0 error "Fechar"
+                            in
+                                Snackbar.add ({ contents | timeout = 5000 }) model.snackbar
+                                    |> map2nd (Cmd.map Snackbar)
                     in
                         { model | snackbar = snackbar } ! [ effect ]
                 else

@@ -294,13 +294,21 @@ dialog model =
                         [ Typo.title ]
                         [ text "Opções:" ]
                     , Toggles.checkbox Mdl
-                        [ 0 ]
+                        [ 0, 0 ]
                         model.mdl
                         [ Options.onToggle ToggleGenerateWithAnswer
                         , Toggles.ripple
                         , Toggles.value model.generateWithAnswer
                         ]
                         [ text "Com gabarito" ]
+                    , Toggles.checkbox Mdl
+                        [ 0, 1 ]
+                        model.mdl
+                        [ Options.onToggle ToggleGenerateWithResolution
+                        , Toggles.ripple
+                        , Toggles.value model.generateWithResolution
+                        ]
+                        [ text "Com resolução" ]
                     ]
                 , Dialog.actions []
                     [ Button.render Mdl
@@ -381,6 +389,23 @@ textToChip s =
         [ Chip.content []
             [ text s ]
         ]
+
+
+questionListToLink : QuestionListInfo -> Html msg
+questionListToLink questionListInfo =
+    let
+        owner =
+            questionListInfo.owner
+    in
+        Options.div []
+            [ Options.styled a
+                [ Typo.subhead, Layout.href ("#questions/questionlists/" ++ toString questionListInfo.id) ]
+                [ text questionListInfo.question_list_header ]
+            , text " criada por "
+            , Options.styled a
+                [ Typo.subhead, Layout.href ("#users/" ++ toString owner.id) ]
+                [ text owner.username ]
+            ]
 
 
 cardTitle : Question -> Card.Block msg
@@ -480,6 +505,16 @@ viewQuestion model =
                             Options.span [] []
                         , (List.map textToChip question.tags)
                             |> Options.styled div [ Options.css "margin" "10px 0" ]
+                        , if List.length question.question_lists > 0 then
+                            [ Options.styled p
+                                [ Typo.title ]
+                                [ text "Lista(s) que esta questão aparece:"
+                                ]
+                            ]
+                                ++ (List.map questionListToLink question.question_lists)
+                                |> Options.styled div [ Options.css "margin" "10px 0" ]
+                          else
+                            Options.span [] []
                         ]
                     , Card.actions
                         [ Card.border
@@ -496,16 +531,6 @@ viewQuestion model =
                             , Options.onClick QuestionBack
                             ]
                             [ Icon.view "arrow_back" [ Icon.size18 ], text " Voltar" ]
-                          -- , Button.render Mdl
-                          --     [ 2, 1, question.id ]
-                          --     model.mdl
-                          --     [ Button.ripple
-                          --     , Button.accent
-                          --     , Color.text Color.white
-                          --     , css "font-size" "11px"
-                          --     , css "width" "33%"
-                          --     ]
-                          --     [ Icon.view "favorite" [ Icon.size18 ], text " Favoritar" ]
                         , Button.render Mdl
                             [ 2, 2, question.id ]
                             model.mdl

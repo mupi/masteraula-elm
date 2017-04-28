@@ -45,6 +45,7 @@ questionDecoder =
         |> required "education_level" (Decode.nullable Decode.string)
         |> required "year" (Decode.nullable Decode.int)
         |> required "source" (Decode.nullable Decode.string)
+        |> required "question_lists" (Decode.list questionListInfoDecoder)
 
 
 questionOrderDecoder : Decode.Decoder QuestionOrder
@@ -62,6 +63,17 @@ questionListDecoder =
         |> required "secret" Decode.bool
         |> required "owner" User.userDecoder
         |> optional "questions" (Decode.list questionOrderDecoder) []
+        |> required "question_count" Decode.int
+        |> required "create_date" Decode.string
+
+
+questionListInfoDecoder : Decode.Decoder QuestionListInfo
+questionListInfoDecoder =
+    decode QuestionListInfo
+        |> required "id" Decode.int
+        |> required "question_list_header" Decode.string
+        |> required "secret" Decode.bool
+        |> required "owner" User.userDecoder
         |> required "question_count" Decode.int
         |> required "create_date" Decode.string
 
@@ -386,26 +398,25 @@ fetchGetMineQuestionList page token =
 -- Question List (Docx file generation)
 
 
-urlGenerateList : Int -> Bool -> String
-urlGenerateList id answers =
+urlGenerateList : Int -> Model -> String
+urlGenerateList id model =
     String.concat
         [ Config.baseUrl
         , "question_lists/"
         , toString id
         , "/generate_list/?answers="
-        , if answers then
-            "True"
-          else
-            "False"
+        , toString model.generateWithAnswer
+        , "&resolution="
+        , toString model.generateWithResolution
         ]
 
 
-getGenerateList : Int -> Maybe String -> Bool -> Http.Request String
-getGenerateList id token answers =
+getGenerateList : Int -> Maybe String -> Model -> Http.Request String
+getGenerateList id token model =
     Http.request
         { method = "GET"
         , headers = (headerBuild token)
-        , url = (urlGenerateList id answers)
+        , url = (urlGenerateList id model)
         , body = Http.emptyBody
         , expect = (Http.expectJson (field "code" Decode.string))
         , timeout = Nothing
@@ -413,6 +424,6 @@ getGenerateList id token answers =
         }
 
 
-fetchGetGenerateList : Int -> Maybe String -> Bool -> Cmd Msg
-fetchGetGenerateList id token answers =
-    Http.send OnFecthQuestionListGenerate (getGenerateList id token answers)
+fetchGetGenerateList : Int -> Maybe String -> Model -> Cmd Msg
+fetchGetGenerateList id token model =
+    Http.send OnFecthQuestionListGenerate (getGenerateList id token model)

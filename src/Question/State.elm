@@ -15,7 +15,7 @@ import Utils.StringUtils as StringUtils
 
 initQuestion : Question
 initQuestion =
-    Question 0 "" Nothing User.initUser 0 [] Nothing [] [] Nothing Nothing Nothing
+    Question 0 "" Nothing User.initUser 0 [] Nothing [] [] Nothing Nothing Nothing []
 
 
 initQuestionPage : QuestionPage
@@ -49,6 +49,7 @@ init =
         ""
         initFilters
         []
+        False
         False
         False
         False
@@ -280,7 +281,7 @@ update msg model global =
                 { model | questionListEdit = newQuestionList } ! []
 
         QuestionListGenerate questionList ->
-            { model | downloading = True, generateWithAnswer = False } ! [ fetchGetGenerateList questionList.id global.token model.generateWithAnswer ]
+            { model | downloading = True, generateWithAnswer = False, generateWithResolution = False } ! [ fetchGetGenerateList questionList.id global.token model ]
 
         QuestionListDelete ->
             model ! [ fetchDeleteQuestionList model.questionListEdit global.token ]
@@ -293,6 +294,9 @@ update msg model global =
 
         ToggleGenerateWithAnswer ->
             { model | generateWithAnswer = not model.generateWithAnswer } ! []
+
+        ToggleGenerateWithResolution ->
+            { model | generateWithResolution = not model.generateWithResolution } ! []
 
         QuestionListCancel ->
             let
@@ -484,7 +488,7 @@ update msg model global =
 
                 cmds =
                     if model.generateAfterSave then
-                        [ fetchGetGenerateList newId global.token model.generateWithAnswer ]
+                        [ fetchGetGenerateList newId global.token model ]
                     else
                         [ Navigation.newUrl <| String.concat [ "#questions/questionlists/", toString newId ] ]
             in

@@ -136,8 +136,8 @@ header model =
                         [ Layout.href "#" ]
                         [ span [] [ text "Home" ] ]
                     , Layout.link
-                        [ Layout.href "#questions/1" ]
-                        [ text "Questões" ]
+                        [ Layout.href "#questions/questionlist" ]
+                        [ text "Preparar prova" ]
                     , Layout.link
                         [ Layout.href "#users" ]
                         [ text "Minha conta" ]

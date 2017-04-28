@@ -31,23 +31,19 @@ drawerLink model =
     Layout.navigation
         []
         ([ Layout.link
-            [ Layout.href "https://goo.gl/forms/NckNklDbJM2uBf3I2"
-            ]
-            [ Icon.view "add_circle_outline" [ Icon.size18 ], text " Sugerir questão" ]
-         , Layout.link
-            [ Options.onClick <| DrawerLinkClick SelectQuestions
-            ]
-            [ Icon.view "view_module" [ Icon.size18 ], text " Selecionar Questões" ]
-         , Layout.link
             [ Options.onClick <| DrawerLinkClick SelectedQuestions
             ]
-            [ Icon.view "list" [ Icon.size18 ], text " Questões Selecionadas" ]
+            [ Icon.view "list" [ Icon.size18 ], text " Preparar prova" ]
          , Layout.link
             [ Options.onClick <| DrawerLinkClick MineLists
             ]
             [ Icon.view "favorite" [ Icon.size18 ]
-            , text " Minhas listas"
+            , text " Minhas provas"
             ]
+         , Layout.link
+            [ Options.onClick <| DrawerLinkClick SelectQuestions
+            ]
+            [ Icon.view "view_module" [ Icon.size18 ], text " Banco de questões" ]
          ]
             ++ if model.selectingQuestions then
                 filters model

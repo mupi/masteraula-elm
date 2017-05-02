@@ -1,31 +1,42 @@
 module Question.View exposing (..)
 
-import Html.Attributes exposing (class, placeholder, autofocus, value, name, id)
-import Html.Events exposing (onInput)
-import Html exposing (..)
 import Date
+import Html exposing (..)
+import Html.Attributes exposing (class, placeholder, autofocus, value, name, id)
 import Html.Events exposing (..)
-import Question.Types exposing (..)
+import Json.Decode as Json
 import Markdown
-import Material.Textfield as Textfield
+import Json.Decode as Json
 import Material.Badge as Badge
 import Material.Button as Button
-import Material.Grid as Grid
 import Material.Card as Card
 import Material.Chip as Chip
-import Material.Icon as Icon
-import Material.List as Lists
-import Material.Layout as Layout
-import Material.Toggles as Toggles
-import Material.Options as Options exposing (css)
-import Material.Grid exposing (grid, cell, size, offset, Device(..))
-import Material.Typography as Typo
-import Material.Dialog as Dialog
-import Material.Spinner as Loading
-import Material.Snackbar as Snackbar
 import Material.Color as Color
-import Utils.MDLUtils as Utils
+import Material.Dialog as Dialog
+import Material.Grid as Grid
+import Material.Grid exposing (grid, cell, size, offset, Device(..))
+import Material.Icon as Icon
+import Material.Layout as Layout
+import Material.List as Lists
+import Material.Options as Options exposing (css)
+import Material.Snackbar as Snackbar
+import Material.Spinner as Loading
+import Material.Toggles as Toggles
+import Question.Types exposing (..)
+import Material.Typography as Typo
 import Utils.StringUtils as StringUtils
+
+
+onEnter : Msg -> Attribute Msg
+onEnter msg =
+    let
+        isEnter code =
+            if code == 13 then
+                Json.succeed msg
+            else
+                Json.fail "not ENTER"
+    in
+        on "keydown" (Json.andThen isEnter keyCode)
 
 
 drawerLink : Model -> Html Msg
@@ -723,50 +734,42 @@ searchTagChip tag =
 
 searchView : Model -> Html Msg
 searchView model =
-    div []
+    Options.div []
         [ Grid.grid []
-            [ Grid.cell [ size All 4 ]
-                [ Textfield.render Mdl
-                    [ 4, 0 ]
-                    model.mdl
-                    [ Options.onInput TagSearchInput
-                    , Utils.onEnter TagSearchAdd
-                    , Textfield.value model.currentTag
-                    , Textfield.label "Buscar questões"
-                    , Textfield.floatingLabel
+            [ Grid.cell [ size All 11 ]
+                [ input
+                    [ class "search-input"
+                    , placeholder "Digite o(s) termo(s) e encontre questões relacionadas"
+                    , value model.currentTag
+                    , onInput TagSearchInput
+                    , onEnter TagSearchAdd
                     ]
                     []
                 ]
-            , Grid.cell [ size All 2 ]
+            , Grid.cell [ size All 1 ]
                 [ Button.render Mdl
                     [ 4, 1 ]
                     model.mdl
-                    [ Button.ripple
-                    , Button.colored
-                    , Button.raised
+                    [ Button.fab
                     , Options.onClick TagSearch
                     ]
-                    [ text "Buscar" ]
-                ]
-            , Grid.cell
-                [ size All 6 ]
-                [ Button.render Mdl
-                    [ 4, 2 ]
-                    model.mdl
-                    [ Button.ripple
-                    , Button.colored
-                    , Button.flat
-                    , Button.link "https://goo.gl/forms/0wUWEPzVn212FTNg1"
-                    ]
-                    [ text "Não encontrou o que queria? Faça seu pedido!" ]
+                    [ Icon.i "zoom_in" ]
                 ]
             ]
         , Options.styled div
             [ Options.css "margin-left" "5px"
-            , Options.css "margin-top" "-25px"
             ]
           <|
             List.map (\tag -> searchTagChip tag) model.filters.tags
+        , Button.render Mdl
+            [ 4, 2 ]
+            model.mdl
+            [ Button.ripple
+            , Button.colored
+            , Button.flat
+            , Button.link "https://goo.gl/forms/0wUWEPzVn212FTNg1"
+            ]
+            [ text "Não encontrou o que queria? Faça seu pedido!" ]
         ]
 
 

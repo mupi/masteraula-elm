@@ -15,7 +15,7 @@ import Utils.StringUtils as StringUtils
 
 initQuestion : Question
 initQuestion =
-    Question 0 "" Nothing User.initUser 0 [] Nothing [] [] Nothing Nothing Nothing []
+    Question 0 (QuestionParent Nothing) "" Nothing User.initUser 0 [] Nothing [] [] Nothing Nothing Nothing [] (RelatedQuestion [])
 
 
 initQuestionPage : QuestionPage
@@ -78,10 +78,7 @@ update : Msg -> Model -> App.Global -> ( Model, Cmd Msg )
 update msg model global =
     case msg of
         GetQuestion questionId ->
-            if model.question.id == questionId then
-                { model | selectingQuestions = False } ! []
-            else
-                { model | selectingQuestions = False, redirected = True } ! [ fetchGetQuestion questionId global.token ]
+            { model | selectingQuestions = False, redirected = True, loading = True } ! [ fetchGetQuestion questionId global.token ]
 
         GetQuestionPage questionPage ->
             if model.questionPage.actual == questionPage && emptyFilters model.filters then
@@ -416,9 +413,9 @@ update msg model global =
 
         OnFetchGetQuestion (Ok question) ->
             if model.redirected then
-                { model | question = question, error = "", redirected = False } ! []
+                { model | question = question, error = "", redirected = False, loading = False } ! []
             else
-                { model | question = question, error = "" } ! [ Navigation.newUrl <| String.concat [ "#question/", toString question.id ] ]
+                { model | question = question, error = "", loading = False } ! [ Navigation.newUrl <| String.concat [ "#question/", toString question.id ] ]
 
         OnFetchGetQuestion (Err error) ->
             let

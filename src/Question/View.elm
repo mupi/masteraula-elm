@@ -215,7 +215,7 @@ filters model =
                                         , Options.onToggle (FilterSubject (StringSubject subject.slug))
                                         , Options.cs "question_radio_span"
                                         ]
-                                        [ text subject.name ]
+                                        [ text subject.subject_name ]
                                     ]
                             )
                             subjects
@@ -490,7 +490,7 @@ cardTitle question =
                     else
                         case List.head question.subjects of
                             Just s ->
-                                s.name
+                                s.subject_name
 
                             Nothing ->
                                 ""

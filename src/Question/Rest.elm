@@ -4,10 +4,11 @@ import App.Config as Config
 import Http
 import Json.Decode as Decode exposing (field)
 import Json.Decode.Pipeline exposing (decode, required, optional, hardcoded)
-import Json.Encode as Encode exposing (Value, encode, object, string, list, int, bool)
+import Json.Encode as Encode exposing (encode)
 import Question.Types exposing (..)
 import User.Rest as User
 import Utils.StringUtils exposing (..)
+import Utils.EncodeUtils as Encode
 
 
 -- Decoders
@@ -34,6 +35,7 @@ questionDecoder : Decode.Decoder Question
 questionDecoder =
     decode Question
         |> required "id" Decode.int
+        |> optional "question_parent" (Decode.map QuestionParent (Decode.nullable (Decode.lazy (\_ -> questionDecoder)))) (QuestionParent Nothing)
         |> required "question_statement" Decode.string
         |> required "level" (Decode.nullable Decode.string)
         |> required "author" User.userDecoder
@@ -45,7 +47,8 @@ questionDecoder =
         |> required "education_level" (Decode.nullable Decode.string)
         |> required "year" (Decode.nullable Decode.int)
         |> required "source" (Decode.nullable Decode.string)
-        |> required "question_lists" (Decode.list questionListInfoDecoder)
+        |> optional "question_lists" (Decode.list questionListInfoDecoder) []
+        |> optional "related_questions" (Decode.map RelatedQuestion (Decode.list (Decode.lazy (\_ -> questionDecoder)))) (RelatedQuestion [])
 
 
 questionOrderDecoder : Decode.Decoder QuestionOrder
@@ -106,6 +109,92 @@ headerBuild token =
 
         Nothing ->
             []
+
+
+
+-- Encoders
+
+
+questionEncoder : Question -> Encode.Value
+questionEncoder question =
+    Encode.object
+        [ ( "id", Encode.int question.id )
+        , case question.question_parent of
+            QuestionParent (Just parent) ->
+                ( "question_parent", questionEncoder parent )
+
+            _ ->
+                ( "question_parent", Encode.null )
+        , ( "question_statement", Encode.string question.question_statement )
+        , ( "level", Encode.maybeString question.level )
+        , ( "author", User.userEncoder question.author )
+        , ( "credit_cost", Encode.int question.credit_cost )
+        , ( "tags", Encode.list <| List.map Encode.string question.tags )
+        , ( "resolution", Encode.maybeString question.resolution )
+        , ( "answers", Encode.list <| List.map answerEncoder question.answers )
+        , ( "subjects", Encode.list <| List.map subjectEncoder question.subjects )
+        , ( "education_level", Encode.maybeString question.education_level )
+        , ( "year", Encode.maybeInt question.year )
+        , ( "source", Encode.maybeString question.source )
+        , ( "question_lists", Encode.list <| List.map questionListInfoEncoder question.question_lists )
+        , case question.related_questions of
+            RelatedQuestion [] ->
+                ( "related_questions", Encode.list [] )
+
+            RelatedQuestion qc ->
+                ( "related_questions", Encode.list <| List.map questionEncoder qc )
+        ]
+
+
+answerEncoder : Answer -> Encode.Value
+answerEncoder answer =
+    Encode.object
+        [ ( "id", Encode.int answer.id )
+        , ( "answer_text", Encode.string answer.answer_text )
+        , ( "is_correct", Encode.bool answer.is_correct )
+        ]
+
+
+subjectEncoder : Subject -> Encode.Value
+subjectEncoder subject =
+    Encode.object
+        [ ( "id", Encode.int subject.id )
+        , ( "subject_name", Encode.string subject.subject_name )
+        , ( "slug", Encode.string subject.slug )
+        ]
+
+
+questionListEncoder : QuestionList -> Encode.Value
+questionListEncoder questionList =
+    Encode.object
+        [ ( "id", Encode.int questionList.id )
+        , ( "question_list_header", Encode.string questionList.question_list_header )
+        , ( "secret", Encode.bool questionList.secret )
+        , ( "owner", User.userEncoder questionList.owner )
+        , ( "questions", Encode.list <| List.map questionOrderEncoder questionList.questions )
+        , ( "question_count", Encode.int questionList.question_count )
+        , ( "create_date", Encode.string questionList.create_date )
+        ]
+
+
+questionListInfoEncoder : QuestionListInfo -> Encode.Value
+questionListInfoEncoder questionListInfo =
+    Encode.object
+        [ ( "id", Encode.int questionListInfo.id )
+        , ( "question_list_header", Encode.string questionListInfo.question_list_header )
+        , ( "secret", Encode.bool questionListInfo.secret )
+        , ( "owner", User.userEncoder questionListInfo.owner )
+        , ( "question_count", Encode.int questionListInfo.question_count )
+        , ( "create_date", Encode.string questionListInfo.create_date )
+        ]
+
+
+questionOrderEncoder : QuestionOrder -> Encode.Value
+questionOrderEncoder questionOrder =
+    Encode.object
+        [ ( "question", questionEncoder questionOrder.question )
+        , ( "order", Encode.int questionOrder.order )
+        ]
 
 
 
@@ -287,20 +376,20 @@ urlQuestionList questionListId =
         String.concat [ Config.baseUrl, "question_lists/", toString questionListId, "/" ]
 
 
-questionEncoder : Int -> QuestionOrder -> Value
-questionEncoder newOrder questionOrder =
-    object
-        [ ( "question", int questionOrder.question.id )
-        , ( "order", int (newOrder + 1) )
+questionOrderSaveEncoder : Int -> QuestionOrder -> Encode.Value
+questionOrderSaveEncoder newOrder questionOrder =
+    Encode.object
+        [ ( "question", Encode.int questionOrder.question.id )
+        , ( "order", Encode.int (newOrder + 1) )
         ]
 
 
-saveQuestionListEncoder : QuestionList -> Value
+saveQuestionListEncoder : QuestionList -> Encode.Value
 saveQuestionListEncoder questionList =
-    object
-        [ ( "secret", bool False )
-        , ( "questions", list (List.indexedMap questionEncoder questionList.questions) )
-        , ( "question_list_header", string questionList.question_list_header )
+    Encode.object
+        [ ( "secret", Encode.bool False )
+        , ( "questions", Encode.list (List.indexedMap questionOrderSaveEncoder questionList.questions) )
+        , ( "question_list_header", Encode.string questionList.question_list_header )
         ]
 
 

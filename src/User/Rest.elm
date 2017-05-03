@@ -4,10 +4,13 @@ import App.Config as Config
 import Http exposing (..)
 import Json.Decode as Decode exposing (field)
 import Json.Decode.Pipeline exposing (decode, required, optional, hardcoded)
-import Json.Encode as Encode exposing (Value, encode, object, string)
+import Json.Encode as Encode exposing (encode)
 import User.Types exposing (..)
 import Json.Decode as Decode exposing (field)
 import User.Types exposing (User)
+
+
+--Decoder
 
 
 usersDecoder : Decode.Decoder (List User)
@@ -24,6 +27,20 @@ userDecoder =
         |> optional "email" Decode.string ""
 
 
+
+--Encoder
+
+
+userEncoder : User -> Encode.Value
+userEncoder user =
+    Encode.object
+        [ ( "id", Encode.int user.id )
+        , ( "username", Encode.string user.username )
+        , ( "name", Encode.string user.name )
+        , ( "email", Encode.string user.email )
+        ]
+
+
 headerBuild : Maybe String -> List Http.Header
 headerBuild token =
     case token of
@@ -34,7 +51,7 @@ headerBuild token =
             []
 
 
-bodyBuild : Model -> (Model -> Value) -> Body
+bodyBuild : Model -> (Model -> Encode.Value) -> Body
 bodyBuild model encoder =
     stringBody "application/json" (encode 0 (encoder model))
 
@@ -48,12 +65,12 @@ changePasswordUrl =
     String.concat [ Config.baseUrl, "auth/password/change/" ]
 
 
-changePasswordEncoder : Model -> Value
+changePasswordEncoder : Model -> Encode.Value
 changePasswordEncoder model =
-    object
-        [ ( "old_password", string model.password )
-        , ( "new_password1", string model.newPassword )
-        , ( "new_password2", string model.newPassword )
+    Encode.object
+        [ ( "old_password", Encode.string model.password )
+        , ( "new_password1", Encode.string model.newPassword )
+        , ( "new_password2", Encode.string model.newPassword )
         ]
 
 
@@ -84,7 +101,7 @@ profileUpdateUrl =
     String.concat [ Config.baseUrl, "auth/user/" ]
 
 
-profileUpdateEncoder : Model -> Value
+profileUpdateEncoder : Model -> Encode.Value
 profileUpdateEncoder model =
     let
         editUser =
@@ -94,13 +111,13 @@ profileUpdateEncoder model =
             model.user
     in
         if user.email /= editUser.email then
-            object
-                [ ( "name", string editUser.name )
-                , ( "email", string editUser.email )
+            Encode.object
+                [ ( "name", Encode.string editUser.name )
+                , ( "email", Encode.string editUser.email )
                 ]
         else
-            object
-                [ ( "name", string editUser.name ) ]
+            Encode.object
+                [ ( "name", Encode.string editUser.name ) ]
 
 
 patchProfileUpdate : Model -> Maybe String -> Http.Request String

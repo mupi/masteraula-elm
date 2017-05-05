@@ -53,8 +53,11 @@ type alias Question =
 
 type alias Filter =
     { levelFilters : List LevelFilterType
+    , levelToggle : Bool
     , subjectFilters : List String
+    , subjectToggle : Bool
     , educationLevelFilters : List String
+    , educationToggle : Bool
     , tags : List String
     }
 
@@ -144,9 +147,15 @@ type SubjectFilterType
     | AllSubject
 
 
-type EducationLevelType
+type EducationFilterType
     = StringEducationLevel String
     | AllEducationLevel
+
+
+type ToggleFilterType
+    = LevelToggle
+    | SubjectToggle
+    | EducationToggle
 
 
 type DrawerLink
@@ -193,7 +202,8 @@ type Msg
       -- Filter
     | FilterLevel LevelFilterType
     | FilterSubject SubjectFilterType
-    | FilterEducationLevel EducationLevelType
+    | FilterEducationLevel EducationFilterType
+    | ToggleFilter ToggleFilterType
       -- Fetch
     | OnFetchGetQuestion (Result Http.Error Question)
     | OnFetchGetQuestionPage (Result Http.Error QuestionPage)

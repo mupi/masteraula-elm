@@ -35,7 +35,7 @@ initQuestionList =
 
 initFilters : Filter
 initFilters =
-    Filter [] [] [] []
+    Filter [] False [] False [] False []
 
 
 init : Model
@@ -263,8 +263,12 @@ update msg model global =
                 if not valid then
                     let
                         ( snackbar, effect ) =
-                            Snackbar.add (Snackbar.snackbar 0 error "Fechar") model.snackbar
-                                |> map2nd (Cmd.map Snackbar)
+                            let
+                                contents =
+                                    Snackbar.snackbar 0 error "Fechar"
+                            in
+                                Snackbar.add ({ contents | timeout = 5000 }) model.snackbar
+                                    |> map2nd (Cmd.map Snackbar)
                     in
                         { model | snackbar = snackbar } ! [ effect ]
                 else
@@ -391,6 +395,24 @@ update msg model global =
                     { model | filters = newFilters, loading = True } ! [ fetchGetQuestionPage 1 global.token, fetchGetSubject global.token ]
                 else
                     { model | filters = newFilters, loading = True } ! [ fetchGetQuestionFilterSearch 1 newFilters global.token ]
+
+        ToggleFilter toogle ->
+            let
+                filters =
+                    model.filters
+
+                newFilters =
+                    case toogle of
+                        LevelToggle ->
+                            { filters | levelToggle = not filters.levelToggle }
+
+                        SubjectToggle ->
+                            { filters | subjectToggle = not filters.subjectToggle }
+
+                        EducationToggle ->
+                            { filters | educationToggle = not filters.educationToggle }
+            in
+                { model | filters = newFilters } ! []
 
         OnFetchGetQuestion (Ok question) ->
             if model.redirected then

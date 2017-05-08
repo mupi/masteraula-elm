@@ -529,10 +529,25 @@ viewQuestion model =
 
         resolution =
             StringUtils.maybeStringToString question.resolution
+
+        related_questions =
+            case question.related_questions of
+                RelatedQuestion l ->
+                    l
+
+        question_parent =
+            case question.question_parent of
+                QuestionParent p ->
+                    p
     in
         Grid.grid [ Color.background (Color.color Color.Grey Color.S50) ]
             [ Grid.cell
-                [ size All 12
+                [ size All
+                    (if List.length related_questions > 0 then
+                        9
+                     else
+                        12
+                    )
                 , Options.css "padding" "8px 8px"
                 ]
                 [ Card.view
@@ -544,7 +559,13 @@ viewQuestion model =
                         [ css "min-height" "196px"
                         , Options.cs "question_card"
                         ]
-                        [ (if (String.length year_text > 0) && (String.length source_text > 0) then
+                        [ case question_parent of
+                            Just p ->
+                                Markdown.toHtml [] p.question_statement
+
+                            Nothing ->
+                                span [] []
+                        , (if (String.length year_text > 0) && (String.length source_text > 0) then
                             text ("(" ++ year_text ++ " - " ++ source_text ++ ")")
                            else if String.length year_text > 0 then
                             text ("(" ++ year_text ++ ")")
@@ -590,31 +611,58 @@ viewQuestion model =
                             , Button.accent
                             , Color.text Color.white
                             , css "font-size" "11px"
-                            , css "width" "50%"
+                            , css "width"
+                                (if List.length related_questions > 0 && question_parent == Nothing then
+                                    "100%"
+                                 else
+                                    "50%"
+                                )
                             , Options.onClick QuestionBack
                             ]
                             [ Icon.view "arrow_back" [ Icon.size18 ], text " Voltar" ]
-                        , Button.render Mdl
-                            [ 2, 2, question.id ]
-                            model.mdl
-                            [ Button.ripple
-                            , Button.accent
-                            , Color.text Color.white
-                            , css "font-size" "11px"
-                            , css "width" "50%"
-                            , if List.member question.id questionsId then
-                                Button.disabled
-                              else
-                                Options.onClick (QuestionListAdd question)
-                            ]
-                            (if List.member question.id questionsId then
-                                [ text "Adicionada" ]
-                             else
-                                [ Icon.view "add" [ Icon.size18 ], text " Adicionar" ]
-                            )
+                        , if List.length related_questions > 0 && question_parent == Nothing then
+                            span [] []
+                          else
+                            Button.render Mdl
+                                [ 2, 2, question.id ]
+                                model.mdl
+                                [ Button.ripple
+                                , Button.accent
+                                , Color.text Color.white
+                                , css "font-size" "11px"
+                                , css "width" "50%"
+                                , if List.member question.id questionsId then
+                                    Button.disabled
+                                  else
+                                    Options.onClick (QuestionListAdd question)
+                                ]
+                                (if List.member question.id questionsId then
+                                    [ text "Adicionada" ]
+                                 else
+                                    [ Icon.view "add" [ Icon.size18 ], text " Adicionar" ]
+                                )
                         ]
                     ]
                 ]
+            , if List.length related_questions > 0 then
+                Grid.cell
+                    [ size All 3 ]
+                <|
+                    Options.styled p
+                        [ Typo.title ]
+                        [ text "Questões relacionadas"
+                        ]
+                        :: (List.map
+                                (\question ->
+                                    Options.div [ Options.css "margin-bottom" "20px" ]
+                                        [ questionCardView model AddQuestionButton question ]
+                                )
+                                related_questions
+                           )
+              else
+                Grid.cell
+                    [ size All 0 ]
+                    []
             ]
 
 
@@ -676,7 +724,7 @@ questionCardButton model questionButtonType question =
                 Card.actions [] []
 
 
-questionCardView : Model -> QuestionButtonType -> Question -> Grid.Cell Msg
+questionCardView : Model -> QuestionButtonType -> Question -> Html Msg
 questionCardView model questionButtonType question =
     let
         year_text =
@@ -685,34 +733,29 @@ questionCardView model questionButtonType question =
         source_text =
             StringUtils.maybeStringToString question.source
     in
-        Grid.cell
-            [ size All 3
-            , Options.css "padding" "8px 8px"
+        Card.view
+            [ Color.background (Color.white)
+            , css "width" "100%"
+            , Options.cs "mdl-shadow--2dp"
+            , Options.onClick <| QuestionClick question
             ]
-            [ Card.view
-                [ Color.background (Color.white)
-                , css "width" "100%"
-                , Options.cs "mdl-shadow--2dp"
-                , Options.onClick <| QuestionClick question
+            [ cardTitle question
+            , Card.text
+                [ css "height" "196px"
+                , Options.cs "question_card thumb"
                 ]
-                [ cardTitle question
-                , Card.text
-                    [ css "height" "196px"
-                    , Options.cs "question_card thumb"
-                    ]
-                    [ (if (String.length year_text > 0) && (String.length source_text > 0) then
-                        text ("(" ++ year_text ++ " - " ++ source_text ++ ")")
-                       else if String.length year_text > 0 then
-                        text ("(" ++ year_text ++ ")")
-                       else if String.length source_text > 0 then
-                        text ("(" ++ source_text ++ ")")
-                       else
-                        text ""
-                      )
-                    , Markdown.toHtml [] question.question_statement
-                    ]
-                , (questionCardButton model questionButtonType question)
+                [ (if (String.length year_text > 0) && (String.length source_text > 0) then
+                    text ("(" ++ year_text ++ " - " ++ source_text ++ ")")
+                   else if String.length year_text > 0 then
+                    text ("(" ++ year_text ++ ")")
+                   else if String.length source_text > 0 then
+                    text ("(" ++ source_text ++ ")")
+                   else
+                    text ""
+                  )
+                , Markdown.toHtml [] question.question_statement
                 ]
+            , (questionCardButton model questionButtonType question)
             ]
 
 
@@ -858,7 +901,16 @@ viewQuestionPage model =
                 ]
             ]
         , Grid.grid []
-            (List.map (questionCardView model AddQuestionButton) (List.take 12 model.questionPage.questions))
+            (List.map
+                (\question ->
+                    Grid.cell
+                        [ size All 3
+                        , Options.css "padding" "8px 8px"
+                        ]
+                        [ questionCardView model AddQuestionButton question ]
+                )
+                (List.take 12 model.questionPage.questions)
+            )
         , questionPageControls model
         , Button.render Mdl
             [ 10 ]
@@ -907,7 +959,17 @@ viewQuestionList model =
                 ]
                 [ text "Veja abaixo as questões que você selecionou. Para baixá-las, digite um nome para a lista no campo acima, clique em salvar e em seguida Fazer Download." ]
             , Grid.grid [ Options.cs "questions_list_display" ]
-                (List.map (questionCardView model RemoveQuestionButton) <| List.map (\q -> q.question) questionList.questions)
+                (List.map
+                    (\question ->
+                        Grid.cell
+                            [ size All 3
+                            , Options.css "padding" "8px 8px"
+                            ]
+                            [ questionCardView model RemoveQuestionButton question ]
+                    )
+                 <|
+                    List.map (\q -> q.question) questionList.questions
+                )
             , if questionList.id == 0 then
                 viewQuestionListButtonNew model
               else
@@ -1051,7 +1113,17 @@ viewSelectedQuestionList model =
             , Grid.grid
                 [ Options.cs "questions_list_display"
                 ]
-                (List.map (questionCardView model NoneQuestionButton) <| List.map (\q -> q.question) questionList.questions)
+                (List.map
+                    (\question ->
+                        Grid.cell
+                            [ size All 3
+                            , Options.css "padding" "8px 8px"
+                            ]
+                            [ questionCardView model NoneQuestionButton question ]
+                    )
+                 <|
+                    List.map (\q -> q.question) questionList.questions
+                )
             , Options.div
                 [ Color.background Color.primaryDark
                 , Options.cs "questions_list_action"

@@ -655,7 +655,7 @@ viewQuestion model =
                         :: (List.map
                                 (\question ->
                                     Options.div [ Options.css "margin-bottom" "20px" ]
-                                        [ questionCardView model AddQuestionButton question ]
+                                        [ questionCardView model NoneQuestionButton question True ]
                                 )
                                 related_questions
                            )
@@ -724,8 +724,8 @@ questionCardButton model questionButtonType question =
                 Card.actions [] []
 
 
-questionCardView : Model -> QuestionButtonType -> Question -> Html Msg
-questionCardView model questionButtonType question =
+questionCardView : Model -> QuestionButtonType -> Question -> Bool -> Html Msg
+questionCardView model questionButtonType question forceLoad =
     let
         year_text =
             StringUtils.maybeIntToString question.year
@@ -737,7 +737,10 @@ questionCardView model questionButtonType question =
             [ Color.background (Color.white)
             , css "width" "100%"
             , Options.cs "mdl-shadow--2dp"
-            , Options.onClick <| QuestionClick question
+            , if forceLoad then
+                Options.onClick <| GetQuestion question.id
+              else
+                Options.onClick <| QuestionClick question
             ]
             [ cardTitle question
             , Card.text
@@ -907,7 +910,7 @@ viewQuestionPage model =
                         [ size All 3
                         , Options.css "padding" "8px 8px"
                         ]
-                        [ questionCardView model AddQuestionButton question ]
+                        [ questionCardView model AddQuestionButton question False ]
                 )
                 (List.take 12 model.questionPage.questions)
             )
@@ -965,7 +968,7 @@ viewQuestionList model =
                             [ size All 3
                             , Options.css "padding" "8px 8px"
                             ]
-                            [ questionCardView model RemoveQuestionButton question ]
+                            [ questionCardView model RemoveQuestionButton question False ]
                     )
                  <|
                     List.map (\q -> q.question) questionList.questions
@@ -1119,7 +1122,7 @@ viewSelectedQuestionList model =
                             [ size All 3
                             , Options.css "padding" "8px 8px"
                             ]
-                            [ questionCardView model NoneQuestionButton question ]
+                            [ questionCardView model NoneQuestionButton question False ]
                     )
                  <|
                     List.map (\q -> q.question) questionList.questions

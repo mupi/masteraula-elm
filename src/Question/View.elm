@@ -611,36 +611,28 @@ viewQuestion model =
                             , Button.accent
                             , Color.text Color.white
                             , css "font-size" "11px"
-                            , css "width"
-                                (if List.length related_questions > 0 && question_parent == Nothing then
-                                    "100%"
-                                 else
-                                    "50%"
-                                )
+                            , css "width" "50%"
                             , Options.onClick QuestionBack
                             ]
                             [ Icon.view "arrow_back" [ Icon.size18 ], text " Voltar" ]
-                        , if List.length related_questions > 0 && question_parent == Nothing then
-                            span [] []
-                          else
-                            Button.render Mdl
-                                [ 2, 2, question.id ]
-                                model.mdl
-                                [ Button.ripple
-                                , Button.accent
-                                , Color.text Color.white
-                                , css "font-size" "11px"
-                                , css "width" "50%"
-                                , if List.member question.id questionsId then
-                                    Button.disabled
-                                  else
-                                    Options.onClick (QuestionListAdd question)
-                                ]
-                                (if List.member question.id questionsId then
-                                    [ text "Adicionada" ]
-                                 else
-                                    [ Icon.view "add" [ Icon.size18 ], text " Adicionar" ]
-                                )
+                        , Button.render Mdl
+                            [ 2, 2, question.id ]
+                            model.mdl
+                            [ Button.ripple
+                            , Button.accent
+                            , Color.text Color.white
+                            , css "font-size" "11px"
+                            , css "width" "50%"
+                            , if List.member question.id questionsId then
+                                Button.disabled
+                              else
+                                Options.onClick (QuestionListAdd question)
+                            ]
+                            (if List.member question.id questionsId then
+                                [ text "Adicionada" ]
+                             else
+                                [ Icon.view "add" [ Icon.size18 ], text " Adicionar" ]
+                            )
                         ]
                     ]
                 ]

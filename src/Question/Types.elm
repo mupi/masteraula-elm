@@ -34,8 +34,20 @@ type alias Model =
     }
 
 
+type alias Filter =
+    { levelFilters : List LevelFilterType
+    , levelToggle : Bool
+    , subjectFilters : List String
+    , subjectToggle : Bool
+    , educationLevelFilters : List String
+    , educationToggle : Bool
+    , tags : List String
+    }
+
+
 type alias Question =
     { id : Int
+    , question_parent : QuestionParent
     , question_statement : String
     , level : Maybe String
     , author : User.User
@@ -48,30 +60,40 @@ type alias Question =
     , year : Maybe Int
     , source : Maybe String
     , question_lists : List QuestionListInfo
+    , related_questions : RelatedQuestion
     }
 
 
-type alias Filter =
-    { levelFilters : List LevelFilterType
-    , levelToggle : Bool
-    , subjectFilters : List String
-    , subjectToggle : Bool
-    , educationLevelFilters : List String
-    , educationToggle : Bool
-    , tags : List String
+type QuestionParent
+    = QuestionParent (Maybe Question)
+
+
+type RelatedQuestion
+    = RelatedQuestion (List Question)
+
+
+type alias Answer =
+    { id : Int
+    , answer_text : String
+    , is_correct : Bool
     }
 
 
 type alias Subject =
     { id : Int
-    , name : String
+    , subject_name : String
     , slug : String
     }
 
 
-type alias QuestionOrder =
-    { question : Question
-    , order : Int
+type alias QuestionList =
+    { id : Int
+    , question_list_header : String
+    , secret : Bool
+    , owner : User.User
+    , questions : List QuestionOrder
+    , question_count : Int
+    , create_date : String
     }
 
 
@@ -85,14 +107,9 @@ type alias QuestionListInfo =
     }
 
 
-type alias QuestionList =
-    { id : Int
-    , question_list_header : String
-    , secret : Bool
-    , owner : User.User
-    , questions : List QuestionOrder
-    , question_count : Int
-    , create_date : String
+type alias QuestionOrder =
+    { question : Question
+    , order : Int
     }
 
 
@@ -120,13 +137,6 @@ type alias QuestionId =
 
 type alias PageNumber =
     Int
-
-
-type alias Answer =
-    { id : Int
-    , answer_text : String
-    , is_correct : Bool
-    }
 
 
 type DialogType

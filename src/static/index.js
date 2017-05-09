@@ -6,7 +6,7 @@ var startingState = storedState ? storedState : null;
 
 var mupiApp = Elm.Main.fullscreen(startingState);
 
-mupiApp.ports.setLocalStorage.subscribe(function(state) {
+mupiApp.ports.portLocalStorage.subscribe(function(state) {
   localStorage.setItem('elm-app-save', JSON.stringify(state));
 });
 

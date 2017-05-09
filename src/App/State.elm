@@ -9,6 +9,7 @@ import App.Routing exposing (parseLocation, Route(..))
 import App.Types exposing (..)
 import Login.State as Login
 import Login.Types as Login
+import Json.Encode as Encode
 import User.State as User
 import User.Types as User
 import Signup.State as Signup
@@ -22,7 +23,12 @@ import User.State as User
 import Material
 
 
-port setLocalStorage : LocalStorage -> Cmd msg
+port portLocalStorage : Encode.Value -> Cmd msg
+
+
+setLocalStorage : LocalStorage -> Cmd msg
+setLocalStorage localStorage =
+    portLocalStorage <| localStorageEncoder localStorage
 
 
 port displayDialog : String -> Cmd msg
@@ -39,7 +45,11 @@ init storage location =
                             Just value
 
                         Err error ->
-                            Nothing
+                            let
+                                a =
+                                    Debug.log "a" error
+                            in
+                                Nothing
 
                 Nothing ->
                     Nothing

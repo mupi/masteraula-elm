@@ -1,31 +1,42 @@
 module Question.View exposing (..)
 
-import Html.Attributes exposing (class, placeholder, autofocus, value, name, id)
-import Html.Events exposing (onInput)
-import Html exposing (..)
 import Date
+import Html exposing (..)
+import Html.Attributes exposing (class, placeholder, autofocus, value, name, id)
 import Html.Events exposing (..)
-import Question.Types exposing (..)
+import Json.Decode as Json
 import Markdown
-import Material.Textfield as Textfield
+import Json.Decode as Json
 import Material.Badge as Badge
 import Material.Button as Button
-import Material.Grid as Grid
 import Material.Card as Card
 import Material.Chip as Chip
-import Material.Icon as Icon
-import Material.List as Lists
-import Material.Layout as Layout
-import Material.Toggles as Toggles
-import Material.Options as Options exposing (css)
-import Material.Grid exposing (grid, cell, size, offset, Device(..))
-import Material.Typography as Typo
-import Material.Dialog as Dialog
-import Material.Spinner as Loading
-import Material.Snackbar as Snackbar
 import Material.Color as Color
-import Utils.MDLUtils as Utils
+import Material.Dialog as Dialog
+import Material.Grid as Grid
+import Material.Grid exposing (grid, cell, size, offset, Device(..))
+import Material.Icon as Icon
+import Material.Layout as Layout
+import Material.List as Lists
+import Material.Options as Options exposing (css)
+import Material.Snackbar as Snackbar
+import Material.Spinner as Loading
+import Material.Toggles as Toggles
+import Question.Types exposing (..)
+import Material.Typography as Typo
 import Utils.StringUtils as StringUtils
+
+
+onEnter : Msg -> Attribute Msg
+onEnter msg =
+    let
+        isEnter code =
+            if code == 13 then
+                Json.succeed msg
+            else
+                Json.fail "not ENTER"
+    in
+        on "keydown" (Json.andThen isEnter keyCode)
 
 
 drawerLink : Model -> Html Msg
@@ -204,7 +215,7 @@ filters model =
                                         , Options.onToggle (FilterSubject (StringSubject subject.slug))
                                         , Options.cs "question_radio_span"
                                         ]
-                                        [ text subject.name ]
+                                        [ text subject.subject_name ]
                                     ]
                             )
                             subjects
@@ -479,7 +490,7 @@ cardTitle question =
                     else
                         case List.head question.subjects of
                             Just s ->
-                                s.name
+                                s.subject_name
 
                             Nothing ->
                                 ""
@@ -518,10 +529,25 @@ viewQuestion model =
 
         resolution =
             StringUtils.maybeStringToString question.resolution
+
+        related_questions =
+            case question.related_questions of
+                RelatedQuestion l ->
+                    l
+
+        question_parent =
+            case question.question_parent of
+                QuestionParent p ->
+                    p
     in
         Grid.grid [ Color.background (Color.color Color.Grey Color.S50) ]
             [ Grid.cell
-                [ size All 12
+                [ size All
+                    (if List.length related_questions > 0 then
+                        9
+                     else
+                        12
+                    )
                 , Options.css "padding" "8px 8px"
                 ]
                 [ Card.view
@@ -533,7 +559,13 @@ viewQuestion model =
                         [ css "min-height" "196px"
                         , Options.cs "question_card"
                         ]
-                        [ (if (String.length year_text > 0) && (String.length source_text > 0) then
+                        [ case question_parent of
+                            Just p ->
+                                Markdown.toHtml [] p.question_statement
+
+                            Nothing ->
+                                span [] []
+                        , (if (String.length year_text > 0) && (String.length source_text > 0) then
                             text ("(" ++ year_text ++ " - " ++ source_text ++ ")")
                            else if String.length year_text > 0 then
                             text ("(" ++ year_text ++ ")")
@@ -604,6 +636,25 @@ viewQuestion model =
                         ]
                     ]
                 ]
+            , if List.length related_questions > 0 then
+                Grid.cell
+                    [ size All 3 ]
+                <|
+                    Options.styled p
+                        [ Typo.title ]
+                        [ text "Questões relacionadas"
+                        ]
+                        :: (List.map
+                                (\question ->
+                                    Options.div [ Options.css "margin-bottom" "20px" ]
+                                        [ questionCardView model NoneQuestionButton question True ]
+                                )
+                                related_questions
+                           )
+              else
+                Grid.cell
+                    [ size All 0 ]
+                    []
             ]
 
 
@@ -665,8 +716,8 @@ questionCardButton model questionButtonType question =
                 Card.actions [] []
 
 
-questionCardView : Model -> QuestionButtonType -> Question -> Grid.Cell Msg
-questionCardView model questionButtonType question =
+questionCardView : Model -> QuestionButtonType -> Question -> Bool -> Html Msg
+questionCardView model questionButtonType question forceLoad =
     let
         year_text =
             StringUtils.maybeIntToString question.year
@@ -674,34 +725,32 @@ questionCardView model questionButtonType question =
         source_text =
             StringUtils.maybeStringToString question.source
     in
-        Grid.cell
-            [ size All 3
-            , Options.css "padding" "8px 8px"
+        Card.view
+            [ Color.background (Color.white)
+            , css "width" "100%"
+            , Options.cs "mdl-shadow--2dp"
+            , if forceLoad then
+                Options.onClick <| GetQuestion question.id
+              else
+                Options.onClick <| QuestionClick question
             ]
-            [ Card.view
-                [ Color.background (Color.white)
-                , css "width" "100%"
-                , Options.cs "mdl-shadow--2dp"
-                , Options.onClick <| QuestionClick question
+            [ cardTitle question
+            , Card.text
+                [ css "height" "196px"
+                , Options.cs "question_card thumb"
                 ]
-                [ cardTitle question
-                , Card.text
-                    [ css "height" "196px"
-                    , Options.cs "question_card thumb"
-                    ]
-                    [ (if (String.length year_text > 0) && (String.length source_text > 0) then
-                        text ("(" ++ year_text ++ " - " ++ source_text ++ ")")
-                       else if String.length year_text > 0 then
-                        text ("(" ++ year_text ++ ")")
-                       else if String.length source_text > 0 then
-                        text ("(" ++ source_text ++ ")")
-                       else
-                        text ""
-                      )
-                    , Markdown.toHtml [] question.question_statement
-                    ]
-                , (questionCardButton model questionButtonType question)
+                [ (if (String.length year_text > 0) && (String.length source_text > 0) then
+                    text ("(" ++ year_text ++ " - " ++ source_text ++ ")")
+                   else if String.length year_text > 0 then
+                    text ("(" ++ year_text ++ ")")
+                   else if String.length source_text > 0 then
+                    text ("(" ++ source_text ++ ")")
+                   else
+                    text ""
+                  )
+                , Markdown.toHtml [] question.question_statement
                 ]
+            , (questionCardButton model questionButtonType question)
             ]
 
 
@@ -723,50 +772,42 @@ searchTagChip tag =
 
 searchView : Model -> Html Msg
 searchView model =
-    div []
+    Options.div []
         [ Grid.grid []
-            [ Grid.cell [ size All 4 ]
-                [ Textfield.render Mdl
-                    [ 4, 0 ]
-                    model.mdl
-                    [ Options.onInput TagSearchInput
-                    , Utils.onEnter TagSearchAdd
-                    , Textfield.value model.currentTag
-                    , Textfield.label "Buscar questões"
-                    , Textfield.floatingLabel
+            [ Grid.cell [ size All 11 ]
+                [ input
+                    [ class "search-input"
+                    , placeholder "Digite o(s) termo(s) e encontre questões relacionadas"
+                    , value model.currentTag
+                    , onInput TagSearchInput
+                    , onEnter TagSearchAdd
                     ]
                     []
                 ]
-            , Grid.cell [ size All 2 ]
+            , Grid.cell [ size All 1 ]
                 [ Button.render Mdl
                     [ 4, 1 ]
                     model.mdl
-                    [ Button.ripple
-                    , Button.colored
-                    , Button.raised
+                    [ Button.fab
                     , Options.onClick TagSearch
                     ]
-                    [ text "Buscar" ]
-                ]
-            , Grid.cell
-                [ size All 6 ]
-                [ Button.render Mdl
-                    [ 4, 2 ]
-                    model.mdl
-                    [ Button.ripple
-                    , Button.colored
-                    , Button.flat
-                    , Button.link "https://goo.gl/forms/0wUWEPzVn212FTNg1"
-                    ]
-                    [ text "Não encontrou o que queria? Faça seu pedido!" ]
+                    [ Icon.i "zoom_in" ]
                 ]
             ]
         , Options.styled div
             [ Options.css "margin-left" "5px"
-            , Options.css "margin-top" "-25px"
             ]
           <|
             List.map (\tag -> searchTagChip tag) model.filters.tags
+        , Button.render Mdl
+            [ 4, 2 ]
+            model.mdl
+            [ Button.ripple
+            , Button.colored
+            , Button.flat
+            , Button.link "https://goo.gl/forms/0wUWEPzVn212FTNg1"
+            ]
+            [ text "Não encontrou o que queria? Faça seu pedido!" ]
         ]
 
 
@@ -855,7 +896,16 @@ viewQuestionPage model =
                 ]
             ]
         , Grid.grid []
-            (List.map (questionCardView model AddQuestionButton) (List.take 12 model.questionPage.questions))
+            (List.map
+                (\question ->
+                    Grid.cell
+                        [ size All 3
+                        , Options.css "padding" "8px 8px"
+                        ]
+                        [ questionCardView model AddQuestionButton question False ]
+                )
+                (List.take 12 model.questionPage.questions)
+            )
         , questionPageControls model
         , Button.render Mdl
             [ 10 ]
@@ -904,7 +954,17 @@ viewQuestionList model =
                 ]
                 [ text "Veja abaixo as questões que você selecionou. Para baixá-las, digite um nome para a lista no campo acima, clique em salvar e em seguida Fazer Download." ]
             , Grid.grid [ Options.cs "questions_list_display" ]
-                (List.map (questionCardView model RemoveQuestionButton) <| List.map (\q -> q.question) questionList.questions)
+                (List.map
+                    (\question ->
+                        Grid.cell
+                            [ size All 3
+                            , Options.css "padding" "8px 8px"
+                            ]
+                            [ questionCardView model RemoveQuestionButton question False ]
+                    )
+                 <|
+                    List.map (\q -> q.question) questionList.questions
+                )
             , if questionList.id == 0 then
                 viewQuestionListButtonNew model
               else
@@ -1048,7 +1108,17 @@ viewSelectedQuestionList model =
             , Grid.grid
                 [ Options.cs "questions_list_display"
                 ]
-                (List.map (questionCardView model NoneQuestionButton) <| List.map (\q -> q.question) questionList.questions)
+                (List.map
+                    (\question ->
+                        Grid.cell
+                            [ size All 3
+                            , Options.css "padding" "8px 8px"
+                            ]
+                            [ questionCardView model NoneQuestionButton question False ]
+                    )
+                 <|
+                    List.map (\q -> q.question) questionList.questions
+                )
             , Options.div
                 [ Color.background Color.primaryDark
                 , Options.cs "questions_list_action"

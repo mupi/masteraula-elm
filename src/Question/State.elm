@@ -15,7 +15,7 @@ import Utils.StringUtils as StringUtils
 
 initQuestion : Question
 initQuestion =
-    Question 0 "" Nothing User.initUser 0 [] Nothing [] [] Nothing Nothing Nothing []
+    Question 0 (QuestionParent Nothing) "" Nothing User.initUser 0 [] Nothing [] [] Nothing Nothing Nothing [] (RelatedQuestion [])
 
 
 initQuestionPage : QuestionPage
@@ -81,7 +81,7 @@ update msg model global =
             if model.question.id == questionId then
                 { model | selectingQuestions = False } ! []
             else
-                { model | selectingQuestions = False, redirected = True } ! [ fetchGetQuestion questionId global.token ]
+                { model | selectingQuestions = False, redirected = True, loading = True } ! [ fetchGetQuestion questionId global.token ]
 
         GetQuestionPage questionPage ->
             if model.questionPage.actual == questionPage && emptyFilters model.filters then
@@ -202,12 +202,35 @@ update msg model global =
                     model.questionListEdit
 
                 updQuestionList =
-                    { questionList | questions = List.append questionList.questions [ QuestionOrder question 0 ] }
+                    let
+                        insert : Question -> List QuestionOrder -> List QuestionOrder
+                        insert question list =
+                            case list of
+                                qo :: rest ->
+                                    if question.question_parent == qo.question.question_parent then
+                                        (qo :: [ QuestionOrder question 0 ]) ++ rest
+                                    else
+                                        qo :: insert question rest
 
-                newQuestionList =
-                    { questionList | questions = List.indexedMap (\index questionOrder -> { questionOrder | order = index + 1 }) updQuestionList.questions }
+                                [] ->
+                                    [ QuestionOrder question 0 ]
+
+                        questions =
+                            case question.question_parent of
+                                QuestionParent q ->
+                                    case q of
+                                        Just a ->
+                                            insert question questionList.questions
+
+                                        Nothing ->
+                                            questionList.questions ++ [ QuestionOrder question 0 ]
+                    in
+                        { questionList | questions = List.indexedMap (\index questionOrder -> { questionOrder | order = index + 1 }) <| questions }
+
+                -- newQuestionList =
+                --     { questionList | questions = List.indexedMap (\index questionOrder -> { questionOrder | order = index + 1 }) updQuestionList.questions }
             in
-                { model | questionListEdit = newQuestionList } ! []
+                { model | questionListEdit = updQuestionList } ! []
 
         QuestionListRemove question ->
             let
@@ -416,9 +439,9 @@ update msg model global =
 
         OnFetchGetQuestion (Ok question) ->
             if model.redirected then
-                { model | question = question, error = "", redirected = False } ! []
+                { model | question = question, error = "", redirected = False, loading = False } ! []
             else
-                { model | question = question, error = "" } ! [ Navigation.newUrl <| String.concat [ "#question/", toString question.id ] ]
+                { model | question = question, error = "", loading = False } ! [ Navigation.newUrl <| String.concat [ "#question/", toString question.id ] ]
 
         OnFetchGetQuestion (Err error) ->
             let

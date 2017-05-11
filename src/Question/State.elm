@@ -208,22 +208,29 @@ update msg model global =
                             case list of
                                 qo :: rest ->
                                     if question.question_parent == qo.question.question_parent then
-                                        (qo :: [ QuestionOrder question 0 ]) ++ rest
+                                        QuestionOrder question 0 :: qo :: rest
                                     else
                                         qo :: insert question rest
 
                                 [] ->
-                                    [ QuestionOrder question 0 ]
+                                    []
 
                         questions =
                             case question.question_parent of
                                 QuestionParent q ->
                                     case q of
                                         Just a ->
-                                            insert question questionList.questions
+                                            let
+                                                aux =
+                                                    insert question questionList.questions
+                                            in
+                                                if aux == questionList.questions then
+                                                    QuestionOrder question 0 :: questionList.questions
+                                                else
+                                                    aux
 
                                         Nothing ->
-                                            questionList.questions ++ [ QuestionOrder question 0 ]
+                                            QuestionOrder question 0 :: questionList.questions
                     in
                         { questionList | questions = List.indexedMap (\index questionOrder -> { questionOrder | order = index + 1 }) <| questions }
 

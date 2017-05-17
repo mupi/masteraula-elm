@@ -52,7 +52,7 @@ removeSpaces text =
 
 removeSpecialCharacters : String -> String
 removeSpecialCharacters text =
-    replace All (regex "[^a-z\\-A-Z ]") (\_ -> "") text
+    replace All (regex "[^a-z\\-A-Z0-9 ]") (\_ -> "") <| replace All (regex "ç") (\_ -> "c") text
 
 
 tagFormatter : String -> String

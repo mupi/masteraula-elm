@@ -476,11 +476,10 @@ cardTitle question =
     Card.title
         [ Color.text Color.white
         , Color.background (Color.color Color.Pink Color.S300)
-          -- Clear default padding to encompass scrim
+        , Options.css "height" "80px"
         ]
         [ Options.div
             []
-            -- Icon.view "description" [ Icon.size36 ]
             [ Card.head []
                 [ text <|
                     if (List.length question.subjects > 1) then
@@ -603,6 +602,7 @@ viewQuestion model =
                     , Card.actions
                         [ Card.border
                         , Color.background (Color.color Color.Blue Color.S600)
+                        , Options.css "height" "52px"
                         ]
                         [ Button.render Mdl
                             [ 2, 0, question.id ]
@@ -673,6 +673,7 @@ questionCardButton model questionButtonType question =
                 Card.actions
                     [ Card.border
                     , Color.background (Color.color Color.Blue Color.S700)
+                    , Options.css "height" "52px"
                     ]
                     [ Button.render Mdl
                         [ 2, 1, question.id ]
@@ -698,6 +699,7 @@ questionCardButton model questionButtonType question =
                 Card.actions
                     [ Card.border
                     , Color.background (Color.color Color.Red Color.S700)
+                    , Options.css "height" "52px"
                     ]
                     [ Button.render Mdl
                         [ 2, 1, question.id ]
@@ -954,16 +956,42 @@ viewQuestionList model =
                 ]
                 [ text "Veja abaixo as questões que você selecionou. Para baixá-las, digite um nome para a lista no campo acima, clique em salvar e em seguida Fazer Download." ]
             , Grid.grid [ Options.cs "questions_list_display" ]
-                (List.map
-                    (\question ->
-                        Grid.cell
-                            [ size All 3
-                            , Options.css "padding" "8px 8px"
+                (Grid.cell
+                    [ size All 3
+                    , Options.css "padding" "8px 8px"
+                    ]
+                    [ Card.view
+                        [ Color.background (Color.white)
+                        , css "width" "100%"
+                        , Options.cs "mdl-shadow--2dp"
+                        , Options.onClick <| DrawerLinkClick SelectQuestions
+                        ]
+                        [ Card.text
+                            [ css "height" "328px"
+                            , Options.css "line-height" "328px"
+                            , Options.css "text-align" "center"
+                            , Options.cs "question_card thumb"
                             ]
-                            [ questionCardView model RemoveQuestionButton question False ]
-                    )
-                 <|
-                    List.map (\q -> q.question) questionList.questions
+                            [ Options.span
+                                [ Options.css "display" "inline-block"
+                                , Options.css "vertical-align" "middle"
+                                , Options.css "line-height" "normal"
+                                ]
+                                [ Icon.view "add" [ Options.css "font-size" "128px" ] ]
+                            ]
+                        ]
+                    ]
+                    :: (List.map
+                            (\question ->
+                                Grid.cell
+                                    [ size All 3
+                                    , Options.css "padding" "8px 8px"
+                                    ]
+                                    [ questionCardView model RemoveQuestionButton question False ]
+                            )
+                        <|
+                            List.map (\q -> q.question) questionList.questions
+                       )
                 )
             , if questionList.id == 0 then
                 viewQuestionListButtonNew model

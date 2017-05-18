@@ -62,6 +62,13 @@ init =
         Material.model
 
 
+questionParent : Question -> Maybe Question
+questionParent question =
+    case question.question_parent of
+        QuestionParent p ->
+            p
+
+
 emptyFilters : Filter -> Bool
 emptyFilters filters =
     filters.tags
@@ -207,35 +214,15 @@ update msg model global =
                         insert question list =
                             case list of
                                 qo :: rest ->
-                                    if question.question_parent == qo.question.question_parent then
+                                    if questionParent question /= Nothing && question.question_parent == qo.question.question_parent then
                                         QuestionOrder question 0 :: qo :: rest
                                     else
                                         qo :: insert question rest
 
                                 [] ->
-                                    []
-
-                        questions =
-                            case question.question_parent of
-                                QuestionParent q ->
-                                    case q of
-                                        Just a ->
-                                            let
-                                                aux =
-                                                    insert question questionList.questions
-                                            in
-                                                if aux == questionList.questions then
-                                                    QuestionOrder question 0 :: questionList.questions
-                                                else
-                                                    aux
-
-                                        Nothing ->
-                                            QuestionOrder question 0 :: questionList.questions
+                                    [ QuestionOrder question 0 ]
                     in
-                        { questionList | questions = List.indexedMap (\index questionOrder -> { questionOrder | order = index + 1 }) <| questions }
-
-                -- newQuestionList =
-                --     { questionList | questions = List.indexedMap (\index questionOrder -> { questionOrder | order = index + 1 }) updQuestionList.questions }
+                        { questionList | questions = List.indexedMap (\index questionOrder -> { questionOrder | order = index + 1 }) <| insert question questionList.questions }
             in
                 { model | questionListEdit = updQuestionList } ! []
 

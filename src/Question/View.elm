@@ -956,42 +956,41 @@ viewQuestionList model =
                 ]
                 [ text "Veja abaixo as questões que você selecionou. Para baixá-las, digite um nome para a lista no campo acima, clique em salvar e em seguida Fazer Download." ]
             , Grid.grid [ Options.cs "questions_list_display" ]
-                (Grid.cell
-                    [ size All 3
-                    , Options.css "padding" "8px 8px"
-                    ]
-                    [ Card.view
-                        [ Color.background (Color.white)
-                        , css "width" "100%"
-                        , Options.cs "mdl-shadow--2dp"
-                        , Options.onClick <| DrawerLinkClick SelectQuestions
-                        ]
-                        [ Card.text
-                            [ css "height" "328px"
-                            , Options.css "line-height" "328px"
-                            , Options.css "text-align" "center"
-                            , Options.cs "question_card thumb"
+                (List.map
+                    (\question ->
+                        Grid.cell
+                            [ size All 3
+                            , Options.css "padding" "8px 8px"
                             ]
-                            [ Options.span
-                                [ Options.css "display" "inline-block"
-                                , Options.css "vertical-align" "middle"
-                                , Options.css "line-height" "normal"
+                            [ questionCardView model RemoveQuestionButton question False ]
+                    )
+                    (List.map (\q -> q.question) questionList.questions)
+                    ++ [ Grid.cell
+                            [ size All 3
+                            , Options.css "padding" "8px 8px"
+                            ]
+                            [ Card.view
+                                [ Color.background (Color.white)
+                                , css "width" "100%"
+                                , Options.cs "mdl-shadow--2dp"
+                                , Options.onClick <| DrawerLinkClick SelectQuestions
                                 ]
-                                [ Icon.view "add" [ Options.css "font-size" "128px" ] ]
-                            ]
-                        ]
-                    ]
-                    :: (List.map
-                            (\question ->
-                                Grid.cell
-                                    [ size All 3
-                                    , Options.css "padding" "8px 8px"
+                                [ Card.text
+                                    [ css "height" "328px"
+                                    , Options.css "line-height" "328px"
+                                    , Options.css "text-align" "center"
+                                    , Options.cs "question_card thumb"
                                     ]
-                                    [ questionCardView model RemoveQuestionButton question False ]
-                            )
-                        <|
-                            List.map (\q -> q.question) questionList.questions
-                       )
+                                    [ Options.span
+                                        [ Options.css "display" "inline-block"
+                                        , Options.css "vertical-align" "middle"
+                                        , Options.css "line-height" "normal"
+                                        ]
+                                        [ Icon.view "add" [ Options.css "font-size" "128px" ] ]
+                                    ]
+                                ]
+                            ]
+                       ]
                 )
             , if questionList.id == 0 then
                 viewQuestionListButtonNew model

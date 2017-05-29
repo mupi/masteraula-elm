@@ -834,11 +834,16 @@ questionPageControls model =
         page =
             model.questionPage
 
-        prevPage =
-            page.actual - 1
+        maxPage =
+            ceiling <| toFloat page.count / 12
 
-        nextPage =
-            page.actual + 1
+        numRange =
+            if page.actual < 5 then
+                List.range 1 <| min maxPage 10
+            else if page.actual > maxPage - 4 then
+                List.range (maxPage - 9) <| maxPage
+            else
+                List.range (page.actual - 5) <| min maxPage (page.actual + 4)
 
         numberButtons =
             List.map
@@ -852,13 +857,13 @@ questionPageControls model =
                             (text <| toString number)
                 )
             <|
-                List.range 1 (ceiling <| (toFloat page.count) / 12)
+                numRange
     in
         Grid.grid [] <|
             (if page.previous /= Nothing then
                 [ pageButton model
                     0
-                    (Options.onClick <| ChangePage prevPage)
+                    (Options.onClick <| ChangePage <| page.actual - 1)
                     (Icon.view "chevron_left" [ Icon.size18 ])
                 ]
              else
@@ -868,7 +873,7 @@ questionPageControls model =
                 ++ (if page.next /= Nothing then
                         [ pageButton model
                             1
-                            (Options.onClick <| ChangePage nextPage)
+                            (Options.onClick <| ChangePage <| page.actual + 1)
                             (Icon.view "chevron_right" [ Icon.size18 ])
                         ]
                     else

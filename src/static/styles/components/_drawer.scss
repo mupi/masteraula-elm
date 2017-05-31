@@ -1,0 +1,25 @@
+.mdl-navigation__link, .drawer-nav-link {
+  cursor: pointer;
+}
+.drawer-nav-link {
+  // margin-bottom: 10px;
+  width: 192px;
+  margin: 5px auto;
+  .mdl-card__title:hover{
+    background-color: #ddd;
+  }
+  .mdl-card__supporting-text{
+    padding: 0 16px;
+  }
+  .hide-filter{
+    height: 0;
+  }
+  .show-filter{
+    height: auto;
+  }
+}
+.mdl-layout__drawer{
+  h1{
+    font-size: 1em;
+  }
+}

@@ -104,6 +104,51 @@ urlQuestionList questionListId =
         String.concat [ Config.baseUrl, "question_lists/", toString questionListId, "/" ]
 
 
+saveQuestionListBody : QuestionList -> Http.Body
+saveQuestionListBody questionList =
+    Http.stringBody "application/json" (encode 0 (saveQuestionListEncoder questionList))
+
+
+postSaveQuestionList : QuestionList -> Maybe String -> Http.Request Int
+postSaveQuestionList questionList token =
+    Http.request
+        { method =
+            if questionList.id <= 0 then
+                "POST"
+            else
+                "PATCH"
+        , headers = (headerBuild token)
+        , url = (urlQuestionList questionList.id)
+        , body = saveQuestionListBody questionList
+        , expect = (Http.expectJson (field "id" Decode.int))
+        , timeout = Nothing
+        , withCredentials = False
+        }
+
+
+fetchPostSaveQuestionList : QuestionList -> Maybe String -> Cmd Msg
+fetchPostSaveQuestionList questionList token =
+    Http.send OnFetchSaveQuestionList (postSaveQuestionList questionList token)
+
+
+deleteQuestionList : QuestionList -> Maybe String -> Http.Request String
+deleteQuestionList questionList token =
+    Http.request
+        { method = "DELETE"
+        , headers = (headerBuild token)
+        , url = (urlQuestionList questionList.id)
+        , body = Http.emptyBody
+        , expect = (Http.expectString)
+        , timeout = Nothing
+        , withCredentials = False
+        }
+
+
+fetchDeleteQuestionList : QuestionList -> Maybe String -> Cmd Msg
+fetchDeleteQuestionList question token =
+    Http.send OnFetchDeleteQuestionList (deleteQuestionList question token)
+
+
 getQuestionList : Int -> Maybe String -> Http.Request QuestionList
 getQuestionList questionListId token =
     Http.request

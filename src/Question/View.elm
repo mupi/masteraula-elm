@@ -22,8 +22,14 @@ import Material.Options as Options exposing (css)
 import Material.Snackbar as Snackbar
 import Material.Spinner as Loading
 import Material.Toggles as Toggles
-import Question.Types exposing (..)
 import Material.Typography as Typo
+
+
+-- My modules
+
+import Question.Types exposing (..)
+import Question.Question.Types as Question
+import Question.QuestionList.Types as QuestionList
 import Utils.StringUtils as StringUtils
 
 
@@ -289,7 +295,7 @@ dialog model =
                         [ 0 ]
                         model.mdl
                         [ Dialog.closeOn "click"
-                        , Options.onClick QuestionListDelete
+                        , Options.onClick <| QuestionListMsg QuestionList.QuestionListDelete
                         ]
                         [ text "Confirmar" ]
                     , Button.render Mdl
@@ -390,12 +396,12 @@ view method model =
 -- Question View
 
 
-answerView : Int -> Answer -> Html Msg
+answerView : Int -> Question.Answer -> Html Msg
 answerView index answer =
     Markdown.toHtml [] <| String.concat [ StringUtils.intToResponseString index, ") ", StringUtils.removeEnters answer.answer_text ]
 
 
-correctAnswerView : List Answer -> Html Msg
+correctAnswerView : List Question.Answer -> Html Msg
 correctAnswerView answers =
     let
         res =
@@ -436,7 +442,7 @@ textToChip s =
         ]
 
 
-questionListToLink : QuestionListInfo -> Html msg
+questionListToLink : Question.QuestionListInfo -> Html msg
 questionListToLink questionListInfo =
     let
         owner =
@@ -453,7 +459,7 @@ questionListToLink questionListInfo =
             ]
 
 
-cardTitle : Question -> Card.Block msg
+cardTitle : Question.Question -> Card.Block msg
 cardTitle question =
     Card.title
         [ -- Color.text Color.white
@@ -513,12 +519,12 @@ viewQuestion model =
 
         related_questions =
             case question.related_questions of
-                RelatedQuestion l ->
+                Question.RelatedQuestion l ->
                     l
 
         question_parent =
             case question.question_parent of
-                QuestionParent p ->
+                Question.QuestionParent p ->
                     p
     in
         Grid.grid [ Color.background (Color.color Color.Grey Color.S50) ]
@@ -608,7 +614,7 @@ viewQuestion model =
                             , if List.member question.id questionsId then
                                 Button.disabled
                               else
-                                Options.onClick (QuestionListAdd question)
+                                Options.onClick <| QuestionListMsg (QuestionList.QuestionListAdd question)
                             ]
                             (if List.member question.id questionsId then
                                 [ text "Adicionada" ]
@@ -644,7 +650,7 @@ viewQuestion model =
 -- Question card view
 
 
-questionCardButton : Model -> QuestionButtonType -> Question -> Card.Block Msg
+questionCardButton : Model -> QuestionButtonType -> Question.Question -> Card.Block Msg
 questionCardButton model questionButtonType question =
     let
         questionsId =
@@ -668,7 +674,7 @@ questionCardButton model questionButtonType question =
                         , if List.member question.id questionsId then
                             Button.disabled
                           else
-                            Options.onClick (QuestionListAdd question)
+                            Options.onClick <| QuestionListMsg (QuestionList.QuestionListAdd question)
                         ]
                         (if List.member question.id questionsId then
                             [ Icon.i "done", text "Adicionada" ]
@@ -688,7 +694,7 @@ questionCardButton model questionButtonType question =
                         model.mdl
                         [ Button.ripple
                         , Button.accent
-                        , Options.onClick (QuestionListRemove question)
+                        , Options.onClick <| QuestionListMsg (QuestionList.QuestionListRemove question)
                         , Color.text Color.white
                         , css "font-size" "11px"
                         , css "width" "100%"
@@ -700,7 +706,7 @@ questionCardButton model questionButtonType question =
                 Card.actions [] []
 
 
-questionCardView : Model -> QuestionButtonType -> Question -> Bool -> Html Msg
+questionCardView : Model -> QuestionButtonType -> Question.Question -> Bool -> Html Msg
 questionCardView model questionButtonType question forceLoad =
     let
         year_text =
@@ -714,7 +720,7 @@ questionCardView model questionButtonType question forceLoad =
             , css "width" "100%"
             , Options.cs "mdl-shadow--2dp"
             , if forceLoad then
-                Options.onClick <| GetQuestion question.id
+                Options.onClick <| QuestionMsg (Question.GetQuestion question.id)
               else
                 Options.onClick <| QuestionClick question
             ]
@@ -934,7 +940,7 @@ viewQuestionList model =
                 , autofocus True
                 , placeholder "Nome da nova lista"
                 , value questionList.question_list_header
-                , onInput QuestionListHeaderInput
+                  -- , onInput (QuestionListMsgParam QuestionList.QuestionListHeaderInput)
                 ]
                 []
             , Options.styled p
@@ -997,7 +1003,7 @@ viewQuestionListButtonNew model =
             [ Button.ripple
             , Button.plain
             , Color.text Color.white
-            , Options.onClick QuestionListSave
+            , Options.onClick <| QuestionListMsg QuestionList.QuestionListSave
             ]
             [ Icon.i "save", text "Salvar" ]
         , Button.render Mdl
@@ -1011,8 +1017,7 @@ viewQuestionListButtonNew model =
                 Options.nop
               else
                 Button.disabled
-
-            -- , Options.onClick QuestionListClear
+              -- , Options.onClick QuestionListClear
             ]
             [ Icon.i "delete_forever", text "Limpar lista" ]
         ]
@@ -1030,7 +1035,7 @@ viewQuestionListButtonEdit model =
             [ Button.ripple
             , Button.plain
             , Color.text Color.white
-            , Options.onClick QuestionListSave
+            , Options.onClick <| QuestionListMsg QuestionList.QuestionListSave
             ]
             [ Icon.i "save", text "Salvar" ]
         , Button.render Mdl
@@ -1044,8 +1049,7 @@ viewQuestionListButtonEdit model =
                 Options.nop
               else
                 Button.disabled
-
-            -- , Options.onClick QuestionListClear
+              -- , Options.onClick QuestionListClear
             ]
             [ Icon.i "delete_forever", text "Limpar lista" ]
         , Button.render Mdl
@@ -1055,8 +1059,7 @@ viewQuestionListButtonEdit model =
             , Button.plain
             , Color.text Color.white
             , Options.onClick (Dialog Delete)
-
-            -- , Options.onClick QuestionListDelete
+              -- , Options.onClick QuestionListDelete
             ]
             [ Icon.i "clear", text "Apagar lista" ]
         , Button.render Mdl
@@ -1075,7 +1078,7 @@ viewQuestionListButtonEdit model =
 -- Mine Question List Page
 
 
-questionListItems : Model -> QuestionList -> Html Msg
+questionListItems : Model -> QuestionList.QuestionList -> Html Msg
 questionListItems model questionList =
     let
         createdDate =
@@ -1092,16 +1095,15 @@ questionListItems model questionList =
                 , Lists.subtitle [] [ text <| String.concat [ "Lista criada em: ", StringUtils.dateToString createdDate, " às ", StringUtils.timeToString createdDate ] ]
                 , Lists.subtitle [] [ text <| String.concat [ toString questionList.question_count, " questões." ] ]
                 ]
-
-            -- , Lists.content2 []
-            --     [ Toggles.checkbox Mdl
-            --         [ 4 ]
-            --         model.mdl
-            --         [ Toggles.value 4
-            --            , Options.onToggle SelectQuestionList
-            --         ]
-            --         []
-            --     ]
+              -- , Lists.content2 []
+              --     [ Toggles.checkbox Mdl
+              --         [ 4 ]
+              --         model.mdl
+              --         [ Toggles.value 4
+              --            , Options.onToggle SelectQuestionList
+              --         ]
+              --         []
+              --     ]
             ]
 
 

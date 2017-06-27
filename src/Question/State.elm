@@ -1,21 +1,22 @@
-module Question.State exposing (init, update, initQuestionList)
+module Question.State exposing (init, update)
 
 import App.Config as Config
 import Http
-import Question.Types exposing (..)
-import Question.Rest exposing (..)
-import App.Types as App
-import User.State as User
 import Navigation
 import Material
 import Material.Snackbar as Snackbar
 import Material.Helpers exposing (map1st, map2nd)
+
+
+-- My Modules
+
+import App.Types as App
+import Question.Types exposing (..)
+import Question.Rest exposing (..)
+import Question.Question.State as Question
+import Question.QuestionList.State as QuestionList
+import Question.QuestionList.Rest as QuestionList
 import Utils.StringUtils as StringUtils
-
-
-initQuestion : Question
-initQuestion =
-    Question 0 (QuestionParent Nothing) "" Nothing User.initUser 0 [] Nothing [] [] Nothing Nothing Nothing [] (RelatedQuestion [])
 
 
 initQuestionPage : QuestionPage
@@ -28,11 +29,6 @@ initQuestionListPage =
     QuestionListPage 0 0 Nothing Nothing []
 
 
-initQuestionList : QuestionList
-initQuestionList =
-    QuestionList 0 "" False User.initUser [] 0 ""
-
-
 initFilters : Filter
 initFilters =
     Filter [] False [] False [] False []
@@ -41,10 +37,12 @@ initFilters =
 init : Model
 init =
     Model
-        initQuestion
+        Question.init
+        QuestionList.init
+        Question.initQuestion
         initQuestionPage
-        initQuestionList
-        initQuestionList
+        QuestionList.initQuestionList
+        QuestionList.initQuestionList
         []
         ""
         initFilters
@@ -62,13 +60,6 @@ init =
         Material.model
 
 
-questionParent : Question -> Maybe Question
-questionParent question =
-    case question.question_parent of
-        QuestionParent p ->
-            p
-
-
 emptyFilters : Filter -> Bool
 emptyFilters filters =
     filters.tags
@@ -84,12 +75,25 @@ emptyFilters filters =
 update : Msg -> Model -> App.Global -> ( Model, Cmd Msg )
 update msg model global =
     case msg of
-        GetQuestion questionId ->
-            if model.question.id == questionId then
-                { model | selectingQuestions = False } ! []
-            else
-                { model | selectingQuestions = False, redirected = True, loading = True } ! [ fetchGetQuestion questionId global.token ]
+        QuestionMsg subMsg ->
+            let
+                ( updatedQuestion, cmd ) =
+                    Question.update subMsg model.questionModel global
+            in
+                { model | questionModel = updatedQuestion } ! []
 
+        QuestionListMsg subMsg ->
+            let
+                ( updatedQuestionList, cmd ) =
+                    QuestionList.update subMsg model.questionListModel global
+            in
+                { model | questionListModel = updatedQuestionList } ! []
+
+        -- GetQuestion questionId ->
+        --     if model.question.id == questionId then
+        --         { model | selectingQuestions = False } ! []
+        --     else
+        --         { model | selectingQuestions = False, redirected = True, loading = True } ! [ Question.fetchGetQuestion questionId global.token ]
         GetQuestionPage questionPage ->
             if model.questionPage.actual == questionPage && emptyFilters model.filters then
                 { model | selectingQuestions = True } ! []
@@ -105,20 +109,19 @@ update msg model global =
         GetMineQuestionListPage questionPage ->
             { model | selectingQuestions = False } ! [ fetchGetMineQuestionList questionPage global.token ]
 
-        GetQuestionList questionListId ->
-            let
-                newFilters =
-                    let
-                        filters =
-                            model.filters
-                    in
-                        { filters | tags = [] }
-            in
-                if model.questionListSelected.id == questionListId then
-                    model ! []
-                else
-                    { model | filters = newFilters, selectingQuestions = False, redirected = True, loading = True } ! [ fetchGetQuestionList questionListId global.token ]
-
+        -- GetQuestionList questionListId ->
+        --     let
+        --         newFilters =
+        --             let
+        --                 filters =
+        --                     model.filters
+        --             in
+        --                 { filters | tags = [] }
+        --     in
+        --         if model.questionListSelected.id == questionListId then
+        --             model ! []
+        --         else
+        --             { model | filters = newFilters, selectingQuestions = False, redirected = True, loading = True } ! [ Cmd.map GetQuestionListTest <| QuestionList.fetchGetQuestionList questionListId global.token ]
         DrawerLinkClick drawerLink ->
             case drawerLink of
                 MineLists ->
@@ -203,94 +206,91 @@ update msg model global =
         QuestionBack ->
             model ! [ Navigation.back 1 ]
 
-        QuestionListAdd question ->
-            let
-                questionList =
-                    model.questionListEdit
-
-                updQuestionList =
-                    let
-                        insert : Question -> List QuestionOrder -> List QuestionOrder
-                        insert question list =
-                            case list of
-                                qo :: rest ->
-                                    if questionParent question /= Nothing && question.question_parent == qo.question.question_parent then
-                                        QuestionOrder question 0 :: qo :: rest
-                                    else
-                                        qo :: insert question rest
-
-                                [] ->
-                                    [ QuestionOrder question 0 ]
-                    in
-                        { questionList | questions = List.indexedMap (\index questionOrder -> { questionOrder | order = index + 1 }) <| insert question questionList.questions }
-            in
-                { model | questionListEdit = updQuestionList } ! []
-
-        QuestionListRemove question ->
-            let
-                questionList =
-                    model.questionListEdit
-
-                newQuestions =
-                    List.filterMap
-                        (\questionOrder ->
-                            if questionOrder.question == question then
-                                Nothing
-                            else
-                                Just questionOrder
-                        )
-                        questionList.questions
-
-                newQuestionList =
-                    { questionList
-                        | questions = List.indexedMap (\index questionOrder -> { questionOrder | order = index }) newQuestions
-                    }
-            in
-                { model | questionListEdit = newQuestionList } ! []
-
-        QuestionListHeaderInput newQuestionHeader ->
-            let
-                questionList =
-                    model.questionListEdit
-
-                newQuestionList =
-                    { questionList | question_list_header = newQuestionHeader }
-            in
-                { model | questionListEdit = newQuestionList } ! []
-
-        QuestionListSave ->
-            let
-                ( valid, error ) =
-                    let
-                        question_list_header =
-                            model.questionListEdit.question_list_header
-
-                        question_list =
-                            model.questionListEdit
-                    in
-                        if question_list_header == "" then
-                            ( False, "Por favor, coloque o nome da lista antes de salvá-la" )
-                        else if List.length question_list.questions <= 0 then
-                            ( False, "Por favor, adicione pelo menos uma questão antes de salvá-la" )
-                        else if (not <| StringUtils.hasNoSpecialCharacters question_list_header) then
-                            ( False, "Por favor, coloque apenas letras (sem acentos), números e espaços no nome da lista." )
-                        else
-                            ( True, "" )
-            in
-                if not valid then
-                    let
-                        ( snackbar, effect ) =
-                            let
-                                contents =
-                                    Snackbar.snackbar 0 error "Fechar"
-                            in
-                                Snackbar.add ({ contents | timeout = 5000 }) model.snackbar
-                                    |> map2nd (Cmd.map Snackbar)
-                    in
-                        { model | snackbar = snackbar } ! [ effect ]
-                else
-                    { model | generateAfterSave = False, loading = True } ! [ fetchPostSaveQuestionList model.questionListEdit global.token ]
-
+        -- QuestionListAdd question ->
+        --     let
+        --         questionList =
+        --             model.questionListEdit
+        --
+        --         updQuestionList =
+        --             let
+        --                 insert : Question.Question -> List QuestionList.QuestionOrder -> List QuestionList.QuestionOrder
+        --                 insert question list =
+        --                     case list of
+        --                         qo :: rest ->
+        --                             if Question.questionParent question /= Nothing && question.question_parent == qo.question.question_parent then
+        --                                 QuestionList.QuestionOrder question 0 :: qo :: rest
+        --                             else
+        --                                 qo :: insert question rest
+        --
+        --                         [] ->
+        --                             [ QuestionList.QuestionOrder question 0 ]
+        --             in
+        --                 { questionList | questions = List.indexedMap (\index questionOrder -> { questionOrder | order = index + 1 }) <| insert question questionList.questions }
+        --     in
+        --         { model | questionListEdit = updQuestionList } ! []
+        --
+        -- QuestionListRemove question ->
+        --     let
+        --         questionList =
+        --             model.questionListEdit
+        --
+        --         newQuestions =
+        --             List.filterMap
+        --                 (\questionOrder ->
+        --                     if questionOrder.question == question then
+        --                         Nothing
+        --                     else
+        --                         Just questionOrder
+        --                 )
+        --                 questionList.questions
+        --
+        --         newQuestionList =
+        --             { questionList
+        --                 | questions = List.indexedMap (\index questionOrder -> { questionOrder | order = index }) newQuestions
+        --             }
+        --     in
+        --         { model | questionListEdit = newQuestionList } ! []
+        -- QuestionListHeaderInput newQuestionHeader ->
+        --     let
+        --         questionList =
+        --             model.questionListEdit
+        --
+        --         newQuestionList =
+        --             { questionList | question_list_header = newQuestionHeader }
+        --     in
+        --         { model | questionListEdit = newQuestionList } ! []
+        -- QuestionListSave ->
+        --     let
+        --         ( valid, error ) =
+        --             let
+        --                 question_list_header =
+        --                     model.questionListEdit.question_list_header
+        --
+        --                 question_list =
+        --                     model.questionListEdit
+        --             in
+        --                 if question_list_header == "" then
+        --                     ( False, "Por favor, coloque o nome da lista antes de salvá-la" )
+        --                 else if List.length question_list.questions <= 0 then
+        --                     ( False, "Por favor, adicione pelo menos uma questão antes de salvá-la" )
+        --                 else if (not <| StringUtils.hasNoSpecialCharacters question_list_header) then
+        --                     ( False, "Por favor, coloque apenas letras (sem acentos), números e espaços no nome da lista." )
+        --                 else
+        --                     ( True, "" )
+        --     in
+        --         if not valid then
+        --             let
+        --                 ( snackbar, effect ) =
+        --                     let
+        --                         contents =
+        --                             Snackbar.snackbar 0 error "Fechar"
+        --                     in
+        --                         Snackbar.add ({ contents | timeout = 5000 }) model.snackbar
+        --                             |> map2nd (Cmd.map Snackbar)
+        --             in
+        --                 { model | snackbar = snackbar } ! [ effect ]
+        --         else
+        --             { model | generateAfterSave = False, loading = True } ! [ QuestionList.fetchPostSaveQuestionList model.questionListEdit global.token ]
         QuestionListClear ->
             let
                 questionListEdit =
@@ -304,11 +304,10 @@ update msg model global =
         QuestionListGenerate questionList ->
             { model | downloading = True, generateWithAnswer = False, generateWithResolution = False } ! [ fetchGetGenerateList questionList.id global.token model ]
 
-        QuestionListDelete ->
-            model ! [ fetchDeleteQuestionList model.questionListEdit global.token ]
-
+        -- QuestionListDelete ->
+        --     model ! [ QuestionList.fetchDeleteQuestionList model.questionListEdit global.token ]
         QuestionListClick questionListId ->
-            { model | loading = True } ! [ fetchGetQuestionList questionListId global.token ]
+            { model | loading = True } ! [ Cmd.map QuestionListMsg <| QuestionList.fetchGetQuestionList questionListId global.token ]
 
         QuestionListEdit questionList ->
             { model | questionListEdit = questionList } ! [ Navigation.newUrl <| String.concat [ "#questions/questionlist" ] ]
@@ -324,7 +323,7 @@ update msg model global =
                 questionListId =
                     model.questionListEdit.id
             in
-                { model | questionListEdit = initQuestionList } ! [ Navigation.newUrl <| String.concat [ "#questions/questionlists/", toString questionListId ] ]
+                { model | questionListEdit = QuestionList.initQuestionList } ! [ Navigation.newUrl <| String.concat [ "#questions/questionlists/", toString questionListId ] ]
 
         FilterLevel newFilter ->
             let
@@ -431,27 +430,26 @@ update msg model global =
             in
                 { model | filters = newFilters } ! []
 
-        OnFetchGetQuestion (Ok question) ->
-            if model.redirected then
-                { model | question = question, error = "", redirected = False, loading = False } ! []
-            else
-                { model | question = question, error = "", loading = False } ! [ Navigation.newUrl <| String.concat [ "#question/", toString question.id ] ]
-
-        OnFetchGetQuestion (Err error) ->
-            let
-                errorMsg =
-                    case error of
-                        Http.NetworkError ->
-                            "Erro de conexão com o servidor"
-
-                        Http.BadStatus response ->
-                            "Questão inexistente"
-
-                        _ ->
-                            toString error
-            in
-                { model | error = errorMsg } ! []
-
+        -- OnFetchGetQuestion (Ok question) ->
+        --     if model.redirected then
+        --         { model | question = question, error = "", redirected = False, loading = False } ! []
+        --     else
+        --         { model | question = question, error = "", loading = False } ! [ Navigation.newUrl <| String.concat [ "#question/", toString question.id ] ]
+        --
+        -- OnFetchGetQuestion (Err error) ->
+        --     let
+        --         errorMsg =
+        --             case error of
+        --                 Http.NetworkError ->
+        --                     "Erro de conexão com o servidor"
+        --
+        --                 Http.BadStatus response ->
+        --                     "Questão inexistente"
+        --
+        --                 _ ->
+        --                     toString error
+        --     in
+        --         { model | error = errorMsg } ! []
         OnFetchGetQuestionPage (Ok questionPage) ->
             if model.redirected then
                 { model | questionPage = questionPage, error = "", redirected = False, loading = False } ! []
@@ -516,60 +514,58 @@ update msg model global =
             in
                 { model | error = errorMsg, downloading = False } ! []
 
-        OnFetchSaveQuestionList (Ok newId) ->
-            let
-                newQuestionList =
-                    let
-                        questionList =
-                            model.questionListEdit
-                    in
-                        { questionList | id = newId }
-
-                cmds =
-                    if model.generateAfterSave then
-                        [ fetchGetGenerateList newId global.token model ]
-                    else
-                        [ Navigation.newUrl <| String.concat [ "#questions/questionlists/", toString newId ] ]
-            in
-                { model | questionListSelected = newQuestionList, questionListEdit = initQuestionList, generateAfterSave = False, loading = False } ! cmds
-
-        OnFetchSaveQuestionList (Err error) ->
-            let
-                errorMsg =
-                    case error of
-                        Http.NetworkError ->
-                            "Erro de conexão com o servidor"
-
-                        Http.BadStatus response ->
-                            "Página inexistente"
-
-                        _ ->
-                            toString error
-            in
-                { model | error = errorMsg, loading = False } ! []
-
-        OnFetchDeleteQuestionList (Ok text) ->
-            { model | questionListEdit = initQuestionList } ! [ Navigation.newUrl "#questions/user_lists/1" ]
-
-        OnFetchDeleteQuestionList (Err error) ->
-            let
-                errorMsg =
-                    case error of
-                        Http.NetworkError ->
-                            "Erro de conexão com o servidor"
-
-                        Http.BadStatus response ->
-                            "Página inexistente"
-
-                        _ ->
-                            toString error
-
-                ( snackbar, effect ) =
-                    Snackbar.add (Snackbar.snackbar 0 errorMsg "Close") model.snackbar
-                        |> map2nd (Cmd.map Snackbar)
-            in
-                { model | error = errorMsg, snackbar = snackbar } ! [ effect ]
-
+        -- OnFetchSaveQuestionList (Ok newId) ->
+        --     let
+        --         newQuestionList =
+        --             let
+        --                 questionList =
+        --                     model.questionListEdit
+        --             in
+        --                 { questionList | id = newId }
+        --
+        --         cmds =
+        --             if model.generateAfterSave then
+        --                 [ fetchGetGenerateList newId global.token model ]
+        --             else
+        --                 [ Navigation.newUrl <| String.concat [ "#questions/questionlists/", toString newId ] ]
+        --     in
+        --         { model | questionListSelected = newQuestionList, questionListEdit = QuestionList.initQuestionList, generateAfterSave = False, loading = False } ! cmds
+        --
+        -- OnFetchSaveQuestionList (Err error) ->
+        --     let
+        --         errorMsg =
+        --             case error of
+        --                 Http.NetworkError ->
+        --                     "Erro de conexão com o servidor"
+        --
+        --                 Http.BadStatus response ->
+        --                     "Página inexistente"
+        --
+        --                 _ ->
+        --                     toString error
+        --     in
+        --         { model | error = errorMsg, loading = False } ! []
+        -- OnFetchDeleteQuestionList (Ok text) ->
+        --     { model | questionListEdit = QuestionList.initQuestionList } ! [ Navigation.newUrl "#questions/user_lists/1" ]
+        --
+        -- OnFetchDeleteQuestionList (Err error) ->
+        --     let
+        --         errorMsg =
+        --             case error of
+        --                 Http.NetworkError ->
+        --                     "Erro de conexão com o servidor"
+        --
+        --                 Http.BadStatus response ->
+        --                     "Página inexistente"
+        --
+        --                 _ ->
+        --                     toString error
+        --
+        --         ( snackbar, effect ) =
+        --             Snackbar.add (Snackbar.snackbar 0 errorMsg "Close") model.snackbar
+        --                 |> map2nd (Cmd.map Snackbar)
+        --     in
+        --         { model | error = errorMsg, snackbar = snackbar } ! [ effect ]
         OnFetchGetMineQuestionListPage (Ok mineQuestionLists) ->
             { model | mineQuestionLists = mineQuestionLists, error = "" } ! []
 
@@ -588,27 +584,26 @@ update msg model global =
             in
                 { model | error = errorMsg } ! []
 
-        OnFetchGetQuestionList (Ok questionList) ->
-            if model.redirected then
-                { model | questionListSelected = questionList, error = "", loading = False, redirected = False } ! []
-            else
-                { model | questionListSelected = questionList, error = "", loading = False } ! [ Navigation.newUrl <| String.concat [ "#questions/questionlists/", toString questionList.id ] ]
-
-        OnFetchGetQuestionList (Err error) ->
-            let
-                errorMsg =
-                    case error of
-                        Http.NetworkError ->
-                            "Erro de conexão com o servidor"
-
-                        Http.BadStatus response ->
-                            "Página inexistente"
-
-                        _ ->
-                            toString error
-            in
-                { model | error = errorMsg } ! []
-
+        -- OnFetchGetQuestionList (Ok questionList) ->
+        --     if model.redirected then
+        --         { model | questionListSelected = questionList, error = "", loading = False, redirected = False } ! []
+        --     else
+        --         { model | questionListSelected = questionList, error = "", loading = False } ! [ Navigation.newUrl <| String.concat [ "#questions/questionlists/", toString questionList.id ] ]
+        --
+        -- OnFetchGetQuestionList (Err error) ->
+        --     let
+        --         errorMsg =
+        --             case error of
+        --                 Http.NetworkError ->
+        --                     "Erro de conexão com o servidor"
+        --
+        --                 Http.BadStatus response ->
+        --                     "Página inexistente"
+        --
+        --                 _ ->
+        --                     toString error
+        --     in
+        --         { model | error = errorMsg } ! []
         OnFetchGetSubjects (Ok subjectList) ->
             { model | subjects = subjectList, error = "" } ! []
 

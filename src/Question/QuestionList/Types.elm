@@ -36,9 +36,16 @@ type alias QuestionListId =
 
 type Msg
     = GetQuestionList QuestionListId
+      -- Inpput
+    | QuestionListHeaderInput String
       -- QuestionList (on Edit)
     | QuestionListAdd Question.Question
     | QuestionListRemove Question.Question
+    | QuestionListSave
+    | QuestionListDelete
+    | QuestionListClear
       -- Fetch
     | OnFetchGetQuestionList (Result Http.Error QuestionList)
+    | OnFetchSaveQuestionList (Result Http.Error Int)
+    | OnFetchDeleteQuestionList (Result Http.Error String)
     | Mdl (Material.Msg Msg)

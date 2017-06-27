@@ -3,19 +3,22 @@ module Question.Types exposing (..)
 import Http
 import Material
 import Material.Snackbar as Snackbar
-import User.Types as User
+import Question.Question.Types as Question
+import Question.QuestionList.Types as QuestionList
 
 
 type alias Model =
-    { question : Question
+    { questionModel : Question.Model
+    , questionListModel : QuestionList.Model
+    , question : Question.Question
     , questionPage : QuestionPage
-    , questionListEdit : QuestionList
-    , questionListSelected : QuestionList
-    , mineQuestionLists : List QuestionList
+    , questionListEdit : QuestionList.QuestionList
+    , questionListSelected : QuestionList.QuestionList
+    , mineQuestionLists : List QuestionList.QuestionList
     , -- Search
       currentTag : String
     , filters : Filter
-    , subjects : List Subject
+    , subjects : List Question.Subject
     , -- List docx file generation
       generateAfterSave : Bool
     , generateWithAnswer : Bool
@@ -45,80 +48,12 @@ type alias Filter =
     }
 
 
-type alias Question =
-    { id : Int
-    , question_parent : QuestionParent
-    , question_statement : String
-    , level : Maybe String
-    , author : User.User
-    , credit_cost : Int
-    , tags : List String
-    , resolution : Maybe String
-    , answers : List Answer
-    , subjects : List Subject
-    , education_level : Maybe String
-    , year : Maybe Int
-    , source : Maybe String
-    , question_lists : List QuestionListInfo
-    , related_questions : RelatedQuestion
-    }
-
-
-type QuestionParent
-    = QuestionParent (Maybe Question)
-
-
-type RelatedQuestion
-    = RelatedQuestion (List Question)
-
-
-type alias Answer =
-    { id : Int
-    , answer_text : String
-    , is_correct : Bool
-    }
-
-
-type alias Subject =
-    { id : Int
-    , subject_name : String
-    , slug : String
-    }
-
-
-type alias QuestionList =
-    { id : Int
-    , question_list_header : String
-    , secret : Bool
-    , owner : User.User
-    , questions : List QuestionOrder
-    , question_count : Int
-    , create_date : String
-    }
-
-
-type alias QuestionListInfo =
-    { id : Int
-    , question_list_header : String
-    , secret : Bool
-    , owner : User.User
-    , question_count : Int
-    , create_date : String
-    }
-
-
-type alias QuestionOrder =
-    { question : Question
-    , order : Int
-    }
-
-
 type alias QuestionPage =
     { count : Int
     , actual : Int
     , next : Maybe String
     , previous : Maybe String
-    , questions : List Question
+    , questions : List Question.Question
     }
 
 
@@ -127,22 +62,14 @@ type alias QuestionListPage =
     , actual : Int
     , next : Maybe String
     , previous : Maybe String
-    , questionLists : List QuestionList
+    , questionLists : List QuestionList.QuestionList
     }
-
-
-type alias QuestionId =
-    Int
-
-
-type alias PageNumber =
-    Int
 
 
 type DialogType
     = Delete
     | Clear
-    | GenerateList QuestionList
+    | GenerateList QuestionList.QuestionList
 
 
 type LevelFilterType
@@ -181,32 +108,35 @@ type QuestionButtonType
 
 
 type Msg
-    = GetQuestion QuestionId
-    | GetQuestionPage PageNumber
-    | GetQuestionPageSearch PageNumber
-    | GetMineQuestionListPage PageNumber
-    | GetQuestionList QuestionId
+    = QuestionMsg Question.Msg
+    | QuestionListMsg QuestionList.Msg
+      -- | GetQuestion Question.QuestionId
+      -- | GetQuestionListTest QuestionList.Msg
+    | GetQuestionPage Int
+    | GetQuestionPageSearch Int
+    | GetMineQuestionListPage Int
+      -- | GetQuestionList Question.QuestionId
     | DrawerLinkClick DrawerLink
-    | ChangePage PageNumber
+    | ChangePage Int
       -- Tags
     | TagSearchInput String
     | TagSearchAdd
     | TagSearchRemove String
     | TagSearch
-    | QuestionClick Question
+    | QuestionClick Question.Question
     | QuestionBack
       -- QuestionList (on Edit)
-    | QuestionListAdd Question
-    | QuestionListRemove Question
-    | QuestionListHeaderInput String
-    | QuestionListSave
+      -- | QuestionListAdd Question.Question
+      -- | QuestionListRemove Question.Question
+      -- | QuestionListHeaderInput String
+      -- | QuestionListSave
     | QuestionListClear
-    | QuestionListGenerate QuestionList
-    | QuestionListDelete
+    | QuestionListGenerate QuestionList.QuestionList
+      -- | QuestionListDelete
     | QuestionListCancel
       -- Question List Page
     | QuestionListClick Int
-    | QuestionListEdit QuestionList
+    | QuestionListEdit QuestionList.QuestionList
     | ToggleGenerateWithAnswer
     | ToggleGenerateWithResolution
       -- Filter
@@ -215,15 +145,15 @@ type Msg
     | FilterEducationLevel EducationFilterType
     | ToggleFilter ToggleFilterType
       -- Fetch
-    | OnFetchGetQuestion (Result Http.Error Question)
+      -- | OnFetchGetQuestion (Result Http.Error Question.Question)
     | OnFetchGetQuestionPage (Result Http.Error QuestionPage)
     | OnFetchGetQuestionFilterSearch (Result Http.Error QuestionPage)
     | OnFecthQuestionListGenerate (Result Http.Error String)
-    | OnFetchSaveQuestionList (Result Http.Error Int)
-    | OnFetchDeleteQuestionList (Result Http.Error String)
-    | OnFetchGetMineQuestionListPage (Result Http.Error (List QuestionList))
-    | OnFetchGetQuestionList (Result Http.Error QuestionList)
-    | OnFetchGetSubjects (Result Http.Error (List Subject))
+      -- | OnFetchSaveQuestionList (Result Http.Error Int)
+      -- | OnFetchDeleteQuestionList (Result Http.Error String)
+    | OnFetchGetMineQuestionListPage (Result Http.Error (List QuestionList.QuestionList))
+      -- | OnFetchGetQuestionList (Result Http.Error QuestionList.QuestionList)
+    | OnFetchGetSubjects (Result Http.Error (List Question.Subject))
     | Dialog DialogType
     | NoOp
     | Snackbar (Snackbar.Msg Int)

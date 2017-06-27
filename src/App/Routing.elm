@@ -2,7 +2,11 @@ module App.Routing exposing (..)
 
 import Navigation exposing (Location)
 import UrlParser exposing (..)
-import Question.Types as Question
+
+
+-- My modules
+
+import Question.Question.Types as Question
 import VerifyEmail.Types as VerifyEmail
 import User.Types as User
 
@@ -18,11 +22,11 @@ type Route
     | ResetPasswordRoute String String
     | ResetPasswordEmailRoute
     | QuestionRoute Question.QuestionId
-    | QuestionPageRoute Question.PageNumber
+    | QuestionPageRoute Int
     | QuestionListRoute
     | SelectedQuestionListRoute Question.QuestionId
-    | UserQuestionListRoute Question.PageNumber
-    | QuestionTagSearchRoute Question.PageNumber
+    | UserQuestionListRoute Int
+    | QuestionTagSearchRoute Int
     | RedirectRouteAux Route
     | RedirectRoute String
     | NotFoundRoute

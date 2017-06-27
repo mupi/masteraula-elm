@@ -1,6 +1,11 @@
 module App.Types exposing (..)
 
 import Navigation exposing (Location)
+import Material
+
+
+-- My Modules
+
 import App.Routing exposing (Route)
 import App.Drawer exposing (DrawerLinks)
 import Login.Types as Login
@@ -8,8 +13,8 @@ import Signup.Types as Signup
 import VerifyEmail.Types as VerifyEmail
 import ResetPassword.Types as ResetPassword
 import Question.Types as Question
+import Question.QuestionList.Types as QuestionList
 import User.Types as User
-import Material
 
 
 type alias Model =
@@ -31,7 +36,7 @@ type alias Model =
 type alias LocalStorage =
     { user : Maybe User.User
     , token : Maybe String
-    , questionList : Question.QuestionList
+    , questionList : QuestionList.QuestionList
     }
 
 

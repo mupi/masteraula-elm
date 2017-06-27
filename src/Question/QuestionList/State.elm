@@ -13,6 +13,7 @@ import Question.QuestionList.Types exposing (..)
 import Question.QuestionList.Rest exposing (..)
 import Question.Question.State as Question
 import Question.Question.Types as Question
+import Utils.StringUtils as StringUtils
 
 
 initQuestionList : QuestionList
@@ -53,6 +54,16 @@ update msg model global =
         --         model ! []
         --     else
         --         { model | filters = newFilters, selectingQuestions = False, redirected = True, loading = True } ! [ fetchGetQuestionList questionListId global.token ]
+        QuestionListHeaderInput newQuestionHeader ->
+            let
+                questionList =
+                    model.questionList
+
+                newQuestionList =
+                    { questionList | question_list_header = newQuestionHeader }
+            in
+                { model | questionList = newQuestionList } ! []
+
         QuestionListAdd question ->
             let
                 questionList =
@@ -97,6 +108,87 @@ update msg model global =
                     }
             in
                 { model | questionList = newQuestionList } ! []
+
+        QuestionListSave ->
+            let
+                ( valid, error ) =
+                    let
+                        questionList =
+                            model.questionList
+                    in
+                        if questionList.question_list_header == "" then
+                            ( False, "Por favor, coloque o nome da lista antes de salvá-la" )
+                        else if List.length questionList.questions <= 0 then
+                            ( False, "Por favor, adicione pelo menos uma questão antes de salvá-la" )
+                        else if (not <| StringUtils.hasNoSpecialCharacters questionList.question_list_header) then
+                            ( False, "Por favor, coloque apenas letras (sem acentos), números e espaços no nome da lista." )
+                        else
+                            ( True, "" )
+            in
+                if not valid then
+                    { model | error = error } ! []
+                else
+                    model ! [ fetchPostSaveQuestionList model.questionList global.token ]
+
+        QuestionListClear ->
+            let
+                questionList =
+                    model.questionList
+
+                newQuestionList =
+                    { questionList | questions = [] }
+            in
+                { model | questionList = newQuestionList } ! []
+
+        QuestionListDelete ->
+            model ! [ fetchDeleteQuestionList model.questionList global.token ]
+
+        OnFetchSaveQuestionList (Ok newId) ->
+            let
+                newQuestionList =
+                    let
+                        questionList =
+                            model.questionList
+                    in
+                        { questionList | id = newId }
+
+                cmds =
+                    [ Navigation.newUrl <| String.concat [ "#questions/questionlists/", toString newId ] ]
+            in
+                { model | questionList = newQuestionList } ! cmds
+
+        OnFetchSaveQuestionList (Err error) ->
+            let
+                errorMsg =
+                    case error of
+                        Http.NetworkError ->
+                            "Erro de conexão com o servidor"
+
+                        Http.BadStatus response ->
+                            "Página inexistente"
+
+                        _ ->
+                            toString error
+            in
+                { model | error = errorMsg } ! []
+
+        OnFetchDeleteQuestionList (Ok text) ->
+            { model | questionList = initQuestionList } ! [ Navigation.newUrl "#questions/user_lists/1" ]
+
+        OnFetchDeleteQuestionList (Err error) ->
+            let
+                errorMsg =
+                    case error of
+                        Http.NetworkError ->
+                            "Erro de conexão com o servidor"
+
+                        Http.BadStatus response ->
+                            "Página inexistente"
+
+                        _ ->
+                            toString error
+            in
+                { model | error = errorMsg } ! []
 
         OnFetchGetQuestionList (Ok questionList) ->
             -- if model.redirected then

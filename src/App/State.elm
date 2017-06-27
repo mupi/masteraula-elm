@@ -1,7 +1,13 @@
 port module App.State exposing (init, update, subscriptions)
 
-import Navigation exposing (Location)
+import Json.Encode as Encode
 import Json.Decode as Decode exposing (..)
+import Material
+import Navigation exposing (Location)
+
+
+-- My Modules
+
 import App.Routing as Routing
 import App.Drawer exposing (..)
 import App.Rest exposing (..)
@@ -9,9 +15,6 @@ import App.Routing exposing (parseLocation, Route(..))
 import App.Types exposing (..)
 import Login.State as Login
 import Login.Types as Login
-import Json.Encode as Encode
-import User.State as User
-import User.Types as User
 import Signup.State as Signup
 import ResetPassword.State as ResetPassword
 import ResetPassword.Types as ResetPassword
@@ -19,8 +22,12 @@ import VerifyEmail.State as VerifyEmail
 import VerifyEmail.Types as VerifyEmail
 import Question.State as Question
 import Question.Types as Question
+import Question.QuestionList.State as QuestionList
+import Question.QuestionList.Types as QuestionList
+import Question.Question.State as Question1
+import Question.Question.Types as Question1
 import User.State as User
-import Material
+import User.Types as User
 
 
 port portLocalStorage : Encode.Value -> Cmd msg
@@ -145,7 +152,7 @@ initUser savedStorage =
 
 initStorage : Maybe LocalStorage -> LocalStorage
 initStorage savedStorage =
-    Maybe.withDefault (LocalStorage Nothing Nothing Question.initQuestionList) savedStorage
+    Maybe.withDefault (LocalStorage Nothing Nothing QuestionList.initQuestionList) savedStorage
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -338,7 +345,7 @@ update msg model =
                         QuestionRoute questionId ->
                             let
                                 ( updatedQuestion, cmd ) =
-                                    Question.update (Question.GetQuestion questionId) model.question model.global
+                                    Question.update (Question.QuestionMsg <| Question1.GetQuestion questionId) model.question model.global
                             in
                                 ( { model | question = updatedQuestion, currentDrawerLinks = QuestionDefault }, Cmd.map QuestionMsg cmd )
 
@@ -366,7 +373,7 @@ update msg model =
                         SelectedQuestionListRoute page ->
                             let
                                 ( updatedQuestion, cmd ) =
-                                    Question.update (Question.GetQuestionList page) model.question model.global
+                                    Question.update (Question.QuestionListMsg <| QuestionList.GetQuestionList page) model.question model.global
                             in
                                 ( { model | question = updatedQuestion, currentDrawerLinks = QuestionDefault }, Cmd.map QuestionMsg cmd )
 

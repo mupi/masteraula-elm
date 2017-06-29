@@ -1,6 +1,5 @@
-port module App.State exposing (init, update, subscriptions)
+module App.State exposing (init, update, subscriptions)
 
-import Json.Encode as Encode
 import Json.Decode as Decode exposing (..)
 import Material
 import Navigation exposing (Location)
@@ -25,8 +24,7 @@ import Question.State as Question
 import Question.Types as Question
 import Question.QuestionList.State as QuestionList
 import Question.QuestionList.Types as QuestionList
-import Question.Question.State as Question1
-import Question.Question.Types as Question1
+import Question.Question.Types as QuestionModel
 import User.State as User
 import User.Types as User
 
@@ -113,12 +111,12 @@ initQuestion savedStorage =
         question =
             Question.init
     in
-        case savedStorage of
-            Just storage ->
-                { question | questionListEdit = storage.questionList }
-
-            Nothing ->
-                question
+        -- case savedStorage of
+        --     Just storage ->
+        --         { question | questionListEdit = storage.questionList }
+        --
+        --     Nothing ->
+        question
 
 
 initUser : Maybe LocalStorage -> User.Model
@@ -301,7 +299,7 @@ update msg model =
                         localStorage =
                             model.localStorage
                     in
-                        { localStorage | questionList = updatedQuestion.questionListEdit }
+                        { localStorage | questionList = updatedQuestion.questionListEdit.questionList.questionList }
 
                 cmds =
                     Cmd.batch <|
@@ -326,38 +324,10 @@ update msg model =
                             in
                                 ( { model | user = updatedUser, currentDrawerLinks = QuestionDefault }, Cmd.map UserMsg cmd )
 
-                        QuestionRoute questionId ->
+                        QuestionsRoute questionRoute ->
                             let
                                 ( updatedQuestion, cmd ) =
-                                    Question.update (Question.QuestionMsg <| Question1.GetQuestion questionId) model.question model.global
-                            in
-                                ( { model | question = updatedQuestion, currentDrawerLinks = QuestionDefault }, Cmd.map QuestionMsg cmd )
-
-                        QuestionPageRoute page ->
-                            let
-                                ( updatedQuestion, cmd ) =
-                                    Question.update (Question.GetQuestionPage page) model.question model.global
-                            in
-                                ( { model | question = updatedQuestion, currentDrawerLinks = QuestionDefault }, Cmd.map QuestionMsg cmd )
-
-                        QuestionTagSearchRoute page ->
-                            let
-                                ( updatedQuestion, cmd ) =
-                                    Question.update (Question.GetQuestionPageSearch page) model.question model.global
-                            in
-                                ( { model | question = updatedQuestion, currentDrawerLinks = QuestionDefault }, Cmd.map QuestionMsg cmd )
-
-                        UserQuestionListRoute page ->
-                            let
-                                ( updatedQuestion, cmd ) =
-                                    Question.update (Question.GetMineQuestionListPage page) model.question model.global
-                            in
-                                ( { model | question = updatedQuestion, currentDrawerLinks = QuestionDefault }, Cmd.map QuestionMsg cmd )
-
-                        SelectedQuestionListRoute page ->
-                            let
-                                ( updatedQuestion, cmd ) =
-                                    Question.update (Question.QuestionListMsg <| QuestionList.GetQuestionList page) model.question model.global
+                                    Question.update (Question.OnLocationChange questionRoute) model.question model.global
                             in
                                 ( { model | question = updatedQuestion, currentDrawerLinks = QuestionDefault }, Cmd.map QuestionMsg cmd )
 

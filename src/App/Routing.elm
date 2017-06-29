@@ -6,7 +6,7 @@ import UrlParser exposing (..)
 
 -- My modules
 
-import Question.Question.Types as Question
+import Question.Routing as Question
 import VerifyEmail.Types as VerifyEmail
 import User.Types as User
 
@@ -21,12 +21,13 @@ type Route
     | VerifyEmailRoute VerifyEmail.EmailKey
     | ResetPasswordRoute String String
     | ResetPasswordEmailRoute
-    | QuestionRoute Question.QuestionId
-    | QuestionPageRoute Int
-    | QuestionListRoute
-    | SelectedQuestionListRoute Question.QuestionId
-    | UserQuestionListRoute Int
-    | QuestionTagSearchRoute Int
+    | QuestionsRoute Question.Route
+      -- | QuestionRoute Question.QuestionId
+      -- | QuestionPageRoute Int
+      -- | QuestionListRoute
+      -- | SelectedQuestionListRoute Question.QuestionId
+      -- | UserQuestionListRoute Int
+      -- | QuestionTagSearchRoute Int
     | RedirectRouteAux Route
     | RedirectRoute String
     | NotFoundRoute
@@ -42,12 +43,12 @@ normalMatchers =
         , map VerifyEmailRoute (s "verify-email" </> string)
         , map ResetPasswordRoute (s "reset-password" </> string </> string)
         , map ResetPasswordEmailRoute (s "reset-password")
-        , map RedirectRouteAux <| map QuestionPageRoute (s "questions" </> int)
-        , map RedirectRouteAux <| map QuestionRoute (s "question" </> int)
-        , map RedirectRouteAux <| map QuestionListRoute (s "questions" </> s "questionlist")
-        , map RedirectRouteAux <| map SelectedQuestionListRoute (s "questions" </> s "questionlists" </> int)
-        , map RedirectRouteAux <| map UserQuestionListRoute (s "questions" </> s "user_lists" </> int)
-        , map RedirectRouteAux <| map QuestionTagSearchRoute (s "questions" </> s "tagsearch" </> int)
+        , map RedirectRouteAux <| map QuestionsRoute <| map Question.QuestionPageRoute (s "questions" </> int)
+        , map RedirectRouteAux <| map QuestionsRoute <| map Question.QuestionRoute (s "question" </> int)
+        , map RedirectRouteAux <| map QuestionsRoute <| map Question.QuestionListRoute (s "questions" </> s "questionlist")
+        , map RedirectRouteAux <| map QuestionsRoute <| map Question.SelectedQuestionListRoute (s "questions" </> s "questionlists" </> int)
+        , map RedirectRouteAux <| map QuestionsRoute <| map Question.UserQuestionListRoute (s "questions" </> s "user_lists" </> int)
+        , map RedirectRouteAux <| map QuestionsRoute <| map Question.QuestionTagSearchRoute (s "questions" </> s "tagsearch" </> int)
         , map RedirectRouteAux <| map UserOtherRoute (s "users" </> int)
         , map RedirectRouteAux <| map UserRoute (s "users")
         , map RedirectRouteAux <| map UserUpdateRoute (s "users" </> s "updateprofile")
@@ -62,12 +63,12 @@ loginMatchers =
         , map IndexRoute (s "login")
         , map IndexRoute (s "signup")
         , map IndexRoute (s "verify-email")
-        , map QuestionPageRoute (s "questions" </> int)
-        , map QuestionRoute (s "question" </> int)
-        , map QuestionListRoute (s "questions" </> s "questionlist")
-        , map SelectedQuestionListRoute (s "questions" </> s "questionlists" </> int)
-        , map UserQuestionListRoute (s "questions" </> s "user_lists" </> int)
-        , map QuestionTagSearchRoute (s "questions" </> s "tagsearch" </> int)
+        , map QuestionsRoute <| map Question.QuestionPageRoute (s "questions" </> int)
+        , map QuestionsRoute <| map Question.QuestionRoute (s "question" </> int)
+        , map QuestionsRoute <| map Question.QuestionListRoute (s "questions" </> s "questionlist")
+        , map QuestionsRoute <| map Question.SelectedQuestionListRoute (s "questions" </> s "questionlists" </> int)
+        , map QuestionsRoute <| map Question.UserQuestionListRoute (s "questions" </> s "user_lists" </> int)
+        , map QuestionsRoute <| map Question.QuestionTagSearchRoute (s "questions" </> s "tagsearch" </> int)
         , map UserOtherRoute (s "users" </> int)
         , map UserRoute (s "users")
         , map UserUpdateRoute (s "users" </> s "updateprofile")

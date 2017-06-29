@@ -73,23 +73,8 @@ page model =
         ResetPasswordEmailRoute ->
             Html.map ResetPasswordMsg (ResetPassword.view model.resetPassword)
 
-        QuestionRoute questionId ->
-            Html.map QuestionMsg (Question.view Question.viewQuestion model.question)
-
-        QuestionPageRoute page ->
-            Html.map QuestionMsg (Question.view Question.viewQuestionPage model.question)
-
-        QuestionTagSearchRoute page ->
-            Html.map QuestionMsg (Question.view Question.viewQuestionPage model.question)
-
-        QuestionListRoute ->
-            Html.map QuestionMsg (Question.view Question.viewQuestionList model.question)
-
-        SelectedQuestionListRoute questionListId ->
-            Html.map QuestionMsg (Question.view Question.viewSelectedQuestionList model.question)
-
-        UserQuestionListRoute page ->
-            Html.map QuestionMsg (Question.view Question.viewQuestionListPage model.question)
+        QuestionsRoute questionRoute ->
+            Html.map QuestionMsg (Question.view model.question)
 
         RedirectRoute redirectRoute ->
             Html.map LoginMsg (Login.view model.login)

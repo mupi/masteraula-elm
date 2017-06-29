@@ -19,22 +19,7 @@ parseDrawerLink user route =
                 UserRoute ->
                     UsersView
 
-                QuestionRoute a ->
-                    QuestionDefault
-
-                QuestionPageRoute a ->
-                    QuestionDefault
-
-                QuestionListRoute ->
-                    QuestionDefault
-
-                QuestionTagSearchRoute a ->
-                    QuestionDefault
-
-                UserQuestionListRoute a ->
-                    QuestionDefault
-
-                SelectedQuestionListRoute a ->
+                QuestionsRoute _ ->
                     QuestionDefault
 
                 _ ->
@@ -48,19 +33,7 @@ parseDrawerLink user route =
                 LoginRoute ->
                     LoggedIn
 
-                QuestionRoute a ->
-                    QuestionDefault
-
-                QuestionPageRoute a ->
-                    QuestionDefault
-
-                QuestionListRoute ->
-                    QuestionDefault
-
-                QuestionTagSearchRoute a ->
-                    QuestionDefault
-
-                UserQuestionListRoute a ->
+                QuestionsRoute _ ->
                     QuestionDefault
 
                 _ ->

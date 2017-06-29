@@ -13,6 +13,7 @@ import App.Drawer exposing (..)
 import App.Rest exposing (..)
 import App.Routing exposing (parseLocation, Route(..))
 import App.Types exposing (..)
+import App.Ports exposing (..)
 import Login.State as Login
 import Login.Types as Login
 import Signup.State as Signup
@@ -28,17 +29,6 @@ import Question.Question.State as Question1
 import Question.Question.Types as Question1
 import User.State as User
 import User.Types as User
-
-
-port portLocalStorage : Encode.Value -> Cmd msg
-
-
-setLocalStorage : LocalStorage -> Cmd msg
-setLocalStorage localStorage =
-    portLocalStorage <| localStorageEncoder localStorage
-
-
-port displayDialog : String -> Cmd msg
 
 
 init : Maybe String -> Location -> ( Model, Cmd Msg )
@@ -316,12 +306,6 @@ update msg model =
                 cmds =
                     Cmd.batch <|
                         [ setLocalStorage newStorage, Cmd.map QuestionMsg cmd ]
-                            ++ case subMsg of
-                                Question.Dialog a ->
-                                    [ displayDialog "elm-mdl-singleton-dialog" ]
-
-                                _ ->
-                                    []
             in
                 ( { model | question = updatedQuestion, localStorage = newStorage }, cmds )
 

@@ -151,9 +151,7 @@ view model =
 cardTitle : Question.Question -> Card.Block msg
 cardTitle question =
     Card.title
-        [ -- Color.text Color.white
-          -- , Color.background (Color.color Color.BlueGrey Color.S100)
-          Options.css "height" "80px"
+        [ Options.css "height" "80px"
         ]
         [ Options.div
             []
@@ -261,10 +259,7 @@ questionCardView model questionButtonType question forceLoad =
             [ Color.background (Color.white)
             , css "width" "100%"
             , Options.cs "mdl-shadow--2dp"
-              --   , if forceLoad then
-              --       Options.onClick <| QuestionMsg (Question.GetQuestion question.id)
-              --     else
-              --       Options.onClick <| QuestionClick question
+            , Options.onClick (QuestionClick question)
             ]
             [ cardTitle question
             , Card.text
@@ -300,7 +295,7 @@ viewQuestionList model =
                 , autofocus True
                 , placeholder "Nome da nova lista"
                 , value questionList.question_list_header
-                  -- , onInput (QuestionListMsgParam QuestionList.QuestionListHeaderInput)
+                , onInput QuestionListHeaderInput
                 ]
                 []
             , Options.styled p
@@ -381,7 +376,7 @@ viewQuestionListButtonNew model =
                     Options.nop
                   else
                     Button.disabled
-                  -- , Options.onClick QuestionListClear
+                , Options.onClick <| QuestionListMsg QuestionList.QuestionListClear
                 ]
                 [ Icon.i "delete_forever", text "Limpar lista" ]
             ]
@@ -427,7 +422,7 @@ viewQuestionListButtonEdit model =
                 , Button.plain
                 , Color.text Color.white
                 , Options.onClick (Dialog Delete)
-                  -- , Options.onClick QuestionListDelete
+                , Options.onClick <| QuestionListMsg QuestionList.QuestionListDelete
                 ]
                 [ Icon.i "clear", text "Apagar lista" ]
             , Button.render Mdl

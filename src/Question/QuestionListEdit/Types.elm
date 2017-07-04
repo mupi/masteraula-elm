@@ -2,6 +2,7 @@ module Question.QuestionListEdit.Types exposing (..)
 
 import Material
 import Material.Snackbar as Snackbar
+import Question.Question.Types as Question
 import Question.QuestionList.Types as QuestionList
 import Question.QuestionListGenerate.Types as QuestionListGenerate
 
@@ -31,21 +32,18 @@ type QuestionButtonType
 
 type Msg
     = QuestionListEdit QuestionList.QuestionList
-      -- QuestionList (on Edit)
-      -- | QuestionListAdd Question.Question
-      -- | QuestionListRemove Question.Question
     | QuestionListHeaderInput String
-      -- | QuestionListSave
-      -- | QuestionListClear
+      -- Controls
     | QuestionListGenerate QuestionList.QuestionList
-      -- | QuestionListDelete
     | QuestionListCancel
+    | QuestionClick Question.Question
     | SelectQuestions
-      -- QuestionList Generate
+      -- UpdateQuestionList
+    | UpdateQuestionList QuestionList.Model
+      -- Fetch
     | QuestionListGenerateMsg QuestionListGenerate.Msg
     | QuestionListMsg QuestionList.Msg
-      -- Filter
-      -- | OnFecthQuestionListGenerate (Result Http.Error String)
+      -- General
     | Dialog DialogType
     | NoOp
     | Snackbar (Snackbar.Msg Int)

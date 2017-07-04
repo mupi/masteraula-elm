@@ -1,7 +1,5 @@
 module Question.QuestionListEdit.State exposing (init, update)
 
-import App.Config as Config
-import Http
 import Navigation
 import Material
 import Material.Snackbar as Snackbar
@@ -11,15 +9,14 @@ import Material.Helpers exposing (map1st, map2nd)
 -- My Modules
 
 import App.Types as App
+import App.Ports as App
 import Question.QuestionListEdit.Types exposing (..)
 import Question.Question.Types as Question
 import Question.Question.State as Question
 import Question.QuestionList.Types as QuestionList
 import Question.QuestionList.State as QuestionList
-import Question.QuestionList.Rest as QuestionList
 import Question.QuestionListGenerate.State as QuestionListGenerate
 import Question.QuestionListGenerate.Types as QuestionListGenerate
-import Utils.StringUtils as StringUtils
 
 
 init : Model
@@ -58,44 +55,8 @@ update msg model global =
                 ( updatedGenerateList, cmd ) =
                     QuestionListGenerate.update (QuestionListGenerate.QuestionListGenerate questionList) model.questionListGenerate global
             in
-                -- { model | downloading = True, generateWithAnswer = False, generateWithResolution = False } ! [ fetchGetGenerateList questionList.id global.token model ]
-                { model | questionListGenerate = updatedGenerateList } ! []
+                { model | questionListGenerate = updatedGenerateList } ! [ (Cmd.map QuestionListGenerateMsg cmd) ]
 
-        -- QuestionListSave ->
-        --     let
-        --         ( valid, error ) =
-        --             let
-        --                 question_list_header =
-        --                     model.questionListEdit.question_list_header
-        --
-        --                 question_list =
-        --                     model.questionListEdit
-        --             in
-        --                 if question_list_header == "" then
-        --                     ( False, "Por favor, coloque o nome da lista antes de salvá-la" )
-        --                 else if List.length question_list.questions <= 0 then
-        --                     ( False, "Por favor, adicione pelo menos uma questão antes de salvá-la" )
-        --                 else if (not <| StringUtils.hasNoSpecialCharacters question_list_header) then
-        --                     ( False, "Por favor, coloque apenas letras (sem acentos), números e espaços no nome da lista." )
-        --                 else
-        --                     ( True, "" )
-        --     in
-        --         if not valid then
-        --             let
-        --                 ( snackbar, effect ) =
-        --                     let
-        --                         contents =
-        --                             Snackbar.snackbar 0 error "Fechar"
-        --                     in
-        --                         Snackbar.add ({ contents | timeout = 5000 }) model.snackbar
-        --                             |> map2nd (Cmd.map Snackbar)
-        --             in
-        --                 { model | snackbar = snackbar } ! [ effect ]
-        --         else
-        --             { model | generateAfterSave = False, loading = True } ! [ QuestionList.fetchPostSaveQuestionList model.questionListEdit global.token ]
-        --
-        -- QuestionListDelete ->
-        --     model ! [ QuestionList.fetchDeleteQuestionList model.questionListEdit global.token ]
         QuestionListCancel ->
             let
                 questionListId =
@@ -106,9 +67,12 @@ update msg model global =
         SelectQuestions ->
             model ! [ Navigation.newUrl "#questions/1" ]
 
+        UpdateQuestionList questionList ->
+            { model | questionList = questionList } ! []
+
         QuestionListGenerateMsg questionListMsg ->
             let
-                ( updatedQuestionListGenerate, cmd ) =
+                ( _, cmd ) =
                     QuestionListGenerate.update questionListMsg model.questionListGenerate global
             in
                 model ! [ (Cmd.map QuestionListGenerateMsg cmd) ]
@@ -117,11 +81,21 @@ update msg model global =
             let
                 ( updatedQuestionList, cmd ) =
                     QuestionList.update questionListMsg model.questionList global
+
+                ( snackbar, effect ) =
+                    Snackbar.add (Snackbar.snackbar 0 updatedQuestionList.error "Close") model.snackbar
+                        |> map2nd (Cmd.map Snackbar)
             in
-                model ! [ (Cmd.map QuestionListMsg cmd) ]
+                if updatedQuestionList.error /= "" then
+                    { model | questionList = updatedQuestionList, snackbar = snackbar } ! [ effect ]
+                else
+                    { model | questionList = updatedQuestionList } ! [ Cmd.map QuestionListMsg cmd ]
+
+        QuestionClick question ->
+            model ! [ Navigation.newUrl <| String.concat [ "#question/", toString question.id ] ]
 
         Dialog dialog ->
-            { model | dialog = dialog } ! []
+            { model | dialog = dialog } ! [ App.displayDialog "" ]
 
         Snackbar (Snackbar.End a) ->
             { model | snackbar = Snackbar.model } ! []

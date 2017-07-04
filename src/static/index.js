@@ -10,9 +10,9 @@ mupiApp.ports.portLocalStorage.subscribe(function(state) {
   localStorage.setItem('elm-app-save', JSON.stringify(state));
 });
 
-mupiApp.ports.displayDialog.subscribe(function(theDialog) {
+mupiApp.ports.displayDialog.subscribe(function(param) {
   try {
-      var dialog = document.getElementById(theDialog);
+      var dialog = document.getElementById("elm-mdl-singleton-dialog");
       if (!dialog) {
           console.log('Cannot display dialog: No dialog element. Use `Dialog.view` to construct one.');
           return;

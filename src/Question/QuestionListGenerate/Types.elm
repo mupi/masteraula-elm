@@ -18,10 +18,8 @@ type alias Model =
 
 type Msg
     = QuestionListGenerate QuestionList.QuestionList
-      -- Question List Page
     | ToggleGenerateWithAnswer
     | ToggleGenerateWithResolution
-      -- Filter
     | OnFecthQuestionListGenerate (Result Http.Error String)
     | NoOp
     | Mdl (Material.Msg Msg)

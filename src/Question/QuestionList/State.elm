@@ -42,18 +42,6 @@ update msg model global =
         GetQuestionList questionListId ->
             model ! [ fetchGetQuestionList questionListId global.token ]
 
-        -- let
-        --     newFilters =
-        --         let
-        --             filters =
-        --                 model.filters
-        --         in
-        --             { filters | tags = [] }
-        -- in
-        --     if model.questionListSelected.id == questionListId then
-        --         model ! []
-        --     else
-        --         { model | filters = newFilters, selectingQuestions = False, redirected = True, loading = True } ! [ fetchGetQuestionList questionListId global.token ]
         QuestionListHeaderInput newQuestionHeader ->
             let
                 questionList =
@@ -128,7 +116,7 @@ update msg model global =
                 if not valid then
                     { model | error = error } ! []
                 else
-                    model ! [ fetchPostSaveQuestionList model.questionList global.token ]
+                    { model | error = "" } ! [ fetchPostSaveQuestionList model.questionList global.token ]
 
         QuestionListClear ->
             let
@@ -155,7 +143,7 @@ update msg model global =
                 cmds =
                     [ Navigation.newUrl <| String.concat [ "#questions/questionlists/", toString newId ] ]
             in
-                { model | questionList = newQuestionList } ! cmds
+                { model | questionList = newQuestionList, error = "" } ! cmds
 
         OnFetchSaveQuestionList (Err error) ->
             let
@@ -173,7 +161,7 @@ update msg model global =
                 { model | error = errorMsg } ! []
 
         OnFetchDeleteQuestionList (Ok text) ->
-            { model | questionList = initQuestionList } ! [ Navigation.newUrl "#questions/user_lists/1" ]
+            { model | questionList = initQuestionList, error = "" } ! [ Navigation.newUrl "#questions/user_lists/1" ]
 
         OnFetchDeleteQuestionList (Err error) ->
             let
@@ -191,10 +179,6 @@ update msg model global =
                 { model | error = errorMsg } ! []
 
         OnFetchGetQuestionList (Ok questionList) ->
-            -- if model.redirected then
-            --     { model | questionList = questionList, error = "", loading = False, redirected = False } ! []
-            -- else
-            --     { model | questionList = questionList, error = "", loading = False } ! [ Navigation.newUrl <| String.concat [ "#questions/questionlists/", toString questionList.id ] ]
             { model | questionList = questionList, error = "" } ! [ Navigation.newUrl <| String.concat [ "#questions/questionlists/", toString questionList.id ] ]
 
         OnFetchGetQuestionList (Err error) ->

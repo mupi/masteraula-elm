@@ -1,28 +1,18 @@
 module Question.QuestionListEdit.View exposing (..)
 
-import Date
 import Html exposing (..)
 import Html.Attributes exposing (class, placeholder, autofocus, value, name, id)
 import Html.Events exposing (..)
-import Json.Decode as Json
 import Markdown
-import Json.Decode as Json
-import Material.Badge as Badge
 import Material.Button as Button
 import Material.Card as Card
-import Material.Chip as Chip
 import Material.Color as Color
 import Material.Dialog as Dialog
 import Material.Grid as Grid
 import Material.Grid exposing (grid, cell, size, offset, Device(..))
 import Material.Icon as Icon
-import Material.Layout as Layout
-import Material.List as Lists
 import Material.Options as Options exposing (css)
 import Material.Snackbar as Snackbar
-import Material.Spinner as Loading
-import Material.Toggles as Toggles
-import Material.Typography as Typo
 
 
 -- My modules
@@ -30,7 +20,6 @@ import Material.Typography as Typo
 import Question.QuestionListEdit.Types exposing (..)
 import Question.Question.Types as Question
 import Question.QuestionList.Types as QuestionList
-import Question.QuestionListGenerate.Types as QuestionListGenerate
 import Utils.StringUtils as StringUtils
 
 
@@ -94,50 +83,6 @@ dialog model =
                     ]
                 ]
 
-        GenerateList questionList ->
-            Dialog.view
-                [ Options.cs "question_dialog"
-                ]
-                [ Dialog.title []
-                    [ text "Download"
-                    ]
-                , Dialog.content []
-                    [ Options.styled p
-                        [ Typo.title ]
-                        [ text "Opções:" ]
-                    , Toggles.checkbox Mdl
-                        [ 0, 0 ]
-                        model.mdl
-                        [ Options.onToggle (QuestionListGenerateMsg QuestionListGenerate.ToggleGenerateWithAnswer)
-                        , Toggles.ripple
-                        , Toggles.value model.questionListGenerate.generateWithAnswer
-                        ]
-                        [ text "Com gabarito" ]
-                    , Toggles.checkbox Mdl
-                        [ 0, 1 ]
-                        model.mdl
-                        [ Options.onToggle (QuestionListGenerateMsg QuestionListGenerate.ToggleGenerateWithResolution)
-                        , Toggles.ripple
-                        , Toggles.value model.questionListGenerate.generateWithResolution
-                        ]
-                        [ text "Com resolução" ]
-                    ]
-                , Dialog.actions []
-                    [ Button.render Mdl
-                        [ 0 ]
-                        model.mdl
-                        [ Dialog.closeOn "click"
-                        , Options.onClick <| QuestionListGenerate questionList
-                        ]
-                        [ text "Download" ]
-                    , Button.render Mdl
-                        [ 1 ]
-                        model.mdl
-                        [ Dialog.closeOn "click" ]
-                        [ text "Cancelar" ]
-                    ]
-                ]
-
 
 view : Model -> Html Msg
 view model =
@@ -190,64 +135,33 @@ cardTitle question =
 -- Question card view
 
 
-questionCardButton : Model -> QuestionButtonType -> Question.Question -> Card.Block Msg
-questionCardButton model questionButtonType question =
+questionCardButton : Model -> Question.Question -> Card.Block Msg
+questionCardButton model question =
     let
         questionsId =
             List.map (\q -> q.question.id) model.questionList.questionList.questions
     in
-        case questionButtonType of
-            AddQuestionButton ->
-                Card.actions
-                    [ Card.border
-                    , Color.background (Color.color Color.Green Color.S600)
-                    , Options.css "height" "52px"
-                    ]
-                    [ Button.render Mdl
-                        [ 2, 1, question.id ]
-                        model.mdl
-                        [ Button.ripple
-                        , Button.accent
-                        , Color.text Color.white
-                        , css "font-size" "11px"
-                        , css "width" "100%"
-                        , if List.member question.id questionsId then
-                            Button.disabled
-                          else
-                            Options.onClick <| QuestionListMsg (QuestionList.QuestionListAdd question)
-                        ]
-                        (if List.member question.id questionsId then
-                            [ Icon.i "done", text "Adicionada" ]
-                         else
-                            [ Icon.view "add" [ Icon.size18 ], text " Adicionar" ]
-                        )
-                    ]
-
-            RemoveQuestionButton ->
-                Card.actions
-                    [ Card.border
-                    , Color.background (Color.color Color.Red Color.S700)
-                    , Options.css "height" "52px"
-                    ]
-                    [ Button.render Mdl
-                        [ 2, 1, question.id ]
-                        model.mdl
-                        [ Button.ripple
-                        , Button.accent
-                        , Options.onClick <| QuestionListMsg (QuestionList.QuestionListRemove question)
-                        , Color.text Color.white
-                        , css "font-size" "11px"
-                        , css "width" "100%"
-                        ]
-                        [ Icon.view "remove" [ Icon.size18 ], text " Remover" ]
-                    ]
-
-            NoneQuestionButton ->
-                Card.actions [] []
+        Card.actions
+            [ Card.border
+            , Color.background (Color.color Color.Red Color.S700)
+            , Options.css "height" "52px"
+            ]
+            [ Button.render Mdl
+                [ 2, 1, question.id ]
+                model.mdl
+                [ Button.ripple
+                , Button.accent
+                , Options.onClick <| QuestionListMsg (QuestionList.QuestionListRemove question)
+                , Color.text Color.white
+                , css "font-size" "11px"
+                , css "width" "100%"
+                ]
+                [ Icon.view "remove" [ Icon.size18 ], text " Remover" ]
+            ]
 
 
-questionCardView : Model -> QuestionButtonType -> Question.Question -> Bool -> Html Msg
-questionCardView model questionButtonType question forceLoad =
+questionCardView : Model -> Question.Question -> Bool -> Html Msg
+questionCardView model question forceLoad =
     let
         year_text =
             StringUtils.maybeIntToString question.year
@@ -277,7 +191,7 @@ questionCardView model questionButtonType question forceLoad =
                   )
                 , Markdown.toHtml [] question.question_statement
                 ]
-            , (questionCardButton model questionButtonType question)
+            , (questionCardButton model question)
             ]
 
 
@@ -309,7 +223,7 @@ viewQuestionList model =
                             [ size All 3
                             , Options.css "padding" "8px 8px"
                             ]
-                            [ questionCardView model RemoveQuestionButton question False ]
+                            [ questionCardView model question False ]
                     )
                     (List.map (\q -> q.question) questionList.questions)
                     ++ [ Grid.cell

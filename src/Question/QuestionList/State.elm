@@ -161,7 +161,7 @@ update msg model global =
                 { model | error = errorMsg } ! []
 
         OnFetchDeleteQuestionList (Ok text) ->
-            { model | questionList = initQuestionList, error = "" } ! [ Navigation.newUrl "#questions/user_lists/1" ]
+            { model | questionList = initQuestionList, error = "" } ! [ Navigation.newUrl "#questions/user_lists/" ]
 
         OnFetchDeleteQuestionList (Err error) ->
             let

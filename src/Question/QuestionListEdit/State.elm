@@ -50,13 +50,6 @@ update msg model global =
             in
                 { model | questionList = updatedQuestionList } ! []
 
-        QuestionListGenerate questionList ->
-            let
-                ( updatedGenerateList, cmd ) =
-                    QuestionListGenerate.update (QuestionListGenerate.QuestionListGenerate questionList) model.questionListGenerate global
-            in
-                { model | questionListGenerate = updatedGenerateList } ! [ (Cmd.map QuestionListGenerateMsg cmd) ]
-
         QuestionListCancel ->
             let
                 questionListId =
@@ -69,13 +62,6 @@ update msg model global =
 
         UpdateQuestionList questionList ->
             { model | questionList = questionList } ! []
-
-        QuestionListGenerateMsg questionListMsg ->
-            let
-                ( _, cmd ) =
-                    QuestionListGenerate.update questionListMsg model.questionListGenerate global
-            in
-                model ! [ (Cmd.map QuestionListGenerateMsg cmd) ]
 
         QuestionListMsg questionListMsg ->
             let

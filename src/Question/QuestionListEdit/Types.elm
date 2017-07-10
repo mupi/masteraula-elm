@@ -21,27 +21,18 @@ type alias Model =
 type DialogType
     = Delete
     | Clear
-    | GenerateList QuestionList.QuestionList
-
-
-type QuestionButtonType
-    = AddQuestionButton
-    | RemoveQuestionButton
-    | NoneQuestionButton
 
 
 type Msg
     = QuestionListEdit QuestionList.QuestionList
     | QuestionListHeaderInput String
       -- Controls
-    | QuestionListGenerate QuestionList.QuestionList
     | QuestionListCancel
     | QuestionClick Question.Question
     | SelectQuestions
       -- UpdateQuestionList
     | UpdateQuestionList QuestionList.Model
       -- Fetch
-    | QuestionListGenerateMsg QuestionListGenerate.Msg
     | QuestionListMsg QuestionList.Msg
       -- General
     | Dialog DialogType

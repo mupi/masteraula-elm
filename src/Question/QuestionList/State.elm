@@ -179,7 +179,7 @@ update msg model global =
                 { model | error = errorMsg } ! []
 
         OnFetchGetQuestionList (Ok questionList) ->
-            { model | questionList = questionList, error = "" } ! [ Navigation.newUrl <| String.concat [ "#questions/questionlists/", toString questionList.id ] ]
+            { model | questionList = questionList, error = "" } ! []
 
         OnFetchGetQuestionList (Err error) ->
             let

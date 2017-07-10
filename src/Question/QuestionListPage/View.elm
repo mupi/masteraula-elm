@@ -31,7 +31,7 @@ questionListItems model questionList =
         Lists.li [ Lists.withSubtitle ]
             -- ! Required on every Lists.li containing subtitle.
             [ Lists.content
-                [ Options.attribute <| Html.Events.onClick (QuestionListMsg (QuestionList.GetQuestionList questionList.id))
+                [ Options.attribute <| Html.Events.onClick (QuestionListClick questionList)
                 , Options.css "cursor" "pointer"
                 , Options.css "cursor" "hand"
                 ]

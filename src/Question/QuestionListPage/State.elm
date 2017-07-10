@@ -2,6 +2,7 @@ module Question.QuestionListPage.State exposing (init, update)
 
 import Http
 import Material
+import Navigation
 
 
 -- My Modules
@@ -10,7 +11,6 @@ import App.Types as App
 import Question.QuestionListPage.Types exposing (..)
 import Question.QuestionListPage.Rest exposing (..)
 import Question.QuestionList.State as QuestionList
-import Question.QuestionList.Types as QuestionList
 
 
 -- initQuestionListPage : QuestionListPage
@@ -34,11 +34,7 @@ update msg model global =
             model ! [ fetchGetMineQuestionList global.token ]
 
         QuestionListClick questionList ->
-            let
-                ( updatedQuestionList, cmd ) =
-                    QuestionList.update (QuestionList.GetQuestionList questionList.id) model.questionList global
-            in
-                { model | questionList = updatedQuestionList } ! [ Cmd.map QuestionListMsg cmd ]
+            model ! [ Navigation.newUrl <| String.concat [ "#questions/questionlists/", toString questionList.id ] ]
 
         QuestionListMsg subMsg ->
             let

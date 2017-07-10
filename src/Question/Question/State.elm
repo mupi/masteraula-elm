@@ -55,7 +55,7 @@ update msg model global =
             model ! [ fetchGetQuestion questionId global.token ]
 
         OnFetchGetQuestion (Ok question) ->
-            { model | question = question, error = "" } ! [ Navigation.newUrl <| String.concat [ "#question/", toString question.id ] ]
+            { model | question = question, error = "" } ! []
 
         OnFetchGetQuestion (Err error) ->
             let

@@ -60,12 +60,23 @@ update msg model global =
                 ( _, updatedSelectedQuestion, updatedSelectedQuestionList ) =
                     updateQuestionList model global updatedQuestionListEdit.questionList
             in
-                { model
-                    | questionListEdit = updatedQuestionListEdit
-                    , selectedQuestion = updatedSelectedQuestion
-                    , selectedQuestionList = updatedSelectedQuestionList
-                }
-                    ! [ Cmd.map QuestionListEditMsg cmd ]
+                if
+                    subMsg
+                        == (QuestionListEdit.QuestionListMsg QuestionList.QuestionListSave)
+                        || subMsg
+                        == (QuestionListEdit.QuestionListMsg QuestionList.QuestionListDelete)
+                then
+                    { model
+                        | questionListEdit = updatedQuestionListEdit
+                        , selectedQuestion = updatedSelectedQuestion
+                        , selectedQuestionList = updatedSelectedQuestionList
+                    }
+                        ! [ Cmd.map QuestionListEditMsg cmd ]
+                else
+                    { model
+                        | questionListEdit = updatedQuestionListEdit
+                    }
+                        ! [ Cmd.map QuestionListEditMsg cmd ]
 
         SelectedQuestionMsg subMsg ->
             let
@@ -90,12 +101,18 @@ update msg model global =
                 ( updatedQuestionListEdit, updatedSelectedQuestion, _ ) =
                     updateQuestionList model global updatedSelectedQuestionList.questionList
             in
-                { model
-                    | questionListEdit = updatedQuestionListEdit
-                    , selectedQuestion = updatedSelectedQuestion
-                    , selectedQuestionList = updatedSelectedQuestionList
-                }
-                    ! [ Cmd.map SelectedQuestionListMsg cmd ]
+                if subMsg == SelectedQuestionList.QuestionListEdit then
+                    { model
+                        | questionListEdit = updatedQuestionListEdit
+                        , selectedQuestion = updatedSelectedQuestion
+                        , selectedQuestionList = updatedSelectedQuestionList
+                    }
+                        ! [ Cmd.map SelectedQuestionListMsg cmd ]
+                else
+                    { model
+                        | selectedQuestionList = updatedSelectedQuestionList
+                    }
+                        ! [ Cmd.map SelectedQuestionListMsg cmd ]
 
         QuestionListPageMsg subMsg ->
             let

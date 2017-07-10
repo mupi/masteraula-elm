@@ -12,6 +12,9 @@ import Material.Spinner as Loading
 import Question.Types exposing (..)
 import Question.Routing exposing (..)
 import Question.QuestionListEdit.View as QuestionListEdit
+import Question.SelectedQuestion.View as SelectedQuestion
+import Question.SelectedQuestionList.View as SelectedQuestionList
+import Question.QuestionListPage.View as QuestionListPage
 
 
 -- import Question.Question.Types as Question
@@ -65,7 +68,7 @@ page : Model -> Html Msg
 page model =
     case model.route of
         QuestionRoute questionId ->
-            div [] [ text "1" ]
+            Html.map SelectedQuestionMsg <| SelectedQuestion.view model.selectedQuestion
 
         QuestionPageRoute pageNumber ->
             div [] [ text "2" ]
@@ -73,11 +76,11 @@ page model =
         QuestionListRoute ->
             Html.map QuestionListEditMsg <| QuestionListEdit.view model.questionListEdit
 
-        SelectedQuestionListRoute questionId ->
-            div [] [ text "4" ]
+        SelectedQuestionListRoute questionListId ->
+            Html.map SelectedQuestionListMsg <| SelectedQuestionList.view model.selectedQuestionList
 
-        UserQuestionListRoute page ->
-            div [] [ text "5" ]
+        MineQuestionListsRoute ->
+            Html.map QuestionListPageMsg <| QuestionListPage.view model.questionListPage
 
         QuestionTagSearchRoute page ->
             div [] [ text "6" ]

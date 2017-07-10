@@ -8,5 +8,5 @@ type Route
     | QuestionPageRoute Int
     | QuestionListRoute
     | SelectedQuestionListRoute Question.QuestionId
-    | UserQuestionListRoute Int
+    | MineQuestionListsRoute
     | QuestionTagSearchRoute Int

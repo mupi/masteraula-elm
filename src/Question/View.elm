@@ -15,6 +15,7 @@ import Question.QuestionListEdit.View as QuestionListEdit
 import Question.SelectedQuestion.View as SelectedQuestion
 import Question.SelectedQuestionList.View as SelectedQuestionList
 import Question.QuestionListPage.View as QuestionListPage
+import Question.QuestionPage.View as QuestionPage
 
 
 -- import Question.Question.Types as Question
@@ -41,10 +42,16 @@ drawerLink model =
             ]
             [ Icon.view "view_module" [ Icon.size18 ], text " Banco de questões" ]
          ]
-         -- ++ if model.selectingQuestions then
-         --     filters model
-         --    else
-         --     []
+            ++ (case model.route of
+                    QuestionPageRoute _ ->
+                        (List.map (Html.map QuestionPageMsg) <| QuestionPage.filters model.questionPage)
+
+                    QuestionTagSearchRoute _ ->
+                        (List.map (Html.map QuestionPageMsg) <| QuestionPage.filters model.questionPage)
+
+                    _ ->
+                        []
+               )
         )
 
 
@@ -71,7 +78,7 @@ page model =
             Html.map SelectedQuestionMsg <| SelectedQuestion.view model.selectedQuestion
 
         QuestionPageRoute pageNumber ->
-            div [] [ text "2" ]
+            Html.map QuestionPageMsg <| QuestionPage.view model.questionPage
 
         QuestionListRoute ->
             Html.map QuestionListEditMsg <| QuestionListEdit.view model.questionListEdit
@@ -83,4 +90,4 @@ page model =
             Html.map QuestionListPageMsg <| QuestionListPage.view model.questionListPage
 
         QuestionTagSearchRoute page ->
-            div [] [ text "6" ]
+            Html.map QuestionPageMsg <| QuestionPage.view model.questionPage

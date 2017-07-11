@@ -18,6 +18,8 @@ import Question.SelectedQuestionList.State as SelectedQuestionList
 import Question.SelectedQuestionList.Types as SelectedQuestionList
 import Question.QuestionListPage.Types as QuestionListPage
 import Question.QuestionListPage.State as QuestionListPage
+import Question.QuestionPage.Types as QuestionPage
+import Question.QuestionPage.State as QuestionPage
 
 
 init : Model
@@ -27,6 +29,7 @@ init =
         SelectedQuestion.init
         SelectedQuestionList.init
         QuestionListPage.init
+        QuestionPage.init
         (QuestionRoute 0)
         False
         False
@@ -34,7 +37,7 @@ init =
         Material.model
 
 
-updateQuestionList : Model -> App.Global -> QuestionList.Model -> ( QuestionListEdit.Model, SelectedQuestion.Model, SelectedQuestionList.Model )
+updateQuestionList : Model -> App.Global -> QuestionList.Model -> ( QuestionListEdit.Model, SelectedQuestion.Model, SelectedQuestionList.Model, QuestionPage.Model )
 updateQuestionList model global questionList =
     let
         ( updatedQuestionListEdit, _ ) =
@@ -45,8 +48,11 @@ updateQuestionList model global questionList =
 
         ( updatedSelectedQuestionList, _ ) =
             SelectedQuestionList.update (SelectedQuestionList.UpdateQuestionList questionList) model.selectedQuestionList global
+
+        ( updatedQuestionPage, _ ) =
+            QuestionPage.update (QuestionPage.UpdateQuestionList questionList) model.questionPage global
     in
-        ( updatedQuestionListEdit, updatedSelectedQuestion, updatedSelectedQuestionList )
+        ( updatedQuestionListEdit, updatedSelectedQuestion, updatedSelectedQuestionList, updatedQuestionPage )
 
 
 update : Msg -> Model -> App.Global -> ( Model, Cmd Msg )
@@ -57,7 +63,7 @@ update msg model global =
                 ( updatedQuestionListEdit, cmd ) =
                     QuestionListEdit.update subMsg model.questionListEdit global
 
-                ( _, updatedSelectedQuestion, updatedSelectedQuestionList ) =
+                ( _, updatedSelectedQuestion, updatedSelectedQuestionList, updatedQuestionPage ) =
                     updateQuestionList model global updatedQuestionListEdit.questionList
             in
                 if
@@ -70,6 +76,7 @@ update msg model global =
                         | questionListEdit = updatedQuestionListEdit
                         , selectedQuestion = updatedSelectedQuestion
                         , selectedQuestionList = updatedSelectedQuestionList
+                        , questionPage = updatedQuestionPage
                     }
                         ! [ Cmd.map QuestionListEditMsg cmd ]
                 else
@@ -83,13 +90,14 @@ update msg model global =
                 ( updatedSelectedQuestion, cmd ) =
                     SelectedQuestion.update subMsg model.selectedQuestion global
 
-                ( updatedQuestionListEdit, _, updatedSelectedQuestionList ) =
+                ( updatedQuestionListEdit, _, updatedSelectedQuestionList, updatedQuestionPage ) =
                     updateQuestionList model global updatedSelectedQuestion.questionList
             in
                 { model
                     | questionListEdit = updatedQuestionListEdit
                     , selectedQuestion = updatedSelectedQuestion
                     , selectedQuestionList = updatedSelectedQuestionList
+                    , questionPage = updatedQuestionPage
                 }
                     ! [ Cmd.map SelectedQuestionMsg cmd ]
 
@@ -98,7 +106,7 @@ update msg model global =
                 ( updatedSelectedQuestionList, cmd ) =
                     SelectedQuestionList.update subMsg model.selectedQuestionList global
 
-                ( updatedQuestionListEdit, updatedSelectedQuestion, _ ) =
+                ( updatedQuestionListEdit, updatedSelectedQuestion, _, updatedQuestionPage ) =
                     updateQuestionList model global updatedSelectedQuestionList.questionList
             in
                 if subMsg == SelectedQuestionList.QuestionListEdit then
@@ -106,6 +114,7 @@ update msg model global =
                         | questionListEdit = updatedQuestionListEdit
                         , selectedQuestion = updatedSelectedQuestion
                         , selectedQuestionList = updatedSelectedQuestionList
+                        , questionPage = updatedQuestionPage
                     }
                         ! [ Cmd.map SelectedQuestionListMsg cmd ]
                 else
@@ -126,6 +135,30 @@ update msg model global =
                     | questionListPage = updatedQuestionListPage
                 }
                     ! [ Cmd.map QuestionListPageMsg cmd ]
+
+        QuestionPageMsg subMsg ->
+            let
+                ( updatedQuestionPage, cmd ) =
+                    QuestionPage.update subMsg model.questionPage global
+
+                ( updatedQuestionListEdit, updatedSelectedQuestion, updatedQuestionListPage, _ ) =
+                    updateQuestionList model global updatedQuestionPage.questionList
+            in
+                case subMsg of
+                    QuestionPage.QuestionListMsg (QuestionList.QuestionListAdd _) ->
+                        { model
+                            | questionListEdit = updatedQuestionListEdit
+                            , selectedQuestion = updatedSelectedQuestion
+                            , selectedQuestionList = updatedQuestionListPage
+                            , questionPage = updatedQuestionPage
+                        }
+                            ! [ Cmd.map QuestionPageMsg cmd ]
+
+                    _ ->
+                        { model
+                            | questionPage = updatedQuestionPage
+                        }
+                            ! [ Cmd.map QuestionPageMsg cmd ]
 
         DrawerLinkClick drawerLink ->
             case drawerLink of
@@ -151,7 +184,11 @@ update msg model global =
                             { model | route = route } ! [ Cmd.map SelectedQuestionMsg cmd ]
 
                     QuestionPageRoute pageNumber ->
-                        { model | route = route } ! []
+                        let
+                            ( updatedQuestion, cmd ) =
+                                QuestionPage.update (QuestionPage.GetQuestionPage pageNumber) model.questionPage global
+                        in
+                            { model | route = route } ! [ Cmd.map QuestionPageMsg cmd ]
 
                     QuestionListRoute ->
                         { model | route = route } ! []

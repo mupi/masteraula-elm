@@ -1,7 +1,6 @@
 module Question.Question.State exposing (init, update, initQuestion, questionParent)
 
 import Http
-import Navigation
 import Material
 
 

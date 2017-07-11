@@ -5,6 +5,7 @@ import Question.QuestionListEdit.Types as QuestionListEdit
 import Question.SelectedQuestion.Types as SelectedQuestion
 import Question.SelectedQuestionList.Types as SelectedQuestionList
 import Question.QuestionListPage.Types as QuestionListPage
+import Question.QuestionPage.Types as QuestionPage
 import Question.Routing exposing (..)
 
 
@@ -13,6 +14,7 @@ type alias Model =
     , selectedQuestion : SelectedQuestion.Model
     , selectedQuestionList : SelectedQuestionList.Model
     , questionListPage : QuestionListPage.Model
+    , questionPage : QuestionPage.Model
     , route : Route
     , -- flags
       redirected : Bool
@@ -34,6 +36,7 @@ type Msg
     | SelectedQuestionMsg SelectedQuestion.Msg
     | SelectedQuestionListMsg SelectedQuestionList.Msg
     | QuestionListPageMsg QuestionListPage.Msg
+    | QuestionPageMsg QuestionPage.Msg
     | DrawerLinkClick DrawerLink
     | OnLocationChange Route
     | NoOp

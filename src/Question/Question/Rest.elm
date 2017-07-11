@@ -169,3 +169,25 @@ getQuestion questionId token =
 fetchGetQuestion : QuestionId -> Maybe String -> Cmd Msg
 fetchGetQuestion questionId token =
     Http.send OnFetchGetQuestion (getQuestion questionId token)
+
+
+
+-- Subject
+
+
+urlSubject : String
+urlSubject =
+    String.concat [ Config.baseUrl, "subjects/" ]
+
+
+getSubject : Maybe String -> Http.Request (List Subject)
+getSubject token =
+    Http.request
+        { method = "GET"
+        , headers = (headerBuild token)
+        , url = urlSubject
+        , body = Http.emptyBody
+        , expect = (Http.expectJson (Decode.list subjectDecoder))
+        , timeout = Nothing
+        , withCredentials = False
+        }

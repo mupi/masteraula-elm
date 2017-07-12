@@ -1,4 +1,4 @@
-module Question.State exposing (init, update)
+module Question.State exposing (init, initStorage, update)
 
 import Navigation
 import Material
@@ -7,9 +7,11 @@ import Material
 -- My Modules
 
 import App.Types as App
+import App.Ports as Ports
 import Question.Types exposing (..)
 import Question.Routing exposing (..)
 import Question.QuestionList.Types as QuestionList
+import Question.QuestionList.State as QuestionList
 import Question.QuestionListEdit.State as QuestionListEdit
 import Question.QuestionListEdit.Types as QuestionListEdit
 import Question.SelectedQuestion.State as SelectedQuestion
@@ -35,6 +37,40 @@ init =
         False
         ""
         Material.model
+
+
+initStorage : QuestionList.QuestionList -> Model
+initStorage questionList =
+    let
+        questionListModel =
+            QuestionList.init
+
+        newQuestionListModel =
+            { questionListModel | questionList = questionList }
+
+        questionListEdit =
+            QuestionListEdit.init
+
+        newQuestionListEdit =
+            { questionListEdit | questionList = newQuestionListModel }
+
+        questionPage =
+            QuestionPage.init
+
+        newQuestionPage =
+            { questionPage | questionList = newQuestionListModel }
+    in
+        Model
+            newQuestionListEdit
+            SelectedQuestion.init
+            SelectedQuestionList.init
+            QuestionListPage.init
+            newQuestionPage
+            (QuestionRoute 0)
+            False
+            False
+            ""
+            Material.model
 
 
 updateQuestionList : Model -> App.Global -> QuestionList.Model -> ( QuestionListEdit.Model, SelectedQuestion.Model, SelectedQuestionList.Model, QuestionPage.Model )
@@ -83,7 +119,7 @@ update msg model global =
                     { model
                         | questionListEdit = updatedQuestionListEdit
                     }
-                        ! [ Cmd.map QuestionListEditMsg cmd ]
+                        ! [ Cmd.map QuestionListEditMsg cmd, Ports.setLocalStorageQuestionList updatedQuestionListEdit.questionList.questionList ]
 
         SelectedQuestionMsg subMsg ->
             let
@@ -152,7 +188,7 @@ update msg model global =
                             , selectedQuestionList = updatedQuestionListPage
                             , questionPage = updatedQuestionPage
                         }
-                            ! [ Cmd.map QuestionPageMsg cmd ]
+                            ! [ Cmd.map QuestionPageMsg cmd, Ports.setLocalStorageQuestionList updatedQuestionPage.questionList.questionList ]
 
                     _ ->
                         { model

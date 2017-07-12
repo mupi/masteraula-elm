@@ -10,6 +10,13 @@ mupiApp.ports.portLocalStorage.subscribe(function(state) {
   localStorage.setItem('elm-app-save', JSON.stringify(state));
 });
 
+mupiApp.ports.portLocalStorageQuestionList.subscribe(function(questionList) {
+  var aux = localStorage.getItem('elm-app-save');
+  aux = JSON.parse(aux);
+  aux.questionList = questionList;
+  localStorage.setItem('elm-app-save', JSON.stringify(aux));
+});
+
 mupiApp.ports.displayDialog.subscribe(function(param) {
   try {
       var dialog = document.getElementById("elm-mdl-singleton-dialog");

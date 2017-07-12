@@ -24,6 +24,7 @@ import Question.State as Question
 import Question.Types as Question
 import Question.Routing as Question
 import Question.QuestionList.State as QuestionList
+import Question.QuestionList.Types as QuestionList
 import User.State as User
 import User.Types as User
 
@@ -102,16 +103,12 @@ initGlobal savedStorage =
 
 initQuestion : Maybe LocalStorage -> Question.Model
 initQuestion savedStorage =
-    let
-        question =
+    case savedStorage of
+        Just storage ->
+            Question.initStorage storage.questionList
+
+        Nothing ->
             Question.init
-    in
-        -- case savedStorage of
-        --     Just storage ->
-        --         { question | questionListEdit = storage.questionList }
-        --
-        --     Nothing ->
-        question
 
 
 initUser : Maybe LocalStorage -> User.Model

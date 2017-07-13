@@ -10,8 +10,8 @@ import Material.Helpers exposing (map1st, map2nd)
 -- My Modules
 
 import App.Types as App
-import Question.QuestionPage.Types exposing (..)
 import Question.QuestionPage.Rest exposing (..)
+import Question.QuestionPage.Types exposing (..)
 import Question.QuestionList.State as QuestionList
 import Utils.StringUtils as StringUtils
 
@@ -33,6 +33,7 @@ init =
         QuestionList.init
         initFilters
         []
+        False
         ""
         Snackbar.model
         Material.model
@@ -53,30 +54,30 @@ emptyFilters filters =
 update : Msg -> Model -> App.Global -> ( Model, Cmd Msg )
 update msg model global =
     case msg of
+        GetQuestionPage questionPage ->
+            if model.questionPage.actual == questionPage && emptyFilters model.filters then
+                model ! []
+            else
+                { model | loading = True } ! [ fetchGetQuestionPage questionPage global.token, fetchGetSubject global.token ]
+
+        GetQuestionPageSearch questionPage ->
+            if model.questionPage.actual == questionPage && not (emptyFilters model.filters) then
+                model ! []
+            else
+                { model | loading = True } ! [ fetchGetQuestionFilterSearch questionPage model.filters global.token, fetchGetSubject global.token ]
+
+        ChangePage page ->
+            if emptyFilters model.filters then
+                { model | loading = True } ! [ fetchGetQuestionPage page global.token ]
+            else
+                { model | loading = True } ! [ fetchGetQuestionFilterSearch page model.filters global.token ]
+
         QuestionListMsg subMsg ->
             let
                 ( updatedQuestionList, cmd ) =
                     QuestionList.update subMsg model.questionList global
             in
                 { model | questionList = updatedQuestionList } ! []
-
-        GetQuestionPage questionPage ->
-            if model.questionPage.actual == questionPage && emptyFilters model.filters then
-                model ! []
-            else
-                model ! [ fetchGetQuestionPage questionPage global.token, fetchGetSubject global.token ]
-
-        GetQuestionPageSearch questionPage ->
-            if model.questionPage.actual == questionPage && not (emptyFilters model.filters) then
-                model ! []
-            else
-                model ! [ fetchGetQuestionFilterSearch questionPage model.filters global.token, fetchGetSubject global.token ]
-
-        ChangePage page ->
-            if emptyFilters model.filters then
-                model ! [ fetchGetQuestionPage page global.token ]
-            else
-                model ! [ fetchGetQuestionFilterSearch page model.filters global.token ]
 
         SelectedQuestions ->
             model ! [ Navigation.newUrl "#questions/questionlist/" ]
@@ -109,7 +110,7 @@ update msg model global =
                     in
                         { filters | tags = newtags, currentTag = "" }
             in
-                { model | filters = newFilters } ! [ fetchGetQuestionFilterSearch 1 newFilters global.token ]
+                { model | filters = newFilters, loading = True } ! [ fetchGetQuestionFilterSearch 1 newFilters global.token ]
 
         TagSearchRemove tag ->
             let
@@ -131,9 +132,9 @@ update msg model global =
                         { filters | tags = newTags }
             in
                 if emptyFilters newFilters then
-                    { model | filters = newFilters } ! [ fetchGetQuestionPage 1 global.token ]
+                    { model | filters = newFilters, loading = True } ! [ fetchGetQuestionPage 1 global.token ]
                 else
-                    { model | filters = newFilters } ! [ fetchGetQuestionFilterSearch 1 newFilters global.token ]
+                    { model | filters = newFilters, loading = True } ! [ fetchGetQuestionFilterSearch 1 newFilters global.token ]
 
         TagSearch ->
             let
@@ -150,7 +151,7 @@ update msg model global =
                     in
                         { filters | tags = newTags, currentTag = "" }
             in
-                { model | filters = newFilters } ! [ fetchGetQuestionFilterSearch 1 newFilters global.token ]
+                { model | filters = newFilters, loading = True } ! [ fetchGetQuestionFilterSearch 1 newFilters global.token ]
 
         QuestionClick question ->
             model ! [ Navigation.newUrl <| String.concat [ "#question/", toString question.id ] ]
@@ -180,9 +181,9 @@ update msg model global =
                         { filters | levelFilters = newlevelFilters }
             in
                 if emptyFilters newFilters then
-                    { model | filters = newFilters } ! [ fetchGetQuestionPage 1 global.token ]
+                    { model | filters = newFilters, loading = True } ! [ fetchGetQuestionPage 1 global.token ]
                 else
-                    { model | filters = newFilters } ! [ fetchGetQuestionFilterSearch 1 newFilters global.token ]
+                    { model | filters = newFilters, loading = True } ! [ fetchGetQuestionFilterSearch 1 newFilters global.token ]
 
         FilterSubject newFilter ->
             let
@@ -209,9 +210,9 @@ update msg model global =
                         { filters | subjectFilters = newsubjectFilters }
             in
                 if emptyFilters newFilters then
-                    { model | filters = newFilters } ! [ fetchGetQuestionPage 1 global.token, fetchGetSubject global.token ]
+                    { model | filters = newFilters, loading = True } ! [ fetchGetQuestionPage 1 global.token, fetchGetSubject global.token ]
                 else
-                    { model | filters = newFilters } ! [ fetchGetQuestionFilterSearch 1 newFilters global.token ]
+                    { model | filters = newFilters, loading = True } ! [ fetchGetQuestionFilterSearch 1 newFilters global.token ]
 
         FilterEducationLevel newFilter ->
             let
@@ -238,9 +239,9 @@ update msg model global =
                         { filters | educationLevelFilters = neweducationLevelFilter }
             in
                 if emptyFilters newFilters then
-                    { model | filters = newFilters } ! [ fetchGetQuestionPage 1 global.token, fetchGetSubject global.token ]
+                    { model | filters = newFilters, loading = True } ! [ fetchGetQuestionPage 1 global.token, fetchGetSubject global.token ]
                 else
-                    { model | filters = newFilters } ! [ fetchGetQuestionFilterSearch 1 newFilters global.token ]
+                    { model | filters = newFilters, loading = True } ! [ fetchGetQuestionFilterSearch 1 newFilters global.token ]
 
         ToggleFilter toogle ->
             let
@@ -261,7 +262,7 @@ update msg model global =
                 { model | filters = newFilters } ! []
 
         OnFetchGetQuestionPage (Ok questionPage) ->
-            { model | questionPage = questionPage } ! [ Navigation.newUrl <| String.concat [ "#questions/", toString questionPage.actual ] ]
+            { model | questionPage = questionPage, loading = False } ! [ Navigation.newUrl <| String.concat [ "#questions/", toString questionPage.actual ] ]
 
         OnFetchGetQuestionPage (Err error) ->
             let
@@ -276,10 +277,10 @@ update msg model global =
                         _ ->
                             toString error
             in
-                { model | error = errorMsg } ! []
+                { model | error = errorMsg, loading = False } ! []
 
         OnFetchGetQuestionFilterSearch (Ok questionPage) ->
-            { model | questionPage = questionPage, error = "" } ! [ Navigation.newUrl <| String.concat [ "#questions/tagsearch/", toString questionPage.actual ] ]
+            { model | questionPage = questionPage, error = "", loading = False } ! [ Navigation.newUrl <| String.concat [ "#questions/tagsearch/", toString questionPage.actual ] ]
 
         OnFetchGetQuestionFilterSearch (Err error) ->
             let
@@ -294,10 +295,10 @@ update msg model global =
                         _ ->
                             toString error
             in
-                { model | error = errorMsg } ! []
+                { model | error = errorMsg, loading = False } ! []
 
         OnFetchGetSubjects (Ok subjectList) ->
-            { model | subjects = subjectList, error = "" } ! []
+            { model | subjects = subjectList, error = "", loading = False } ! []
 
         OnFetchGetSubjects (Err error) ->
             let
@@ -312,7 +313,7 @@ update msg model global =
                         _ ->
                             toString error
             in
-                { model | error = errorMsg } ! []
+                { model | error = errorMsg, loading = False } ! []
 
         NoOp ->
             model ! []

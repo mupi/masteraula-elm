@@ -11,6 +11,7 @@ import Material.Grid exposing (grid, cell, size, offset, Device(..))
 import Material.Icon as Icon
 import Material.Options as Options exposing (css)
 import Material.Snackbar as Snackbar
+import Material.Spinner as Loading
 import Material.Toggles as Toggles
 import Material.Typography as Typo
 
@@ -88,56 +89,59 @@ view model =
         downloading =
             model.questionListGenerate.downloading
     in
-        div []
-            [ div []
-                [ Options.styled h1
-                    [ Typo.display1, Typo.center ]
-                    [ text questionList.question_list_header ]
-                , Grid.grid
-                    [ Options.cs "questions_list_display"
-                    ]
-                    (List.map
-                        (\question ->
-                            Grid.cell
-                                [ size All 3
-                                , Options.css "padding" "8px 8px"
-                                ]
-                                [ questionCardView model question False ]
+        if model.loading then
+            Options.div [ Options.cs "question_loader_div" ] [ Options.div [ Options.cs "question_loader" ] [ Loading.spinner [ Loading.active model.loading ] ] ]
+        else
+            Options.div []
+                [ Options.div []
+                    [ Options.styled h1
+                        [ Typo.display1, Typo.center ]
+                        [ text questionList.question_list_header ]
+                    , Grid.grid
+                        [ Options.cs "questions_list_display"
+                        ]
+                        (List.map
+                            (\question ->
+                                Grid.cell
+                                    [ size All 3
+                                    , Options.css "padding" "8px 8px"
+                                    ]
+                                    [ questionCardView model question False ]
+                            )
+                         <|
+                            List.map (\q -> q.question) questionList.questions
                         )
-                     <|
-                        List.map (\q -> q.question) questionList.questions
-                    )
-                , Options.div
-                    [ Color.background Color.primaryDark
-                    , Options.cs "questions_list_action"
-                    ]
-                    [ Button.render Mdl
-                        [ 5, 1 ]
-                        model.mdl
-                        [ Button.ripple
-                        , Button.plain
-                        , Color.text Color.white
-                        , Options.onClick Dialog
-                        , if List.length questionList.questions > 0 && not downloading then
-                            Options.nop
-                          else
-                            Button.disabled
+                    , Options.div
+                        [ Color.background Color.primaryDark
+                        , Options.cs "questions_list_action"
                         ]
-                        [ Icon.i "file_download", text "Fazer download" ]
-                    , Button.render Mdl
-                        [ 5, 2 ]
-                        model.mdl
-                        [ Button.ripple
-                        , Button.plain
-                        , Color.text Color.white
-                        , Options.onClick QuestionListEdit
+                        [ Button.render Mdl
+                            [ 5, 1 ]
+                            model.mdl
+                            [ Button.ripple
+                            , Button.plain
+                            , Color.text Color.white
+                            , Options.onClick Dialog
+                            , if List.length questionList.questions > 0 && not downloading then
+                                Options.nop
+                              else
+                                Button.disabled
+                            ]
+                            [ Icon.i "file_download", text "Fazer download" ]
+                        , Button.render Mdl
+                            [ 5, 2 ]
+                            model.mdl
+                            [ Button.ripple
+                            , Button.plain
+                            , Color.text Color.white
+                            , Options.onClick QuestionListEdit
+                            ]
+                            [ Icon.i "mode_edit", text "Editar Lista" ]
                         ]
-                        [ Icon.i "mode_edit", text "Editar Lista" ]
                     ]
+                , Snackbar.view model.snackbar |> Html.map Snackbar
+                , dialog model
                 ]
-            , Snackbar.view model.snackbar |> Html.map Snackbar
-            , dialog model
-            ]
 
 
 

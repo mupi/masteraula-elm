@@ -39,13 +39,4 @@ questionListItems model questionList =
                 , Lists.subtitle [] [ text <| String.concat [ "Lista criada em: ", StringUtils.dateToString createdDate, " às ", StringUtils.timeToString createdDate ] ]
                 , Lists.subtitle [] [ text <| String.concat [ toString questionList.question_count, " questões." ] ]
                 ]
-              -- , Lists.content2 []
-              --     [ Toggles.checkbox Mdl
-              --         [ 4 ]
-              --         model.mdl
-              --         [ Toggles.value 4
-              --            , Options.onToggle SelectQuestionList
-              --         ]
-              --         []
-              --     ]
             ]

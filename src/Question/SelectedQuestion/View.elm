@@ -11,6 +11,7 @@ import Material.Grid exposing (grid, cell, size, offset, Device(..))
 import Material.Icon as Icon
 import Material.Layout as Layout
 import Material.Options as Options exposing (css)
+import Material.Spinner as Loading
 import Material.Typography as Typo
 
 
@@ -50,123 +51,126 @@ view model =
                 Question.QuestionParent p ->
                     p
     in
-        Grid.grid [ Color.background (Color.color Color.Grey Color.S50) ]
-            [ Grid.cell
-                [ size All
-                    (if List.length related_questions > 0 then
-                        9
-                     else
-                        12
-                    )
-                , Options.css "padding" "8px 8px"
-                ]
-                [ Card.view
-                    [ css "width" "100%"
-                    , Options.cs "mdl-shadow--2dp"
+        if model.loading then
+            Options.div [ Options.cs "question_loader_div" ] [ Options.div [ Options.cs "question_loader" ] [ Loading.spinner [ Loading.active model.loading ] ] ]
+        else
+            Grid.grid [ Color.background (Color.color Color.Grey Color.S50) ]
+                [ Grid.cell
+                    [ size All
+                        (if List.length related_questions > 0 then
+                            9
+                         else
+                            12
+                        )
+                    , Options.css "padding" "8px 8px"
                     ]
-                    [ cardTitle question
-                    , Card.text
-                        [ css "min-height" "196px"
-                        , Options.cs "question_card"
+                    [ Card.view
+                        [ css "width" "100%"
+                        , Options.cs "mdl-shadow--2dp"
                         ]
-                        [ case question_parent of
-                            Just p ->
-                                Markdown.toHtml [] p.question_statement
+                        [ cardTitle question
+                        , Card.text
+                            [ css "min-height" "196px"
+                            , Options.cs "question_card"
+                            ]
+                            [ case question_parent of
+                                Just p ->
+                                    Markdown.toHtml [] p.question_statement
 
-                            Nothing ->
-                                span [] []
-                        , (if (String.length year_text > 0) && (String.length source_text > 0) then
-                            text ("(" ++ year_text ++ " - " ++ source_text ++ ")")
-                           else if String.length year_text > 0 then
-                            text ("(" ++ year_text ++ ")")
-                           else if String.length source_text > 0 then
-                            text ("(" ++ source_text ++ ")")
-                           else
-                            text ""
-                          )
-                        , Markdown.toHtml [] question.question_statement
-                        , div [] (List.indexedMap answerView question.answers)
-                        , if (List.length question.answers) > 0 then
-                            p [] [ correctAnswerView question.answers ]
-                          else
-                            Options.span [] []
-                        , if (resolution /= "") then
-                            p []
-                                [ text "RESOLUÇÃO: "
-                                , Markdown.toHtml [] resolution
-                                ]
-                          else
-                            Options.span [] []
-                        , (List.map textToChip question.tags)
-                            |> Options.styled div [ Options.css "margin" "10px 0" ]
-                        , if List.length question.question_lists > 0 then
-                            [ Options.styled p
-                                [ Typo.title ]
-                                [ text "Lista(s) que esta questão aparece:"
-                                ]
-                            ]
-                                ++ (List.map questionListToLink question.question_lists)
-                                |> Options.styled div [ Options.css "margin" "10px 0" ]
-                          else
-                            Options.span [] []
-                        ]
-                    , Card.actions
-                        [ Card.border
-                        , Color.background (Color.color Color.Green Color.S600)
-                        , Options.css "height" "52px"
-                        ]
-                        [ Button.render Mdl
-                            [ 2, 0, question.id ]
-                            model.mdl
-                            [ Button.ripple
-                            , Button.accent
-                            , Color.text Color.white
-                            , css "font-size" "11px"
-                            , css "width" "50%"
-                            , Options.onClick QuestionBack
-                            ]
-                            [ Icon.view "arrow_back" [ Icon.size18 ], text " Voltar" ]
-                        , Button.render Mdl
-                            [ 2, 2, question.id ]
-                            model.mdl
-                            [ Button.ripple
-                            , Button.accent
-                            , Color.text Color.white
-                            , css "font-size" "11px"
-                            , css "width" "50%"
-                            , if List.member question.id questionsId then
-                                Button.disabled
+                                Nothing ->
+                                    span [] []
+                            , (if (String.length year_text > 0) && (String.length source_text > 0) then
+                                text ("(" ++ year_text ++ " - " ++ source_text ++ ")")
+                               else if String.length year_text > 0 then
+                                text ("(" ++ year_text ++ ")")
+                               else if String.length source_text > 0 then
+                                text ("(" ++ source_text ++ ")")
+                               else
+                                text ""
+                              )
+                            , Markdown.toHtml [] question.question_statement
+                            , div [] (List.indexedMap answerView question.answers)
+                            , if (List.length question.answers) > 0 then
+                                p [] [ correctAnswerView question.answers ]
                               else
-                                Options.onClick <| QuestionListMsg (QuestionList.QuestionListAdd question)
+                                Options.span [] []
+                            , if (resolution /= "") then
+                                p []
+                                    [ text "RESOLUÇÃO: "
+                                    , Markdown.toHtml [] resolution
+                                    ]
+                              else
+                                Options.span [] []
+                            , (List.map textToChip question.tags)
+                                |> Options.styled div [ Options.css "margin" "10px 0" ]
+                            , if List.length question.question_lists > 0 then
+                                [ Options.styled p
+                                    [ Typo.title ]
+                                    [ text "Lista(s) que esta questão aparece:"
+                                    ]
+                                ]
+                                    ++ (List.map questionListToLink question.question_lists)
+                                    |> Options.styled div [ Options.css "margin" "10px 0" ]
+                              else
+                                Options.span [] []
                             ]
-                            (if List.member question.id questionsId then
-                                [ text "Adicionada" ]
-                             else
-                                [ Icon.view "add" [ Icon.size18 ], text " Adicionar" ]
-                            )
+                        , Card.actions
+                            [ Card.border
+                            , Color.background (Color.color Color.Green Color.S600)
+                            , Options.css "height" "52px"
+                            ]
+                            [ Button.render Mdl
+                                [ 2, 0, question.id ]
+                                model.mdl
+                                [ Button.ripple
+                                , Button.accent
+                                , Color.text Color.white
+                                , css "font-size" "11px"
+                                , css "width" "50%"
+                                , Options.onClick QuestionBack
+                                ]
+                                [ Icon.view "arrow_back" [ Icon.size18 ], text " Voltar" ]
+                            , Button.render Mdl
+                                [ 2, 2, question.id ]
+                                model.mdl
+                                [ Button.ripple
+                                , Button.accent
+                                , Color.text Color.white
+                                , css "font-size" "11px"
+                                , css "width" "50%"
+                                , if List.member question.id questionsId then
+                                    Button.disabled
+                                  else
+                                    Options.onClick <| QuestionListMsg (QuestionList.QuestionListAdd question)
+                                ]
+                                (if List.member question.id questionsId then
+                                    [ text "Adicionada" ]
+                                 else
+                                    [ Icon.view "add" [ Icon.size18 ], text " Adicionar" ]
+                                )
+                            ]
                         ]
                     ]
+                , if List.length related_questions > 0 then
+                    Grid.cell
+                        [ size All 3 ]
+                    <|
+                        Options.styled p
+                            [ Typo.title ]
+                            [ text "Questões relacionadas"
+                            ]
+                            :: (List.map
+                                    (\question ->
+                                        Options.div [ Options.css "margin-bottom" "20px" ]
+                                            [ questionCardView model NoneQuestionButton question ]
+                                    )
+                                    related_questions
+                               )
+                  else
+                    Grid.cell
+                        [ size All 0 ]
+                        []
                 ]
-            , if List.length related_questions > 0 then
-                Grid.cell
-                    [ size All 3 ]
-                <|
-                    Options.styled p
-                        [ Typo.title ]
-                        [ text "Questões relacionadas"
-                        ]
-                        :: (List.map
-                                (\question ->
-                                    Options.div [ Options.css "margin-bottom" "20px" ]
-                                        [ questionCardView model NoneQuestionButton question ]
-                                )
-                                related_questions
-                           )
-              else
-                Grid.cell
-                    [ size All 0 ]
-                    []
-            ]
 
 
 

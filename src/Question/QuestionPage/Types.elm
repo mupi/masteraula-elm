@@ -14,7 +14,8 @@ type alias Model =
       filters : Filter
     , subjects : List Question.Subject
     , -- MDL
-      error : String
+      loading : Bool
+    , error : String
     , snackbar : Snackbar.Model Int
     , mdl : Material.Model
     }

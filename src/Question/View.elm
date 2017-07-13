@@ -4,7 +4,6 @@ import Html exposing (..)
 import Material.Icon as Icon
 import Material.Layout as Layout
 import Material.Options as Options exposing (css)
-import Material.Spinner as Loading
 
 
 -- My modules
@@ -61,18 +60,6 @@ drawerLink model =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ (if model.loading then
-            Options.div [ Options.cs "question_loader_div" ] [ Options.div [ Options.cs "question_loader" ] [ Loading.spinner [ Loading.active model.loading ] ] ]
-           else
-            span [] []
-          )
-        , page model
-        ]
-
-
-page : Model -> Html Msg
-page model =
     case model.route of
         QuestionRoute questionId ->
             Html.map SelectedQuestionMsg <| SelectedQuestion.view model.selectedQuestion

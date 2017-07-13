@@ -18,6 +18,7 @@ init =
     Model
         Question.init
         QuestionList.init
+        False
         ""
         Material.model
 
@@ -30,7 +31,7 @@ update msg model global =
                 ( updatedQuestion, cmd ) =
                     Question.update (Question.GetQuestion questionId) model.question global
             in
-                { model | question = updatedQuestion } ! [ Cmd.map QuestionMsg cmd ]
+                { model | question = updatedQuestion, loading = True } ! [ Cmd.map QuestionMsg cmd ]
 
         QuestionClick question ->
             let
@@ -60,7 +61,7 @@ update msg model global =
                 ( updatedQuestion, cmd ) =
                     Question.update subMsg model.question global
             in
-                { model | question = updatedQuestion } ! [ Cmd.map QuestionMsg cmd ]
+                { model | question = updatedQuestion, loading = False } ! [ Cmd.map QuestionMsg cmd ]
 
         NoOp ->
             model ! []

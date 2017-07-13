@@ -20,6 +20,7 @@ init =
     Model
         QuestionList.init
         QuestionListGenerate.init
+        False
         Snackbar.model
         Material.model
 
@@ -31,14 +32,8 @@ update msg model global =
             let
                 ( updatedQuestionList, cmd ) =
                     QuestionList.update (QuestionList.GetQuestionList questionListId) model.questionList global
-
-                debuga =
-                    Debug.log "a" updatedQuestionList
-
-                debugb =
-                    Debug.log "b" questionListId
             in
-                { model | questionList = updatedQuestionList } ! [ Cmd.map QuestionListMsg cmd ]
+                { model | questionList = updatedQuestionList, loading = True } ! [ Cmd.map QuestionListMsg cmd ]
 
         QuestionListEdit ->
             model ! [ Navigation.newUrl <| String.concat [ "#questions/questionlist" ] ]
@@ -54,7 +49,7 @@ update msg model global =
                 ( updatedQuestionList, cmd ) =
                     QuestionList.update subMsg model.questionList global
             in
-                { model | questionList = updatedQuestionList } ! [ Cmd.map QuestionListMsg cmd ]
+                { model | questionList = updatedQuestionList, loading = False } ! [ Cmd.map QuestionListMsg cmd ]
 
         QuestionListGenerateMsg subMsg ->
             let

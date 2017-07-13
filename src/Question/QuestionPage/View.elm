@@ -15,6 +15,7 @@ import Material.Grid as Grid
 import Material.Grid exposing (grid, cell, size, offset, Device(..))
 import Material.Icon as Icon
 import Material.Layout as Layout
+import Material.Spinner as Loading
 import Material.Options as Options exposing (css)
 import Material.Snackbar as Snackbar
 import Material.Toggles as Toggles
@@ -244,58 +245,61 @@ filters model =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ Options.styled div
-            [ Color.background (Color.color Color.Grey Color.S50) ]
-            [ Grid.grid []
-                [ Grid.cell [ size All 12 ]
-                    [ searchView model ]
-                , Grid.cell [ size All 12 ]
-                    [ Options.styled p
-                        [ Typo.subhead, Options.css "margin" "0 10px" ]
-                        [ (if model.questionPage.count == 0 then
-                            "Nenhuma questão encontrada"
-                           else if model.questionPage.count == 1 then
-                            "1 questão encontrada"
-                           else
-                            toString (model.questionPage.count) ++ " questões encontradas"
-                          )
-                            |> text
+    if model.loading then
+        Options.div [ Options.cs "question_loader_div" ] [ Options.div [ Options.cs "question_loader" ] [ Loading.spinner [ Loading.active model.loading ] ] ]
+    else
+        Options.div []
+            [ Options.styled div
+                [ Color.background (Color.color Color.Grey Color.S50) ]
+                [ Grid.grid []
+                    [ Grid.cell [ size All 12 ]
+                        [ searchView model ]
+                    , Grid.cell [ size All 12 ]
+                        [ Options.styled p
+                            [ Typo.subhead, Options.css "margin" "0 10px" ]
+                            [ (if model.questionPage.count == 0 then
+                                "Nenhuma questão encontrada"
+                               else if model.questionPage.count == 1 then
+                                "1 questão encontrada"
+                               else
+                                toString (model.questionPage.count) ++ " questões encontradas"
+                              )
+                                |> text
+                            ]
                         ]
                     ]
-                ]
-            , Grid.grid []
-                (List.map
-                    (\question ->
-                        Grid.cell
-                            [ size All 3
-                            , Options.css "padding" "8px 8px"
-                            ]
-                            [ questionCardView model question False ]
+                , Grid.grid []
+                    (List.map
+                        (\question ->
+                            Grid.cell
+                                [ size All 3
+                                , Options.css "padding" "8px 8px"
+                                ]
+                                [ questionCardView model question False ]
+                        )
+                        (List.take 12 model.questionPage.questions)
                     )
-                    (List.take 12 model.questionPage.questions)
-                )
-            , questionPageControls model
-            , Button.render Mdl
-                [ 10 ]
-                model.mdl
-                [ Options.cs "question_selected_button"
-                , (if List.length model.questionList.questionList.questions > 0 then
-                    Badge.add <| toString <| List.length model.questionList.questionList.questions
-                   else
-                    Options.nop
-                  )
-                , Badge.overlap
-                , Color.text Color.white
-                , Button.ripple
-                , Button.colored
-                , Button.raised
-                , Options.onClick SelectedQuestions
+                , questionPageControls model
+                , Button.render Mdl
+                    [ 10 ]
+                    model.mdl
+                    [ Options.cs "question_selected_button"
+                    , (if List.length model.questionList.questionList.questions > 0 then
+                        Badge.add <| toString <| List.length model.questionList.questionList.questions
+                       else
+                        Options.nop
+                      )
+                    , Badge.overlap
+                    , Color.text Color.white
+                    , Button.ripple
+                    , Button.colored
+                    , Button.raised
+                    , Options.onClick SelectedQuestions
+                    ]
+                    [ text "Questões selecionadas" ]
                 ]
-                [ text "Questões selecionadas" ]
+            , Snackbar.view model.snackbar |> Html.map Snackbar
             ]
-        , Snackbar.view model.snackbar |> Html.map Snackbar
-        ]
 
 
 cardTitle : Question.Question -> Card.Block msg

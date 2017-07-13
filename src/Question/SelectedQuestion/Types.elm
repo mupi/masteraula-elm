@@ -8,6 +8,7 @@ import Question.QuestionList.Types as QuestionList
 type alias Model =
     { question : Question.Model
     , questionList : QuestionList.Model
+    , loading : Bool
     , error : String
     , -- MDL
       mdl : Material.Model

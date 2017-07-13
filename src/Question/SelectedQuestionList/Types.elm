@@ -11,7 +11,8 @@ type alias Model =
     { questionList : QuestionList.Model
     , questionListGenerate : QuestionListGenerate.Model
     , -- MDL
-      snackbar : Snackbar.Model Int
+      loading : Bool
+    , snackbar : Snackbar.Model Int
     , mdl : Material.Model
     }
 

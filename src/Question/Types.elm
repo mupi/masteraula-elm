@@ -18,7 +18,6 @@ type alias Model =
     , route : Route
     , -- flags
       redirected : Bool
-    , loading : Bool
     , error : String
     , -- MDL
       mdl : Material.Model

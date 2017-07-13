@@ -34,7 +34,6 @@ init =
         QuestionPage.init
         (QuestionRoute 0)
         False
-        False
         ""
         Material.model
 
@@ -67,7 +66,6 @@ initStorage questionList =
             QuestionListPage.init
             newQuestionPage
             (QuestionRoute 0)
-            False
             False
             ""
             Material.model
@@ -107,6 +105,8 @@ update msg model global =
                         == (QuestionListEdit.QuestionListMsg QuestionList.QuestionListSave)
                         || subMsg
                         == (QuestionListEdit.QuestionListMsg QuestionList.QuestionListDelete)
+                        || subMsg
+                        == QuestionListEdit.QuestionListCancel
                 then
                     { model
                         | questionListEdit = updatedQuestionListEdit
@@ -214,34 +214,34 @@ update msg model global =
                 case route of
                     QuestionRoute questionId ->
                         let
-                            ( updatedQuestion, cmd ) =
+                            ( updatedSelectedQuestion, cmd ) =
                                 SelectedQuestion.update (SelectedQuestion.GetQuestion questionId) model.selectedQuestion global
                         in
-                            { model | route = route } ! [ Cmd.map SelectedQuestionMsg cmd ]
+                            { model | selectedQuestion = updatedSelectedQuestion, route = route } ! [ Cmd.map SelectedQuestionMsg cmd ]
 
                     QuestionPageRoute pageNumber ->
                         let
-                            ( updatedQuestion, cmd ) =
+                            ( updatedQuestionPage, cmd ) =
                                 QuestionPage.update (QuestionPage.GetQuestionPage pageNumber) model.questionPage global
                         in
-                            { model | route = route } ! [ Cmd.map QuestionPageMsg cmd ]
+                            { model | questionPage = updatedQuestionPage, route = route } ! [ Cmd.map QuestionPageMsg cmd ]
 
                     QuestionListRoute ->
                         { model | route = route } ! []
 
                     SelectedQuestionListRoute questionListId ->
                         let
-                            ( updatedQuestion, cmd ) =
+                            ( updatedSelectedQuestionList, cmd ) =
                                 SelectedQuestionList.update (SelectedQuestionList.GetQuestionList questionListId) model.selectedQuestionList global
                         in
-                            { model | route = route } ! [ Cmd.map SelectedQuestionListMsg cmd ]
+                            { model | selectedQuestionList = updatedSelectedQuestionList, route = route } ! [ Cmd.map SelectedQuestionListMsg cmd ]
 
                     MineQuestionListsRoute ->
                         let
-                            ( updatedQuestionListPage, cmd ) =
+                            ( updatedMineQuestionList, cmd ) =
                                 QuestionListPage.update QuestionListPage.GetMineQuestionListPage model.questionListPage global
                         in
-                            { model | route = route } ! [ Cmd.map QuestionListPageMsg cmd ]
+                            { model | questionListPage = updatedMineQuestionList, route = route } ! [ Cmd.map QuestionListPageMsg cmd ]
 
                     QuestionTagSearchRoute page ->
                         { model | route = route } ! []

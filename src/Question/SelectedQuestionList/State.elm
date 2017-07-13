@@ -9,6 +9,7 @@ import Material.Helpers exposing (map1st, map2nd)
 -- My Modules
 
 import App.Types as App
+import App.Ports as App
 import Question.SelectedQuestionList.Types exposing (..)
 import Question.QuestionList.State as QuestionList
 import Question.QuestionList.Types as QuestionList
@@ -56,10 +57,10 @@ update msg model global =
                 ( updatedQuestionListGenerate, cmd ) =
                     QuestionListGenerate.update subMsg model.questionListGenerate global
             in
-                model ! [ Cmd.map QuestionListGenerateMsg cmd ]
+                { model | questionListGenerate = updatedQuestionListGenerate } ! [ Cmd.map QuestionListGenerateMsg cmd ]
 
         Dialog ->
-            model ! []
+            model ! [ App.displayDialog "" ]
 
         NoOp ->
             model ! []

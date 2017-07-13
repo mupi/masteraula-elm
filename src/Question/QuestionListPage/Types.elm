@@ -10,7 +10,8 @@ type alias Model =
     { questionLists : List QuestionList.QuestionList
     , questionList : QuestionList.Model
     , -- flags
-      error : String
+      loading : Bool
+    , error : String
     , -- MDL
       mdl : Material.Model
     }

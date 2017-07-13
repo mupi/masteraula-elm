@@ -23,6 +23,7 @@ init =
     Model
         []
         QuestionList.init
+        False
         ""
         Material.model
 
@@ -31,7 +32,7 @@ update : Msg -> Model -> App.Global -> ( Model, Cmd Msg )
 update msg model global =
     case msg of
         GetMineQuestionListPage ->
-            model ! [ fetchGetMineQuestionList global.token ]
+            { model | loading = True } ! [ fetchGetMineQuestionList global.token ]
 
         QuestionListClick questionList ->
             model ! [ Navigation.newUrl <| String.concat [ "#questions/questionlists/", toString questionList.id ] ]
@@ -44,7 +45,7 @@ update msg model global =
                 { model | questionList = updatedQuestionList } ! [ Cmd.map QuestionListMsg cmd ]
 
         OnFetchGetMineQuestionListPage (Ok questionLists) ->
-            { model | questionLists = questionLists, error = "" } ! []
+            { model | questionLists = questionLists, error = "", loading = False } ! []
 
         OnFetchGetMineQuestionListPage (Err error) ->
             let
@@ -59,7 +60,7 @@ update msg model global =
                         _ ->
                             toString error
             in
-                { model | error = errorMsg } ! []
+                { model | error = errorMsg, loading = False } ! []
 
         NoOp ->
             model ! []

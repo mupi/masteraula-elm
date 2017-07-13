@@ -4,6 +4,7 @@ import Date
 import Html exposing (..)
 import Html.Events exposing (..)
 import Material.List as Lists
+import Material.Spinner as Loading
 import Material.Options as Options exposing (css)
 
 
@@ -17,9 +18,12 @@ import Utils.StringUtils as StringUtils
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ Lists.ul [] <| List.map (questionListItems model) model.questionLists
-        ]
+    if model.loading then
+        Options.div [ Options.cs "question_loader_div" ] [ Options.div [ Options.cs "question_loader" ] [ Loading.spinner [ Loading.active model.loading ] ] ]
+    else
+        Options.div []
+            [ Lists.ul [] <| List.map (questionListItems model) model.questionLists
+            ]
 
 
 questionListItems : Model -> QuestionList.QuestionList -> Html Msg
@@ -29,7 +33,6 @@ questionListItems model questionList =
             (Date.fromString questionList.create_date)
     in
         Lists.li [ Lists.withSubtitle ]
-            -- ! Required on every Lists.li containing subtitle.
             [ Lists.content
                 [ Options.attribute <| Html.Events.onClick (QuestionListClick questionList)
                 , Options.css "cursor" "pointer"
